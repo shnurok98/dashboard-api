@@ -1,4 +1,4 @@
--- dev DB v.18 | 29.01.20 | NOT NULL УБРАН
+-- dev DB v.19 | 29.01.20 | NOT NULL УБРАН
 
 CREATE TABLE IF NOT EXISTS "files_ind_plan"
 (
@@ -100,5 +100,7 @@ CREATE TABLE IF NOT EXISTS "disciplines_year"
  "hours_ruk_aspirant" int,
  "hours_proj_act"     int,
  "id_specialty"       int,
- "semester"           int
+ "semester"           int,
+ "id_file_RPD"			 bigserial,
+ "id_department"		 serial
 );

@@ -1,0 +1,19 @@
+const express = require('express');
+const router = express.Router();
+
+const connection = require('../db');
+
+router.get('/:id', (req, res) => {
+	connection.any(`SELECT * FROM disciplines_year WHERE id_department = $1 ORDER BY title;`, [req.params.id])
+	.then(rows => {
+		res.send(rows);
+	})
+	.catch(err => console.error(err));
+});
+
+// router.post('/', (req, res) => {
+// 	console.log(req.body);
+// 	res.end();
+// });
+
+module.exports = router;

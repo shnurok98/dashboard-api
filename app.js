@@ -10,6 +10,7 @@ const passport = require('passport');
 const users = require('./routes/users');
 const teachers = require('./routes/teachers');
 const files = require('./routes/files');
+const department_load = require('./routes/department_load');
 
 passport.use(strategy);
 
@@ -32,6 +33,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use('/users', users);
 app.use('/teachers', passport.authenticate('jwt', { session: false }), teachers);
 app.use('/files', files);
+app.use('/department_load', department_load);
 
 app.post('/register', auth.register);
 app.post('/login', auth.logIn);

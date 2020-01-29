@@ -3,8 +3,8 @@ const SECRET = require('../config').secret;
 const jwt = require("jsonwebtoken");
 
 exports.logIn = (req, res, next) => {
-	const data = req.body.user;
-	console.log('User logged:', req.body.user.login);
+	const data = req.body;
+	console.log('User logged:', data.login);
 
 	User.authenticate(data.login, data.password, (err, user) => {
 		if (err) return next(err);
@@ -49,6 +49,7 @@ exports.logIn = (req, res, next) => {
 // 	});
 // };
 
+// При logOut нужно удалить токен на клиенте
 exports.logOut = (req, res) => {
 	req.logout();
 	res.status(200).json({ message: 'Success logOut!' });
@@ -56,7 +57,7 @@ exports.logOut = (req, res) => {
 
 // служебный
 exports.register = (req, res, next) => {
-	const data = req.body.user;
+	const data = req.body;
 	User.getByLogin(data.login, (err, user) => {
 		if(err) return next(err);
 

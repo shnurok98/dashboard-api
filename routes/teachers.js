@@ -4,6 +4,7 @@ const router = express.Router();
 const connection = require('../db');
 
 router.get('/', (req, res) => {
+	// console.log(req.user);
 	connection.any(`SELECT * FROM teachers;`)
 	.then(rows => {
 		res.send(rows);
