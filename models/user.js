@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 12;
 
+const Person = require('./person');
+
 class User {
 	constructor(obj){
 		for(let key in obj){
@@ -23,15 +25,32 @@ class User {
 				// 	salt: this.salt
 				// };
 				let obj = this;
-				connection.oneOrNone('INSERT INTO teachers (${this:name}) VALUES (${this:csv}) RETURNING id;', obj)
-				.then((rows) => {
-					if (rows === undefined) return cb(console.log(new Error('Не удалось создать пользователя')));
-					this.id = rows.id;
-					cb();
+				const person = new Person(obj);
+				let teacher = {
+					position: obj.position,
+					rate: obj.rate,
+					hours_worked: obj.hours_worked,
+					RINC: obj.RINC,
+					web_of_science: obj.web_of_science,
+					scopus: obj.scopus,
+					login: obj.login,
+					password: obj.password,
+					salt: obj.salt
+				}
+				person.save((err, id) => {
+					if (err) return cb(err);
+					teacher.id_person = id;
+					connection.oneOrNone('INSERT INTO teachers (${this:name}) VALUES (${this:csv}) RETURNING id;', teacher)
+						.then((rows) => {
+							if (rows === undefined) return cb(console.log(new Error('Не удалось создать пользователя')));
+							this.id = rows.id;
+							cb();
+						})
+						.catch((err) => {
+							cb(err);
+						});
 				})
-				.catch((err) => {
-					cb(err);
-				});
+				
 				
 			});
 		}
