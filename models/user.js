@@ -136,7 +136,7 @@ class User {
 
 	static get(id, cb){
 		connection.oneOrNone(`
-			SELECT * FROM teachers WHERE id = $1;
+			select * from teachers inner join personalities on teachers.id_person = personalities.id and teachers.id = $1;
 		`, [id])
 		.then((user) => {
 			if (user === undefined) return cb();
@@ -147,6 +147,20 @@ class User {
 			cb(err);
 		});
 	}
+
+	// static get(id, cb){
+	// 	connection.oneOrNone(`
+	// 		SELECT * FROM teachers WHERE id = $1;
+	// 	`, [id])
+	// 	.then((user) => {
+	// 		if (user === undefined) return cb();
+	// 		if (user === null) return cb();
+	// 		cb(null, new User(user));
+	// 	})
+	// 	.catch((err) => {
+	// 		cb(err);
+	// 	});
+	// }
 }
 
 module.exports = User;

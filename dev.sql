@@ -1,4 +1,4 @@
--- dev DB v.19 | 29.01.20 | NOT NULL УБРАН
+-- dev DB v.20 | 04.02.20 | NOT NULL УБРАН
 
 CREATE TABLE IF NOT EXISTS "files_ind_plan"
 (
@@ -13,27 +13,36 @@ CREATE TABLE IF NOT EXISTS "degree"
  "degree" varchar(50)
 );
 
--- NOT FULL
+
 CREATE TABLE IF NOT EXISTS "specialties"
 (
  "id"           serial PRIMARY KEY,
  "code"         varchar(20),
  "title"        varchar(50),
- "educ_program" smallint
+ "profile"		 varchar(100),
+ "educ_form"	 varchar(20),
+ "educ_program" smallint,
+ "educ_years"	 int,
+ "year_join"	 date,
+ "id_acad_plan" serial
 );
 
 COMMENT ON COLUMN "specialties"."educ_program" IS '1 - бакалавр, 2 - магистр, 3 - специалитет';
 
--- CREATE TABLE "groups"
--- (
---  "id"             serial,
---  "id_acad_plan"   int NOT NULL,
---  "id_napravlenie" serial NOT NULL,
---  "name"           varchar(15) NOT NULL,
---  "year"           int NOT NULL,
---  CONSTRAINT "FK_38" FOREIGN KEY ( "id_acad_plan" ) REFERENCES "academic_plan" ( "id" ),
---  CONSTRAINT "FK_83" FOREIGN KEY ( "id_napravlenie" ) REFERENCES "specialties" ( "id" )
--- );
+CREATE TABLE IF NOT EXISTS "groups"
+(
+ "id"             serial PRIMARY KEY,
+ "id_specialties" serial,
+ "name" 				varchar(15)
+);
+
+CREATE TABLE IF NOT EXISTS "students"
+(
+ "id"             serial PRIMARY KEY,
+ "id_person" 		serial,
+ "id_group"			serial,
+ "id_proj_act"		serial
+);
 
 CREATE TABLE IF NOT EXISTS "personalities" (
 	"id"         serial PRIMARY KEY,
@@ -104,3 +113,6 @@ CREATE TABLE IF NOT EXISTS "disciplines_year"
  "id_file_RPD"			 bigserial,
  "id_department"		 serial
 );
+
+
+-- select * from teachers inner join personalities on teachers.id_person = personalities.id and teachers.id = 5;

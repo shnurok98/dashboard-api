@@ -3,6 +3,8 @@ const router = express.Router();
 
 const connection = require('../db');
 
+const Teacher = require('../models/user');
+
 router.get('/', (req, res) => {
 	// console.log(req.user);
 	connection.any(`SELECT * FROM teachers;`)
@@ -10,6 +12,17 @@ router.get('/', (req, res) => {
 		res.send(rows);
 	})
 	.catch(err => console.error(err));
+});
+
+router.get('/:id', (req, res) => {
+	Teacher.get(req.params.id, (err, teacher) => {
+		if (err) return next(err);
+		if (teacher) {
+			res.status(200).json(teacher);
+		}else{
+			res.status(200).json({ message: 'Такого препода нету' });
+		}
+	});
 });
 
 module.exports = router;
