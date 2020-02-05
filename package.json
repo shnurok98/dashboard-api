@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "doc": "jsdoc -c jsdoc.json"
   },
   "author": "Alexander Buravov (shnurok98)",
   "license": "ISC",
@@ -17,5 +18,8 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "pg-promise": "^10.3.1"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.6.3"
   }
 }

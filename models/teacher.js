@@ -5,7 +5,7 @@ const saltRounds = 12;
 
 const Person = require('./person');
 
-class User {
+class Teacher {
 	constructor(obj){
 		for(let key in obj){
 			this[key] = obj[key];
@@ -87,9 +87,9 @@ class User {
 	}
 
 	static getByLogin(login, cb){
-		User.getId(login, (err, id) => {
+		Teacher.getId(login, (err, id) => {
 			if(err) return cb(err);
-			User.get(id, cb);
+			Teacher.get(id, cb);
 		});
 	}
 
@@ -108,7 +108,7 @@ class User {
 	// }
 
 	static authenticate(login, password, cb){
-		User.getByLogin(login, (err, user) => {
+		Teacher.getByLogin(login, (err, user) => {
 			if(err) return cb(err);
 			if(!user) return cb();
 			bcrypt.hash(password, user.salt, (err, hash) => {
@@ -141,26 +141,12 @@ class User {
 		.then((user) => {
 			if (user === undefined) return cb();
 			if (user === null) return cb();
-			cb(null, new User(user));
+			cb(null, new Teacher(user));
 		})
 		.catch((err) => {
 			cb(err);
 		});
 	}
-
-	// static get(id, cb){
-	// 	connection.oneOrNone(`
-	// 		SELECT * FROM teachers WHERE id = $1;
-	// 	`, [id])
-	// 	.then((user) => {
-	// 		if (user === undefined) return cb();
-	// 		if (user === null) return cb();
-	// 		cb(null, new User(user));
-	// 	})
-	// 	.catch((err) => {
-	// 		cb(err);
-	// 	});
-	// }
 }
 
-module.exports = User;
+module.exports = Teacher;

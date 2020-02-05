@@ -1,12 +1,12 @@
-const User = require('../models/user');
+const Teacher = require('../models/teacher');
 const SECRET = require('../config').secret;
 const jwt = require("jsonwebtoken");
 
 exports.logIn = (req, res, next) => {
 	const data = req.body;
-	console.log('User logged:', data.login);
+	console.log('Teacher logged:', data.login);
 
-	User.authenticate(data.login, data.password, (err, user) => {
+	Teacher.authenticate(data.login, data.password, (err, user) => {
 		if (err) return next(err);
 		if (user) {
 			const payload = { id: user.id };
@@ -20,19 +20,19 @@ exports.logIn = (req, res, next) => {
 
 // exports.getId = (req, res) => {
 // 	const email = req.params.email;
-// 	User.getId(email, (err, id) => {
+// 	Teacher.getId(email, (err, id) => {
 // 		if (err) return next(err);
 // 		if (id){
 // 			res.send({id: id});
 // 		}else{
-// 			res.send({message: 'User not found'});
+// 			res.send({message: 'Teacher not found'});
 // 		}
 // 	});
 // };
 
 // exports.getInfo = (req, res) => {
 // 	const id = +req.params.id;
-// 	User.get(id, (err, user) => {
+// 	Teacher.get(id, (err, user) => {
 // 		if (err) return next(err);
 // 		if (user){
 // 			if (req.session.uid == user.id){
@@ -44,7 +44,7 @@ exports.logIn = (req, res, next) => {
 // 				res.send(user);
 // 			}
 // 		}else{
-// 			res.send({message: 'User not found'});
+// 			res.send({message: 'Teacher not found'});
 // 		}
 // 	});
 // };
@@ -58,13 +58,13 @@ exports.logOut = (req, res) => {
 // служебный
 exports.register = (req, res, next) => {
 	const data = req.body;
-	User.getByLogin(data.login, (err, user) => {
+	Teacher.getByLogin(data.login, (err, user) => {
 		if(err) return next(err);
 
 		if (user) {
 			res.send({ message: 'Пользователь с данным login уже существует' });
 		}else{
-			user = new User(data);
+			user = new Teacher(data);
 			user.save((err) => {
 				if(err) return next(err);
 				res.status(200).send({ message: 'Success registration!' });

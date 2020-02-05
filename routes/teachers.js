@@ -3,7 +3,7 @@ const router = express.Router();
 
 const connection = require('../db');
 
-const Teacher = require('../models/user');
+const Teacher = require('../models/teacher');
 
 router.get('/', (req, res) => {
 	// console.log(req.user);
