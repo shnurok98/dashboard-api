@@ -1,6 +1,6 @@
 {
 	"source": {
-		 "include": ["./models"],
+		 "include": ["./models", "./routes", "./middleware"],
 		 "includePattern": ".js$",
 		 "excludePattern": "(node_modules/|docs)"
 	},
@@ -12,6 +12,7 @@
 	"opts": {
 		 "encoding": "utf8",
 		 "destination": "./docs/",
-		 "recurse": true
+		 "recurse": true,
+		 "readme": "./README.md"
 	}
 }

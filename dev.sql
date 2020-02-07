@@ -1,118 +1,306 @@
--- dev DB v.20 | 04.02.20 | NOT NULL УБРАН
+--  v.22 | 07.02.20
 
-CREATE TABLE IF NOT EXISTS "files_ind_plan"
+
+CREATE TABLE "academic_plan"
 (
- "id"   serial PRIMARY KEY,
- "file" varchar(50),
- "date" date
+ "id"          serial PRIMARY KEY,
+ "id_sub_unit" serial REFERENCES sub_unit(id)
 );
 
-CREATE TABLE IF NOT EXISTS "degree"
+
+
+CREATE TABLE "blocks_for_acad_plan"
+(
+ "id"               serial PRIMARY KEY,
+ "id_acad_plan"     serial REFERENCES academic_plan(id),
+ "id_discip_blocks" serial REFERENCES discip_blocks(id)
+);
+
+
+
+CREATE TABLE "department"
+(
+ "id"    serial PRIMARY KEY,
+ "title" varchar(50) NOT NULL
+);
+
+
+CREATE TABLE "degree"
 (
  "id"     serial PRIMARY KEY,
- "degree" varchar(50)
+ "degree" varchar(50) NOT NULL
+);
+
+COMMENT ON TABLE "degree" IS 'Степень';
+
+
+
+CREATE TABLE "discip_blocks"
+(
+ "id"    serial PRIMARY KEY,
+ "code"  varchar(10) NOT NULL,
+ "title" varchar(25) NOT NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS "specialties"
+
+
+CREATE TABLE "department_load"
+(
+ "id"            serial PRIMARY KEY,
+ "years"         varchar(20) NOT NULL,
+ "date"          date NOT NULL,
+ "id_department" serial REFERENCES department(id)
+);
+
+
+
+
+CREATE TABLE "discip_modules"
+(
+ "id"       serial PRIMARY KEY,
+ "code"     varchar(10) NOT NULL,
+ "title"    varchar(15) NOT NULL,
+ "id_block" serial REFERENCES discip_blocks(id)
+);
+
+
+
+
+CREATE TABLE "discip_optional"
 (
  "id"           serial PRIMARY KEY,
- "code"         varchar(20),
- "title"        varchar(50),
- "profile"		 varchar(100),
- "educ_form"	 varchar(20),
- "educ_program" smallint,
- "educ_years"	 int,
- "year_join"	 date,
- "id_acad_plan" serial
+ "code"         varchar(10) NOT NULL,
+ "title"        varchar(25) NOT NULL,
+ "semester"     int NOT NULL,
+ "hours"        int NOT NULL,
+ "id_acad_plan" serial REFERENCES academic_plan(id)
 );
 
-COMMENT ON COLUMN "specialties"."educ_program" IS '1 - бакалавр, 2 - магистр, 3 - специалитет';
 
-CREATE TABLE IF NOT EXISTS "groups"
+
+CREATE TABLE "disciplines"
+(
+ "id"          serial PRIMARY KEY,
+ "id_module"   serial REFERENCES discip_modules(id),
+ "title"       varchar(30) NOT NULL,
+ "code"        varchar(10) NOT NULL,
+ "hours_lec"   int NOT NULL,
+ "hours_lab"   int NOT NULL,
+ "hours_prakt" int NOT NULL,
+ "hours_self"  int NOT NULL
+);
+
+
+
+CREATE TABLE "disciplines_year"
+(
+ "id"                 serial PRIMARY KEY,
+ "title"              varchar(50) NOT NULL,
+ "hours_lec"          int NOT NULL,
+ "hours_lab"          int NOT NULL,
+ "hours_seminar"      int NOT NULL,
+ "hours_con_ekzamen"  int NOT NULL,
+ "hours_ekzamen"      int NOT NULL,
+ "hours_zachet"       int NOT NULL,
+ "hours_kursovoy"     int NOT NULL,
+ "hours_GEK"          int NOT NULL,
+ "hours_ruk_prakt"    int NOT NULL,
+ "hours_ruk_VKR"      int NOT NULL,
+ "hours_ruk_magic"    int NOT NULL,
+ "hours_ruk_aspirant" int NOT NULL,
+ "hours_proj_act"     int NOT NULL,
+ "id_specialty"       serial REFERENCES specialties(id),
+ "semester"           int NOT NULL,
+ "id_file_RPD"        bigserial REFERENCES "files_RPD"(id),
+ "id_department_load" serial REFERENCES department_load(id)
+);
+
+
+
+CREATE TABLE "files_ind_plan"
+(
+ "id"         serial PRIMARY KEY,
+ "file"       varchar(50) NOT NULL,
+ "date"       date NOT NULL,
+ "id_teacher" serial REFERENCES teachers(id)
+);
+
+
+
+CREATE TABLE "files_acad_plan"
+(
+ "id"           serial PRIMARY KEY,
+ "file"         varchar(50) NOT NULL,
+ "date"         date NOT NULL,
+ "id_acad_plan" serial REFERENCES academic_plan(id)
+);
+
+
+
+CREATE TABLE "files_proj_act"
+(
+ "id"   serial PRIMARY KEY,
+ "file" varchar(50) NOT NULL,
+ "date" date NOT NULL
+
+);
+
+
+
+CREATE TABLE "files_RPD"
+(
+ "id"         bigserial PRIMARY KEY,
+ "file"       varchar(50) NOT NULL,
+ "date"       date NOT NULL,
+ "id_teacher" serial REFERENCES teachers(id)
+);
+
+
+
+CREATE TABLE "personalities"
+(
+ "id"         serial PRIMARY KEY,
+ "name"       varchar(50) NOT NULL,
+ "surname"    varchar(50) NOT NULL,
+ "patronymic" varchar(50) NOT NULL,
+ "birthday"   date NOT NULL,
+ "phone"      varchar(20) NOT NULL,
+ "email"      varchar(40) NOT NULL,
+ "status"     smallint NOT NULL
+
+);
+
+
+COMMENT ON COLUMN "personalities"."status" IS '1 - студент, 2 - преподаватель';
+
+
+CREATE TABLE "groups"
 (
  "id"             serial PRIMARY KEY,
- "id_specialties" serial,
- "name" 				varchar(15)
+ "id_specialties" serial NOT NULL REFERENCES specialties(id),
+ "name"           varchar(15) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "students"
+
+
+CREATE TABLE "ranks"
+(
+ "id"   serial PRIMARY KEY,
+ "rank" varchar(50) NOT NULL
+);
+
+
+COMMENT ON TABLE "ranks" IS 'Звание';
+
+
+
+-- сделать что-то с id_file
+CREATE TABLE "project_activities"
+(
+ "id"          serial PRIMARY KEY,
+ "title"       varchar(50) NOT NULL,
+ "id_file"     serial NOT NULL REFERENCES files_proj_act(id),
+ "description" text NOT NULL,
+ "start"       date NOT NULL,
+ "end"         date NOT NULL,
+ "link_trello" varchar(250),
+ "id_sub_unit" serial NOT NULL REFERENCES sub_unit(id)
+);
+
+
+
+CREATE TABLE "rights_roles"
+(
+ "id"          serial PRIMARY KEY,
+ "role"        varchar(50) NOT NULL,
+ "id_teacher"  serial NOT NULL REFERENCES teachers(id),
+ "id_sub_unit" serial NOT NULL REFERENCES sub_unit(id)
+);
+
+
+
+COMMENT ON TABLE "rights_roles" IS 'Права выданные определенным преподавателям к определенным подразделениям и проектам';
+
+COMMENT ON COLUMN "rights_roles"."role" IS 'Можно сделать smallint типо (РОП, Куратор и тд)';
+
+
+
+CREATE TABLE "semestr"
+(
+ "id"            serial PRIMARY KEY,
+ "id_discipline" serial NOT NULL REFERENCES disciplines(id),
+ "semester"      int NOT NULL,
+ "is_exam"       boolean NOT NULL
+);
+
+
+
+CREATE TABLE "specialties"
+(
+ "id"            serial PRIMARY KEY,
+ "code"          varchar(20) NOT NULL,
+ "title"         varchar(50) NOT NULL,
+ "profile"       varchar(100) NOT NULL,
+ "educ_form"     varchar(20) NOT NULL,
+ "educ_programm" smallint NOT NULL,
+ "educ_years"    int NOT NULL,
+ "year_join"     date NOT NULL,
+ "id_acad_plan"  serial REFERENCES academic_plan(id)
+);
+
+
+COMMENT ON COLUMN "specialties"."profile" IS 'Профиль';
+COMMENT ON COLUMN "specialties"."educ_form" IS 'очная, очно-заочная и тд';
+COMMENT ON COLUMN "specialties"."educ_programm" IS '1 - бакалавр, 2 - магистр';
+COMMENT ON COLUMN "specialties"."educ_years" IS 'Срок обучения';
+COMMENT ON COLUMN "specialties"."year_join" IS 'Год набора';
+
+
+
+CREATE TABLE "students"
+(
+ "id"          serial PRIMARY KEY,
+ "id_person"   serial NOT NULL REFERENCES personalities(id),
+ "id_group"    serial NOT NULL REFERENCES groups(id),
+ "id_proj_act" serial REFERENCES project_activities(id)
+);
+
+
+CREATE TABLE "teachers"
 (
  "id"             serial PRIMARY KEY,
- "id_person" 		serial,
- "id_group"			serial,
- "id_proj_act"		serial
-);
-
-CREATE TABLE IF NOT EXISTS "personalities" (
-	"id"         serial PRIMARY KEY,
-	"name"       varchar(50),
-	"surname"    varchar(50),
-	"patronymic" varchar(50),
-	"birthday"   date,
-	"phone"      varchar(20),
-	"email"      varchar(40),
-	"status"     smallint
-);
-
-COMMENT ON COLUMN "personalities"."status" IS '1 - преподаватель, 2 - студент';
-
-CREATE TABLE IF NOT EXISTS "teachers" (
-	"id"         serial PRIMARY KEY,
-	"id_person"      serial NOT NULL,
-	"position"       varchar(50),
-	"id_rank"        serial,
-	"id_degree"      serial,
-	"rate"           real,
-	"hours_worked"   int,
-	"RINC"           real,
-	"id_ind_plan"    serial,
-	"web_of_science" real,
-	"scopus"         real,
-	"login"				varchar(25) NOT NULL,
-	"password"			varchar(150),
-	"salt"				varchar(150)
+ "id_person"      serial NOT NULL REFERENCES personalities(id),
+ "position"       varchar(50) NOT NULL,
+ "id_rank"        serial NOT NULL REFERENCES ranks(id),
+ "id_degree"      serial NOT NULL REFERENCES degree(id),
+ "rate"           real NOT NULL,
+ "hours_worked"   int NOT NULL,
+ "RINC"           real NOT NULL,
+ "web_of_science" real NOT NULL,
+ "scopus"         real NOT NULL,
+ "login"          varchar(25) NOT NULL,
+ "password"       varchar(150) NOT NULL,
+ "salt"           varchar(150) NOT NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS "rights_roles"
+
+COMMENT ON COLUMN "teachers"."rate" IS 'ставка';
+
+
+
+CREATE TABLE "sub_unit"
 (
-	"id"           serial PRIMARY KEY,
-	"role"         varchar(50),
-	"id_teacher"   serial,
-	"sub_unit"		serial
+ "id"            serial PRIMARY KEY,
+ "title"         varchar(50) NOT NULL,
+ "is_project"    boolean NOT NULL,
+ "id_department" serial NOT NULL REFERENCES department(id)
 );
 
-CREATE TABLE IF NOT EXISTS "sub_unit"
-(
- "id"           	serial PRIMARY KEY,
- "title"        	varchar(50),
- "is_project"		boolean
-);
+COMMENT ON TABLE "sub_unit" IS 'Подразделения ( условные САПР, ВЕБ и т.д. ), также сюда включаются проекты по ПД.';
 
 
-CREATE TABLE IF NOT EXISTS "disciplines_year"
-(
- "id"                 serial,
- "title"              varchar(50),
- "hours_lec"          int,
- "hours_lab"          int,
- "hours_seminar"      int,
- "hours_con_ekzamen"  int,
- "hours_ekzamen"      int,
- "hours_zachet"       int,
- "hours_kursovoy"     int,
- "hours_GEK"          int,
- "hours_ruk_prakt"    int,
- "hours_ruk_VKR"      int,
- "hours_ruk_magic"    int,
- "hours_ruk_aspirant" int,
- "hours_proj_act"     int,
- "id_specialty"       int,
- "semester"           int,
- "id_file_RPD"			 bigserial,
- "id_department"		 serial
-);
 
 
--- select * from teachers inner join personalities on teachers.id_person = personalities.id and teachers.id = 5;
+
