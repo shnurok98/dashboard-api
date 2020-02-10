@@ -6,10 +6,7 @@ const saltRounds = 12;
 const Person = require('./person');
 
 /**
- * Класс описывающий преподавателя
- */
-class Teacher {
-	/**
+	 * @memberof Teacher
 	 * @typedef {Teacher} Teacher
 	 * 
 	 * @property {Number} id
@@ -27,8 +24,12 @@ class Teacher {
 	 * @property {String} salt
 	 */
 
+/**
+ * Класс описывающий преподавателя
+ */
+class Teacher {
 	/**
-	 * Создать преподавателя
+	 * Создать экземпляр преподавателя
 	 * @param {Teacher} obj 
 	 */ 
 	constructor(obj){
@@ -37,6 +38,10 @@ class Teacher {
 		}
 	}
 	
+	/**
+	 * Метод сохранения
+	 * @param {Function} cb 
+	 */
 	save(cb){
 		if(this.id){
 			this.update(cb);
@@ -99,6 +104,11 @@ class Teacher {
 		});
 	}
 
+	/**
+	 * Функция хэширования пароля
+	 * @private
+	 * @param {Function} cb 
+	 */
 	hashPassword(cb){
 		bcrypt.genSalt(saltRounds, (err, salt) => {
 			if(err) return cb(err);
@@ -111,6 +121,11 @@ class Teacher {
 		});
 	}
 
+	/**
+	 * Получение преподавателя по login
+	 * @param {String} login логин искомого пользователя
+	 * @param {Function} cb 
+	 */
 	static getByLogin(login, cb){
 		Teacher.getId(login, (err, id) => {
 			if(err) return cb(err);
@@ -118,20 +133,12 @@ class Teacher {
 		});
 	}
 
-	// static getByEmail(email, cb){
-	// 	connection.oneOrNone(`
-	// 		SELECT * FROM personalities WHERE email = $1;
-	// 	`, [email])
-	// 	.then((res) => {
-	// 		if (res === undefined || res === null) return cb();
-	// 		cb(null, res);
-	// 	})
-	// 	.catch((err) => {
-	// 		console.log(err);
-	// 		cb(err);
-	// 	});
-	// }
-
+	/**
+	 * Метод для авторизации пользователя
+	 * @param {String} login логин пользователя
+	 * @param {String} password пароль пользователя
+	 * @param {Function} cb 
+	 */
 	static authenticate(login, password, cb){
 		Teacher.getByLogin(login, (err, user) => {
 			if(err) return cb(err);
@@ -144,6 +151,11 @@ class Teacher {
 		});
 	}
 
+	/**
+	 * Получение id по login
+	 * @param {String} login логин искомого пользователя
+	 * @param {Function} cb 
+	 */
 	static getId(login, cb){
 		connection.oneOrNone(`
 			SELECT teachers.id FROM teachers WHERE login = $1;
@@ -159,6 +171,11 @@ class Teacher {
 		
 	}
 
+	/**
+	 * Получение полной информации о преподавателе
+	 * @param {Number} id id преподавателя
+	 * @param {Function} cb 
+	 */
 	static get(id, cb){
 		connection.oneOrNone(`
 			select * from teachers inner join personalities on teachers.id_person = personalities.id and teachers.id = $1;

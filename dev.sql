@@ -1,10 +1,9 @@
---  v.22 | 07.02.20
+--  v.23 | 08.02.20
 
 
 CREATE TABLE "academic_plan"
 (
- "id"          serial PRIMARY KEY,
- "id_sub_unit" serial REFERENCES sub_unit(id)
+ "id"          serial PRIMARY KEY
 );
 
 
@@ -28,7 +27,7 @@ CREATE TABLE "department"
 CREATE TABLE "degree"
 (
  "id"     serial PRIMARY KEY,
- "degree" varchar(50) NOT NULL
+ "title" varchar(50) NOT NULL
 );
 
 COMMENT ON TABLE "degree" IS 'Степень';
@@ -41,18 +40,6 @@ CREATE TABLE "discip_blocks"
  "code"  varchar(10) NOT NULL,
  "title" varchar(25) NOT NULL
 );
-
-
-
-
-CREATE TABLE "department_load"
-(
- "id"            serial PRIMARY KEY,
- "years"         varchar(20) NOT NULL,
- "date"          date NOT NULL,
- "id_department" serial REFERENCES department(id)
-);
-
 
 
 
@@ -113,7 +100,8 @@ CREATE TABLE "disciplines_year"
  "id_specialty"       serial REFERENCES specialties(id),
  "semester"           int NOT NULL,
  "id_file_RPD"        bigserial REFERENCES "files_RPD"(id),
- "id_department_load" serial REFERENCES department_load(id)
+ "years"          	 varchar(20) NOT NULL,
+ "date"          	 	 date NOT NULL
 );
 
 
@@ -121,7 +109,9 @@ CREATE TABLE "disciplines_year"
 CREATE TABLE "files_ind_plan"
 (
  "id"         serial PRIMARY KEY,
- "file"       varchar(50) NOT NULL,
+ "title"		  varchar(50) NOT NULL,
+ "link"       varchar(80) NOT NULL,
+ "ext" 		  varchar(7) NOT NULL,
  "date"       date NOT NULL,
  "id_teacher" serial REFERENCES teachers(id)
 );
@@ -130,9 +120,11 @@ CREATE TABLE "files_ind_plan"
 
 CREATE TABLE "files_acad_plan"
 (
- "id"           serial PRIMARY KEY,
- "file"         varchar(50) NOT NULL,
- "date"         date NOT NULL,
+ "id"         serial PRIMARY KEY,
+ "title"		  varchar(50) NOT NULL,
+ "link"       varchar(80) NOT NULL,
+ "ext" 		  varchar(7) NOT NULL,
+ "date"       date NOT NULL,
  "id_acad_plan" serial REFERENCES academic_plan(id)
 );
 
@@ -140,18 +132,22 @@ CREATE TABLE "files_acad_plan"
 
 CREATE TABLE "files_proj_act"
 (
- "id"   serial PRIMARY KEY,
- "file" varchar(50) NOT NULL,
- "date" date NOT NULL
-
+ "id"         serial PRIMARY KEY,
+ "title"		  varchar(50) NOT NULL,
+ "link"       varchar(80) NOT NULL,
+ "ext" 		  varchar(7) NOT NULL,
+ "date"       date NOT NULL,
+ "id_proj_act" serial NOT NULL REFERENCES project_activities(id)
 );
 
 
 
 CREATE TABLE "files_RPD"
 (
- "id"         bigserial PRIMARY KEY,
- "file"       varchar(50) NOT NULL,
+ "id"         serial PRIMARY KEY,
+ "title"		  varchar(50) NOT NULL,
+ "link"       varchar(80) NOT NULL,
+ "ext" 		  varchar(7) NOT NULL,
  "date"       date NOT NULL,
  "id_teacher" serial REFERENCES teachers(id)
 );
@@ -168,7 +164,6 @@ CREATE TABLE "personalities"
  "phone"      varchar(20) NOT NULL,
  "email"      varchar(40) NOT NULL,
  "status"     smallint NOT NULL
-
 );
 
 
@@ -187,7 +182,7 @@ CREATE TABLE "groups"
 CREATE TABLE "ranks"
 (
  "id"   serial PRIMARY KEY,
- "rank" varchar(50) NOT NULL
+ "title" varchar(50) NOT NULL
 );
 
 
@@ -195,12 +190,11 @@ COMMENT ON TABLE "ranks" IS 'Звание';
 
 
 
--- сделать что-то с id_file
+
 CREATE TABLE "project_activities"
 (
  "id"          serial PRIMARY KEY,
  "title"       varchar(50) NOT NULL,
- "id_file"     serial NOT NULL REFERENCES files_proj_act(id),
  "description" text NOT NULL,
  "start"       date NOT NULL,
  "end"         date NOT NULL,
@@ -246,7 +240,8 @@ CREATE TABLE "specialties"
  "educ_programm" smallint NOT NULL,
  "educ_years"    int NOT NULL,
  "year_join"     date NOT NULL,
- "id_acad_plan"  serial REFERENCES academic_plan(id)
+ "id_acad_plan"  serial REFERENCES academic_plan(id),
+ "id_sub_unit"   serial REFERENCES sub_unit(id)
 );
 
 
@@ -262,8 +257,7 @@ CREATE TABLE "students"
 (
  "id"          serial PRIMARY KEY,
  "id_person"   serial NOT NULL REFERENCES personalities(id),
- "id_group"    serial NOT NULL REFERENCES groups(id),
- "id_proj_act" serial REFERENCES project_activities(id)
+ "id_group"    serial NOT NULL REFERENCES groups(id)
 );
 
 
@@ -302,5 +296,11 @@ COMMENT ON TABLE "sub_unit" IS 'Подразделения ( условные С
 
 
 
-
+CREATE TABLE "stud_on_proj"
+(
+	"id"	serial PRIMARY KEY,
+	"id_student" serial NOT NULL REFERENCES students(id),
+	"id_project" serial NOT NULL REFERENCES project_activities(id),
+	"date" date NOT NULL
+)
 
