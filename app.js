@@ -30,16 +30,16 @@ app.use(allowCrossDomain);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use('/users', users);
-app.use('/teachers', passport.authenticate('jwt', { session: false }), teachers);
-app.use('/files', files);
-app.use('/department_load', department_load);
+app.use('/api/users', users);
+app.use('/api/teachers', passport.authenticate('jwt', { session: false }), teachers);
+app.use('/api/files', files);
+app.use('/api/department_load', department_load);
 
-app.post('/register', auth.register);
-app.post('/login', auth.logIn);
-app.get('/logout', auth.logOut);
+app.post('/api/register', auth.register);
+app.post('/api/login', auth.logIn);
+app.get('/api/logout', auth.logOut);
 
-app.get('/', (req, res) => {
+app.get('/api/', (req, res) => {
 	res.send('<h1>Api is live</h1>')
 })
 
