@@ -32,7 +32,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use('/api/users', users);
 app.use('/api/teachers', passport.authenticate('jwt', { session: false }), teachers);
-app.use('/api/files', files);
+app.use('/api/files', passport.authenticate('jwt', { session: false }), files);
 app.use('/api/department_load', department_load);
 
 app.post('/api/register', auth.register);

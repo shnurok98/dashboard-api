@@ -1,26 +1,47 @@
 const express = require('express');
 const router = express.Router();
 
-const Formidable = require('formidable');
+// const path = require('path');
+const Formidable  = require('formidable');
 
-const form = new Formidable();
-form.encoding = 'utf-8';
-// form.uploadDir = __dirname + "/uploads";
-form.uploadDir = 'C:\\Uploads';
-form.keepExtensions = true; // сохранять с исходным расшерением
+const File = require('../models/file');
+
+const options = {
+  encoding: 'utf-8',
+  uploadDir: '/uploads',
+  keepExtensions: false,
+  multiples: false
+};
+// uploadDir: path.join(__dirname, '/..', '/uploads'),
+
+console.log(options);
 
 router.post('/', (req, res) => {
-	form.parse(req, (err, fields, files) => {
+  const form = new Formidable(options);
+
+  // form.on('error', (err) => {
+  //   res.status(500);
+  //   console.error(err);
+  // });
+
+  form.parse(req, (err, fields, files) => {
     if (err) {
+      res.status(500).json({message: 'Загрузка не удалась'});
       console.error('Error', err)
       throw err
     }
-    console.log('Fields', fields)
-    console.log('Files', files)
-    for (const file of Object.entries(files)) {
-      console.log(file)
-    }
-  })
+    // console.log(fields)
+
+    File.ind_plan(files.file, req.user.id);
+
+    // console.log(files.file.name);
+    // console.log(files.file.path);
+    // console.log(path.extname(files.file.name));
+    // console.log(files.file.lastModifiedDate);
+    // console.log('tech id:' + req.user.id);
+    res.status(200).json({message: 'Load success!'});
+  });
+  
 })
 
 module.exports = router;
