@@ -3,8 +3,6 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 12;
 
-const Person = require('./person');
-
 /**
 	 * @memberof Teacher
 	 * @typedef {Teacher} Teacher
@@ -48,39 +46,77 @@ class Teacher {
 		}else{
 			this.hashPassword((err) => {
 				if (err) return cb(err);
-				// let obj = { 
-				// 	login: this.login,
-				// 	// email: this.email, 
-				// 	password: this.password, 
-				// 	salt: this.salt
-				// };
+
 				let obj = this;
-				const person = new Person(obj);
-				let teacher = {
-					position: obj.position,
-					rate: obj.rate,
-					hours_worked: obj.hours_worked,
-					RINC: obj.RINC,
-					web_of_science: obj.web_of_science,
-					scopus: obj.scopus,
-					login: obj.login,
-					password: obj.password,
-					salt: obj.salt
-				}
-				person.save((err, id) => {
-					if (err) return cb(err);
-					teacher.id_person = id;
-					connection.oneOrNone('INSERT INTO teachers (${this:name}) VALUES (${this:csv}) RETURNING id;', teacher)
-						.then((rows) => {
-							if (rows === undefined) return cb(console.log(new Error('Не удалось создать пользователя')));
-							this.id = rows.id;
-							cb();
+
+				/**
+				 * @see http://vitaly-t.github.io/pg-promise/Database.html#task
+				 * @see http://vitaly-t.github.io/pg-promise/Database.html#tx
+				 */
+				connection.task(t => {
+					return t.oneOrNone(`
+					INSERT INTO personalities (
+						name, 
+						surname, 
+						patronymic, 
+						birthday, 
+						phone, 
+						email, 
+						status
+					) 
+					VALUES (
+						$<obj.name>, 
+						$<obj.surname>, 
+						$<obj.patronymic>, 
+						$<obj.birthday>, 
+						$<obj.phone>, 
+						$<obj.email>, 
+						$<obj.status>
+					)
+					RETURNING id;`, 
+					{
+						obj
+					})
+					.then(person => {
+						return t.oneOrNone(`
+						INSERT INTO teachers (
+							id_person,
+							position,
+							rate,
+							hours_worked,
+							"RINC",
+							web_of_science,
+							scopus,
+							login,
+							password,
+							salt
+						) 
+						VALUES (
+							$<person.id>,
+							$<obj.position>,
+							$<obj.rate>,
+							$<obj.hours_worked>,
+							$<obj.RINC>,
+							$<obj.web_of_science>,
+							$<obj.scopus>,
+							$<obj.login>,
+							$<obj.password>,
+							$<obj.salt>
+						) 
+						RETURNING id;`,
+						{
+							obj, 
+							person
 						})
-						.catch((err) => {
-							cb(err);
-						});
+					});
+
 				})
-				
+				.then(data => {
+					if (data === undefined) return cb(console.log(new Error('Не удалось создать преподавателя')));
+					this.id = data.id;
+					cb();
+				})
+				.catch((err) => cb(err))
 				
 			});
 		}
@@ -175,6 +211,7 @@ class Teacher {
 	 * Получение полной информации о преподавателе
 	 * @param {Number} id id преподавателя
 	 * @param {Function} cb 
+	 * @todo Затирается поле id
 	 */
 	static get(id, cb){
 		connection.oneOrNone(`

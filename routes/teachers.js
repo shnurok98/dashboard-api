@@ -16,11 +16,11 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
 	Teacher.get(req.params.id, (err, teacher) => {
-		if (err) return next(err);
+		if (err) console.error(err);
 		if (teacher) {
 			res.status(200).json(teacher);
 		}else{
-			res.status(200).json({ message: 'Такого препода нету' });
+			res.status(200).json({ message: 'Такого преподавателя нету' });
 		}
 	});
 });
