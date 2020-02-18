@@ -211,11 +211,22 @@ class Teacher {
 	 * Получение полной информации о преподавателе
 	 * @param {Number} id id преподавателя
 	 * @param {Function} cb 
-	 * @todo Затирается поле id
 	 */
 	static get(id, cb){
 		connection.oneOrNone(`
-			select * from teachers inner join personalities on teachers.id_person = personalities.id and teachers.id = $1;
+			SELECT 
+				T.*, 
+				P.id AS id_person, 
+				P.name, 
+				P.surname, 
+				P.patronymic,
+				P.birthday,
+				P.phone,
+				P.email,
+				P.status
+			FROM teachers AS T 
+			INNER JOIN personalities AS P
+			ON T.id_person = P.id and T.id = $1;
 		`, [id])
 		.then((user) => {
 			if (user === undefined) return cb();
@@ -225,6 +236,28 @@ class Teacher {
 		.catch((err) => {
 			cb(err);
 		});
+	}
+
+	toJSON(){
+		return {
+			id: this.id,
+			id_person: this.id_person,
+			name: this.name,
+			surname: this.surname,
+			patronymic: this.patronymic,
+			birthday: this.birthday,
+			phone: this.phone,
+			email: this.email,
+			position: this.position,
+			id_rank: this.id_rank,
+			id_degree: this.id_degree,
+			rate: this.rate,
+			hours_worked: this.hours_worked,
+			RINC: this.RINC,
+			web_of_science: this.web_of_science,
+			scopus: this.scopus,
+			status: this.status
+		}
 	}
 }
 

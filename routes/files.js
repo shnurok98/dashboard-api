@@ -14,7 +14,7 @@ const options = {
 };
 // uploadDir: path.join(__dirname, '/..', '/uploads'),
 
-console.log(options);
+// console.log(options);
 
 router.post('/', (req, res) => {
   const form = new Formidable(options);
