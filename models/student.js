@@ -11,12 +11,12 @@ class Student {
 	}
 
 	static get(id, cb){
-		connection.oneOrNone(`
-			SELECT S.*,  
-			FROM students AS S 
-			INNER JOIN personalities AS P 
-				ON S.id_person = P.id and S.id = $1
-			INNER JOIN 
-		`)
+		// connection.oneOrNone(`
+		// 	SELECT S.*,  
+		// 	FROM students AS S 
+		// 	INNER JOIN personalities AS P 
+		// 		ON S.id_person = P.id and S.id = $1
+		// 	INNER JOIN 
+		// `)
 	}
 }
