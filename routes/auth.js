@@ -18,37 +18,6 @@ exports.logIn = (req, res, next) => {
 	});
 };
 
-// exports.getId = (req, res) => {
-// 	const email = req.params.email;
-// 	Teacher.getId(email, (err, id) => {
-// 		if (err) return next(err);
-// 		if (id){
-// 			res.send({id: id});
-// 		}else{
-// 			res.send({message: 'Teacher not found'});
-// 		}
-// 	});
-// };
-
-// exports.getInfo = (req, res) => {
-// 	const id = +req.params.id;
-// 	Teacher.get(id, (err, user) => {
-// 		if (err) return next(err);
-// 		if (user){
-// 			if (req.session.uid == user.id){
-// 				res.send({
-// 					id: user.id,
-// 					email: user.email
-// 				});
-// 			}else{
-// 				res.send(user);
-// 			}
-// 		}else{
-// 			res.send({message: 'Teacher not found'});
-// 		}
-// 	});
-// };
-
 // При logOut нужно удалить токен на клиенте
 exports.logOut = (req, res) => {
 	req.logout();

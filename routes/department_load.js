@@ -11,9 +11,4 @@ router.get('/:id', (req, res) => {
 	.catch(err => console.error(err));
 });
 
-// router.post('/', (req, res) => {
-// 	console.log(req.body);
-// 	res.end();
-// });
-
 module.exports = router;

@@ -237,28 +237,6 @@ class Teacher {
 			cb(err);
 		});
 	}
-
-	toJSON(){
-		return {
-			id: this.id,
-			id_person: this.id_person,
-			name: this.name,
-			surname: this.surname,
-			patronymic: this.patronymic,
-			birthday: this.birthday,
-			phone: this.phone,
-			email: this.email,
-			position: this.position,
-			id_rank: this.id_rank,
-			id_degree: this.id_degree,
-			rate: this.rate,
-			hours_worked: this.hours_worked,
-			RINC: this.RINC,
-			web_of_science: this.web_of_science,
-			scopus: this.scopus,
-			status: this.status
-		}
-	}
 }
 
 module.exports = Teacher;
