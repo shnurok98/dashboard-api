@@ -7,11 +7,14 @@ const Teacher = require('../models/teacher');
 
 router.get('/', (req, res) => {
 	// console.log(req.user);
-	connection.any(`SELECT * FROM teachers;`)
-	.then(rows => {
-		res.send(rows);
-	})
-	.catch(err => console.error(err));
+	Teacher.getAll((err, teachers) => {
+		if (err) console.error(err);
+		if (teachers) {
+			res.status(200).json(teachers);
+		}else{
+			res.status(200).json({ message: 'server: Teachers.getAll(err)' });
+		}
+	});
 });
 
 router.get('/:id', (req, res) => {

@@ -9,8 +9,9 @@ const PORT = require('./config').port;
 const strategy = require('./middleware/jwt');
 const passport = require('passport');
 
-const users = require('./routes/users');
+const debug = require('./routes/debug');
 const teachers = require('./routes/teachers');
+const students = require('./routes/students');
 const files = require('./routes/files');
 const department_load = require('./routes/department_load');
 
@@ -25,14 +26,17 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use('/api/users', users);
+app.use('/api/debug', debug);
+
 app.use('/api/teachers', passport.authenticate('jwt', { session: false }), teachers);
 app.use('/api/files', passport.authenticate('jwt', { session: false }), files);
-app.use('/api/department_load', department_load);
+app.use('/api/dep_load', department_load);
 
-app.post('/api/register', auth.register);
-app.post('/api/login', auth.logIn);
-app.get('/api/logout', auth.logOut);
+app.use('/api/students', students);
+
+app.post('/api/users/register', auth.register);
+app.post('/api/users/login', auth.logIn);
+app.get('/api/users/logout', auth.logOut);
 
 app.get('/api/', (req, res) => {
 	res.send('<h1>Api is live</h1>')

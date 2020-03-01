@@ -3,7 +3,7 @@ const router = express.Router();
 
 const connection = require('../db');
 
-router.get('/', (req, res) => {
+router.get('/personalities', (req, res) => {
 	connection.any(`SELECT * FROM personalities;`)
 	.then(rows => {
 		res.send(rows);

@@ -237,6 +237,27 @@ class Teacher {
 			cb(err);
 		});
 	}
+
+	static getAll(cb){
+		connection.many(`
+			SELECT 
+				T.*, 
+				P.id AS id_person, 
+				P.name, 
+				P.surname, 
+				P.patronymic,
+				P.birthday,
+				P.phone,
+				P.email,
+				P.status
+			FROM teachers AS T, personalities AS P
+			WHERE T.id_person = P.id ORDER BY P.surname;
+			`)
+		.then((rows) => {
+			cb(null, rows);
+		})
+		.catch(err => cb(err));
+	}
 }
 
 module.exports = Teacher;
