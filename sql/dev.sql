@@ -17,7 +17,7 @@ CREATE TABLE "discip_modules"
 (
  "id"       serial PRIMARY KEY,
  "code"     varchar(10) NOT NULL,
- "name"    varchar(15) NOT NULL,
+ "name"    varchar(75) NOT NULL,
  "block_id" int REFERENCES discip_blocks(id)
 );
 
