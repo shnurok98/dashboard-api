@@ -3,18 +3,38 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 12;
 
+const fields = `
+	T.id,
+	T.position,
+	T.rank_id,
+	T.degree_id,
+	T.rate,
+	T.hours_worked,
+	T.rinc,
+	T.web_of_science,
+	T.scopus, 
+	P.id AS person_id, 
+	P.name, 
+	P.surname, 
+	P.patronymic,
+	P.birthday,
+	P.phone,
+	P.email,
+	P.status
+`;
+
 /**
 	 * @memberof Teacher
 	 * @typedef {Teacher} Teacher
 	 * 
 	 * @property {Number} id
-	 * @property {Number} id_person
+	 * @property {Number} person_id
 	 * @property {String} position
-	 * @property {Number} id_rank
-	 * @property {Number} id_degree
+	 * @property {Number} rank_id
+	 * @property {Number} degree_id
 	 * @property {Number} rate
 	 * @property {Number} hours_worked
-	 * @property {Number} RINC
+	 * @property {Number} rinc
 	 * @property {Number} web_of_science
 	 * @property {Number} scopus
 	 * @property {String} login
@@ -239,15 +259,7 @@ class Teacher {
 	static get(id, cb){
 		connection.oneOrNone(`
 			SELECT 
-				T.*, 
-				P.id AS person_id, 
-				P.name, 
-				P.surname, 
-				P.patronymic,
-				P.birthday,
-				P.phone,
-				P.email,
-				P.status
+				${fields}
 			FROM teachers AS T 
 			INNER JOIN personalities AS P
 			ON T.person_id = P.id and T.id = $1;
@@ -265,17 +277,9 @@ class Teacher {
 	static getAll(cb){
 		connection.many(`
 			SELECT 
-				T.*, 
-				P.id AS id_person, 
-				P.name, 
-				P.surname, 
-				P.patronymic,
-				P.birthday,
-				P.phone,
-				P.email,
-				P.status
+				${fields}
 			FROM teachers AS T, personalities AS P
-			WHERE T.id_person = P.id ORDER BY P.surname;
+			WHERE T.person_id = P.id ORDER BY P.surname;
 			`)
 		.then((rows) => {
 			cb(null, rows);

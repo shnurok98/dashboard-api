@@ -14,7 +14,7 @@ class Student {
 		connection.oneOrNone(`
 			SELECT 
 				S.*,
-				P.id AS id_person, 
+				P.id AS person_id, 
 				P.name, 
 				P.surname, 
 				P.patronymic,
@@ -22,11 +22,11 @@ class Student {
 				P.phone,
 				P.email,
 				P.status,
-				G.id AS id_group,
-				G.id_specialties,
+				G.id AS group_id,
+				G.specialties_id,
 				G.name   
 			FROM students AS S, personalities AS P, groups AS G 
-			WHERE S.id = $1 AND S.id_person = P.id AND S.id_group = G.id
+			WHERE S.id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [id])
 		.then(rows => {
 			if (rows === undefined) return cb();
@@ -40,7 +40,7 @@ class Student {
 		connection.manyOrNone(`
 			SELECT 
 				S.*,
-				P.id AS id_person, 
+				P.id AS person_id, 
 				P.name, 
 				P.surname, 
 				P.patronymic,
@@ -48,11 +48,11 @@ class Student {
 				P.phone,
 				P.email,
 				P.status,
-				G.id AS id_group,
-				G.id_specialties,
+				G.id AS group_id,
+				G.specialties_id,
 				G.name   
 			FROM students AS S, personalities AS P, groups AS G 
-			WHERE S.id_group = $1 AND S.id_person = P.id AND S.id_group = G.id
+			WHERE S.group_id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [group_id])
 		.then(rows => {
 			if (rows === undefined) return cb();
@@ -66,7 +66,7 @@ class Student {
 		connection.manyOrNone(`
 			SELECT 
 				S.*,
-				P.id AS id_person, 
+				P.id AS person_id, 
 				P.name, 
 				P.surname, 
 				P.patronymic,
@@ -74,20 +74,20 @@ class Student {
 				P.phone,
 				P.email,
 				P.status,
-				G.id AS id_group,
-				G.id_specialties,
+				G.id AS group_id,
+				G.specialties_id,
 				G.name,
 				SP.code,
-				SP.title,
+				SP.name,
 				SP.profile,
 				SP.educ_form,
 				SP.educ_programm,
 				SP.educ_years,
 				SP.year_join,
-				SP.id_acad_plan,
-				SP.id_sub_unit   
+				SP.acad_plan_id,
+				SP.sub_unit_id   
 			FROM students AS S, personalities AS P, groups AS G, specialties AS SP 
-			WHERE G.id_specialties = $1 AND S.id_person = P.id AND S.id_group = G.id
+			WHERE G.specialties_id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [specialty_id])
 		.then(rows => {
 			if (rows === undefined) return cb();
