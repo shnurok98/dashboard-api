@@ -1,4 +1,4 @@
---  v.25 | 01.03.20 | Renamed
+--  v.25 | 07.03.20 | Renamed, fix FK
 
 
 CREATE TABLE "academic_plan"
@@ -18,13 +18,13 @@ CREATE TABLE "discip_modules"
  "id"       serial PRIMARY KEY,
  "code"     varchar(10) NOT NULL,
  "name"    varchar(15) NOT NULL,
- "block_id" serial REFERENCES discip_blocks(id)
+ "block_id" int REFERENCES discip_blocks(id)
 );
 
 CREATE TABLE "disciplines"
 (
  "id"          serial PRIMARY KEY,
- "module_id"   serial REFERENCES discip_modules(id),
+ "module_id"   int REFERENCES discip_modules(id),
  "name"       varchar(30) NOT NULL,
  "code"        varchar(10) NOT NULL,
  "hours_lec"   int NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE "disciplines"
 CREATE TABLE "semestr"
 (
  "id"            serial PRIMARY KEY,
- "discipline_id" serial NOT NULL REFERENCES disciplines(id),
+ "discipline_id" int NOT NULL REFERENCES disciplines(id),
  "semester"      int NOT NULL,
  "is_exam"       boolean NOT NULL
 );
@@ -44,8 +44,8 @@ CREATE TABLE "semestr"
 CREATE TABLE "blocks_for_acad_plan"
 (
  "id"               serial PRIMARY KEY,
- "acad_plan_id"     serial REFERENCES academic_plan(id),
- "discip_blocks_id" serial REFERENCES discip_blocks(id)
+ "acad_plan_id"     int REFERENCES academic_plan(id),
+ "discip_blocks_id" int REFERENCES discip_blocks(id)
 );
 
 CREATE TABLE "discip_optional"
@@ -55,7 +55,7 @@ CREATE TABLE "discip_optional"
  "name"        varchar(25) NOT NULL,
  "semester"     int NOT NULL,
  "hours"        int NOT NULL,
- "acad_plan_id" serial REFERENCES academic_plan(id)
+ "acad_plan_id" int REFERENCES academic_plan(id)
 );
 
 CREATE TABLE "files_acad_plan"
@@ -65,7 +65,7 @@ CREATE TABLE "files_acad_plan"
  "path"       text NOT NULL,
  "extname" 	  varchar(7) NOT NULL,
  "lastModifiedDate"       date NOT NULL,
- "acad_plan_id" serial REFERENCES academic_plan(id)
+ "acad_plan_id" int REFERENCES academic_plan(id)
 );
 
 
@@ -78,10 +78,10 @@ CREATE TABLE "personalities"
  "id"         serial PRIMARY KEY,
  "name"       varchar(50) NOT NULL,
  "surname"    varchar(50) NOT NULL,
- "patronymic" varchar(50) NOT NULL,
- "birthday"   date NOT NULL,
- "phone"      varchar(20) NOT NULL,
- "email"      varchar(40) NOT NULL,
+ "patronymic" varchar(50),
+ "birthday"   date,
+ "phone"      varchar(20),
+ "email"      varchar(40),
  "status"     smallint NOT NULL
 );
 
@@ -106,15 +106,15 @@ COMMENT ON TABLE "degree" IS 'Степень';
 CREATE TABLE "teachers"
 (
  "id"             serial PRIMARY KEY,
- "person_id"      serial NOT NULL REFERENCES personalities(id),
+ "person_id"      int NOT NULL REFERENCES personalities(id),
  "position"       varchar(50) NOT NULL,
  "rank_id"        integer REFERENCES ranks(id),
  "degree_id"      integer REFERENCES degree(id),
- "rate"           real NOT NULL,
- "hours_worked"   int NOT NULL,
- "rinc"           real NOT NULL,
- "web_of_science" real NOT NULL,
- "scopus"         real NOT NULL,
+ "rate"           real,
+ "hours_worked"   int,
+ "rinc"           real,
+ "web_of_science" real,
+ "scopus"         real,
  "login"          varchar(25) NOT NULL,
  "password"       varchar(150) NOT NULL,
  "salt"           varchar(150) NOT NULL
@@ -129,7 +129,7 @@ CREATE TABLE "files_ind_plan"
  "path"       text NOT NULL,
  "extname" 	  varchar(7) NOT NULL,
  "lastModifiedDate"       date NOT NULL,
- "teacher_id" serial REFERENCES teachers(id)
+ "teacher_id" int REFERENCES teachers(id)
 );
 
 CREATE TABLE "files_rpd"
@@ -139,7 +139,7 @@ CREATE TABLE "files_rpd"
  "path"       text NOT NULL,
  "extname" 	  varchar(7) NOT NULL,
  "lastModifiedDate"       date NOT NULL,
- "teacher_id" serial REFERENCES teachers(id)
+ "teacher_id" int REFERENCES teachers(id)
 );
 
 
@@ -158,7 +158,7 @@ CREATE TABLE "sub_unit"
  "id"            serial PRIMARY KEY,
  "name"         varchar(50) NOT NULL,
  "is_project"    boolean NOT NULL,
- "department_id" serial NOT NULL REFERENCES department(id)
+ "department_id" int NOT NULL REFERENCES department(id)
 );
 
 COMMENT ON TABLE "sub_unit" IS 'Подразделения ( условные САПР, ВЕБ и т.д. ), также сюда включаются проекты по ПД.';
@@ -167,8 +167,8 @@ CREATE TABLE "rights_roles"
 (
  "id"          serial PRIMARY KEY,
  "role"        varchar(50) NOT NULL,
- "teacher_id"  serial NOT NULL REFERENCES teachers(id),
- "sub_unit_id" serial NOT NULL REFERENCES sub_unit(id)
+ "teacher_id"  int NOT NULL REFERENCES teachers(id),
+ "sub_unit_id" int NOT NULL REFERENCES sub_unit(id)
 );
 
 COMMENT ON TABLE "rights_roles" IS 'Права выданные определенным преподавателям к определенным подразделениям и проектам';
@@ -179,14 +179,14 @@ CREATE TABLE "specialties"
 (
  "id"            serial PRIMARY KEY,
  "code"          varchar(20) NOT NULL,
- "name"         varchar(50) NOT NULL,
+ "name"          varchar(50) NOT NULL,
  "profile"       varchar(100) NOT NULL,
  "educ_form"     varchar(20) NOT NULL,
  "educ_programm" smallint NOT NULL,
  "educ_years"    int NOT NULL,
  "year_join"     date NOT NULL,
- "acad_plan_id"  serial REFERENCES academic_plan(id),
- "sub_unit_id"   serial REFERENCES sub_unit(id)
+ "acad_plan_id"  int REFERENCES academic_plan(id),
+ "sub_unit_id"   int REFERENCES sub_unit(id)
 );
 
 COMMENT ON COLUMN "specialties"."profile" IS 'Профиль';
@@ -198,7 +198,7 @@ COMMENT ON COLUMN "specialties"."year_join" IS 'Год набора';
 CREATE TABLE "disciplines_year"
 (
  "id"                 serial PRIMARY KEY,
- "name"              varchar(50) NOT NULL,
+ "name"               varchar(50) NOT NULL,
  "hours_lec"          int NOT NULL,
  "hours_lab"          int NOT NULL,
  "hours_seminar"      int NOT NULL,
@@ -212,11 +212,11 @@ CREATE TABLE "disciplines_year"
  "hours_ruk_magic"    int NOT NULL,
  "hours_ruk_aspirant" int NOT NULL,
  "hours_proj_act"     int NOT NULL,
- "specialty_id"       serial REFERENCES specialties(id),
+ "specialty_id"       int REFERENCES specialties(id),
  "semester"           int NOT NULL,
- "file_rpd_id"        bigserial REFERENCES "files_rpd"(id),
- "years"          	 varchar(20) NOT NULL,
- "date"          	 	 date NOT NULL
+ "file_rpd_id"        bigint REFERENCES "files_rpd"(id),
+ "years"          	  varchar(20) NOT NULL,
+ "date"          	 	  date NOT NULL
 );
 
 CREATE TABLE "project_activities"
@@ -227,7 +227,7 @@ CREATE TABLE "project_activities"
  "begin_date"       date NOT NULL,
  "end_date"         date NOT NULL,
  "link_trello" varchar(250),
- "sub_unit_id" serial NOT NULL REFERENCES sub_unit(id)
+ "sub_unit_id" int NOT NULL REFERENCES sub_unit(id)
 );
 
 CREATE TABLE "files_proj_act"
@@ -237,28 +237,28 @@ CREATE TABLE "files_proj_act"
  "path"       text NOT NULL,
  "extname" 	  varchar(7) NOT NULL,
  "lastModifiedDate"       date NOT NULL,
- "proj_act_id" serial NOT NULL REFERENCES project_activities(id)
+ "proj_act_id" int NOT NULL REFERENCES project_activities(id)
 );
 
 CREATE TABLE "groups"
 (
  "id"             serial PRIMARY KEY,
- "specialties_id" serial NOT NULL REFERENCES specialties(id),
+ "specialties_id" int NOT NULL REFERENCES specialties(id),
  "name"           varchar(15) NOT NULL
 );
 
 CREATE TABLE "students"
 (
  "id"          serial PRIMARY KEY,
- "person_id"   serial NOT NULL REFERENCES personalities(id),
- "group_id"    serial NOT NULL REFERENCES groups(id)
+ "person_id"   int NOT NULL REFERENCES personalities(id),
+ "group_id"    int NOT NULL REFERENCES groups(id)
 );
 
 CREATE TABLE "stud_on_proj"
 (
 	"id"	serial PRIMARY KEY,
-	"student_id" serial NOT NULL REFERENCES students(id),
-	"project_id" serial NOT NULL REFERENCES project_activities(id),
+	"student_id" int NOT NULL REFERENCES students(id),
+	"project_id" int NOT NULL REFERENCES project_activities(id),
 	"date" date NOT NULL
 );
 

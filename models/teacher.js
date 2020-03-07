@@ -158,6 +158,30 @@ class Teacher {
 	}
 
 	/**
+	 * Служебная функция для смены пароля, записанного в базу вручную (костыль)
+	 * @param {Function} cb 
+	 */
+	fromSql(cb){
+		this.hashPassword(err => {
+			if (err) return cb(err);
+
+			connection.one(`
+			UPDATE teachers 
+			SET password = $1, salt = $2
+			WHERE id = $3
+			RETURNING *;
+			`, [this.password, this.salt, this.id])
+			.then(row => {
+				if (row === undefined) return cb(err);
+				cb(null, row);
+			})
+			.catch((err) => {
+				cb(err);
+			});
+		})
+	}
+
+	/**
 	 * Получение преподавателя по login
 	 * @param {String} login логин искомого пользователя
 	 * @param {Function} cb 
@@ -216,7 +240,7 @@ class Teacher {
 		connection.oneOrNone(`
 			SELECT 
 				T.*, 
-				P.id AS id_person, 
+				P.id AS person_id, 
 				P.name, 
 				P.surname, 
 				P.patronymic,
@@ -226,7 +250,7 @@ class Teacher {
 				P.status
 			FROM teachers AS T 
 			INNER JOIN personalities AS P
-			ON T.id_person = P.id and T.id = $1;
+			ON T.person_id = P.id and T.id = $1;
 		`, [id])
 		.then((user) => {
 			if (user === undefined) return cb();
