@@ -1,51 +1,61 @@
---  v.26 | 09.03.20 | New scheme. Upgrade discipline
+--  v.25 | 07.03.20 | Renamed, fix FK
 
 
-CREATE TABLE "acad_plan"
+CREATE TABLE "academic_plan"
 (
- "id"          serial PRIMARY KEY,
- "action_date" timestamp
+ "id"          serial PRIMARY KEY
 );
 
-COMMENT ON COLUMN "acad_plan"."action_date" IS 'Дата последнего изменения';
-
-CREATE TABLE "acad_block"
+CREATE TABLE "discip_blocks"
 (
  "id"    serial PRIMARY KEY,
- "name"  varchar(120) UNIQUE NOT NULL,
- "code" varchar(25) NOT NULL
+ "code"  varchar(10) NOT NULL,
+ "name" varchar(25) NOT NULL
 );
 
-CREATE TABLE "acad_part"
+CREATE TABLE "discip_modules"
 (
  "id"       serial PRIMARY KEY,
- "name"     varchar(120) UNIQUE NOT NULL,
- "code"     varchar(25) NOT NULL
+ "code"     varchar(10) NOT NULL,
+ "name"    varchar(75) NOT NULL,
+ "block_id" int REFERENCES discip_blocks(id)
 );
 
-CREATE TABLE "acad_module"
-(
- "id"       serial PRIMARY KEY,
- "name"     varchar(120) UNIQUE NOT NULL,
- "code"     varchar(25) NOT NULL
-);
-
-CREATE TABLE "discipline"
+CREATE TABLE "disciplines"
 (
  "id"          serial PRIMARY KEY,
- "name"        varchar(50) NOT NULL,
- "code"        varchar(25) NOT NULL,
- "hours_lec"   int,
- "hours_lab"   int,
- "hours_sem" 	 int,
- "hours_self"  int,
- "acad_plan_id" int REFERENCES acad_plan(id) NOT NULL,
- "acad_block_id" int REFERENCES acad_block(id) NOT NULL,
- "acad_part_id" int REFERENCES acad_part(id),
- "acad_module_id"   int REFERENCES acad_module(id),
- "semester_num" int NOT NULL,
- "is_exam" boolean NOT NULL,
- "is_optional" boolean NOT NULL
+ "module_id"   int REFERENCES discip_modules(id),
+ "name"       varchar(30) NOT NULL,
+ "code"        varchar(10) NOT NULL,
+ "hours_lec"   int NOT NULL,
+ "hours_lab"   int NOT NULL,
+ "hours_prakt" int NOT NULL,
+ "hours_self"  int NOT NULL
+);
+
+CREATE TABLE "semestr"
+(
+ "id"            serial PRIMARY KEY,
+ "discipline_id" int NOT NULL REFERENCES disciplines(id),
+ "semester"      int NOT NULL,
+ "is_exam"       boolean NOT NULL
+);
+
+CREATE TABLE "blocks_for_acad_plan"
+(
+ "id"               serial PRIMARY KEY,
+ "acad_plan_id"     int REFERENCES academic_plan(id),
+ "discip_blocks_id" int REFERENCES discip_blocks(id)
+);
+
+CREATE TABLE "discip_optional"
+(
+ "id"           serial PRIMARY KEY,
+ "code"         varchar(10) NOT NULL,
+ "name"        varchar(25) NOT NULL,
+ "semester"     int NOT NULL,
+ "hours"        int NOT NULL,
+ "acad_plan_id" int REFERENCES academic_plan(id)
 );
 
 CREATE TABLE "files_acad_plan"
@@ -55,8 +65,13 @@ CREATE TABLE "files_acad_plan"
  "path"       text NOT NULL,
  "extname" 	  varchar(7) NOT NULL,
  "lastModifiedDate"       date NOT NULL,
- "acad_plan_id" int REFERENCES acad_plan(id)
+ "acad_plan_id" int REFERENCES academic_plan(id)
 );
+
+
+
+
+
 
 CREATE TABLE "personalities"
 (
@@ -91,7 +106,7 @@ COMMENT ON TABLE "degree" IS 'Степень';
 CREATE TABLE "teachers"
 (
  "id"             serial PRIMARY KEY,
- "person_id"      int UNIQUE NOT NULL REFERENCES personalities(id),
+ "person_id"      int NOT NULL REFERENCES personalities(id),
  "position"       varchar(50) NOT NULL,
  "rank_id"        integer REFERENCES ranks(id),
  "degree_id"      integer REFERENCES degree(id),
@@ -170,7 +185,7 @@ CREATE TABLE "specialties"
  "educ_programm" smallint NOT NULL,
  "educ_years"    int NOT NULL,
  "year_join"     date NOT NULL,
- "acad_plan_id"  int UNIQUE NOT NULL REFERENCES acad_plan(id),
+ "acad_plan_id"  int REFERENCES academic_plan(id),
  "sub_unit_id"   int REFERENCES sub_unit(id)
 );
 
@@ -180,56 +195,29 @@ COMMENT ON COLUMN "specialties"."educ_programm" IS '1 - бакалавр, 2 - м
 COMMENT ON COLUMN "specialties"."educ_years" IS 'Срок обучения';
 COMMENT ON COLUMN "specialties"."year_join" IS 'Год набора';
 
-CREATE TABLE "dep_load"
-(
- "id"            serial PRIMARY KEY,
- "department_id" int NOT NULL REFERENCES department(id),
- "begin_date" timestamp NOT NULL,
- "end_date" timestamp NOT NULL,
- "action_date" timestamp
-);
-
-CREATE TABLE "dis_load"
+CREATE TABLE "disciplines_year"
 (
  "id"                 serial PRIMARY KEY,
- "name"        varchar(50) NOT NULL,
- "code"        varchar(25) NOT NULL,
- "hours_lec"   int,
- "hours_lab"   int,
- "hours_sem" 	 int,
- "hours_self"  int,
- "hours_con_exam"  int,
- "hours_exam"      int,
- "hours_zachet"       int,
- "hours_kursovoy"     int,
- "hours_gek"          int,
- "hours_ruk_prakt"    int,
- "hours_ruk_vkr"      int,
- "hours_ruk_magic"    int,
- "hours_ruk_aspirant" int,
- "hours_proj_act"     int,
- "semester_num" int NOT NULL,
- "discipline_id" int UNIQUE NOT NULL REFERENCES discipline(id),
+ "name"               varchar(50) NOT NULL,
+ "hours_lec"          int NOT NULL,
+ "hours_lab"          int NOT NULL,
+ "hours_seminar"      int NOT NULL,
+ "hours_con_ekzamen"  int NOT NULL,
+ "hours_ekzamen"      int NOT NULL,
+ "hours_zachet"       int NOT NULL,
+ "hours_kursovoy"     int NOT NULL,
+ "hours_gek"          int NOT NULL,
+ "hours_ruk_prakt"    int NOT NULL,
+ "hours_ruk_vkr"      int NOT NULL,
+ "hours_ruk_magic"    int NOT NULL,
+ "hours_ruk_aspirant" int NOT NULL,
+ "hours_proj_act"     int NOT NULL,
+ "specialty_id"       int REFERENCES specialties(id),
+ "semester"           int NOT NULL,
  "file_rpd_id"        bigint REFERENCES "files_rpd"(id),
- "dep_load_id" int NOT NULL REFERENCES dep_load(id),
- "is_approved" boolean NOT NULL
+ "years"          	  varchar(20) NOT NULL,
+ "date"          	 	  date NOT NULL
 );
-
-COMMENT ON COLUMN dis_load.is_approved IS 'Подтверждены различия с учебным планом, либо различий нету';
-COMMENT ON COLUMN dis_load.hours_self IS 'Самостоятельная работа';
-COMMENT ON COLUMN dis_load.hours_con_exam IS 'Консультация экзамен';
-COMMENT ON COLUMN dis_load.hours_exam IS 'Экзамен';
-COMMENT ON COLUMN dis_load.hours_zachet IS 'Зачет';
-COMMENT ON COLUMN dis_load.hours_kursovoy IS 'Курсовой проект';
-COMMENT ON COLUMN dis_load.hours_gek IS 'ГЭК';
-COMMENT ON COLUMN dis_load.hours_ruk_prakt IS 'Руководство практикой';
-COMMENT ON COLUMN dis_load.hours_ruk_vkr IS 'Руководство ВКР';
-COMMENT ON COLUMN dis_load.hours_ruk_magic IS 'Руководство магистрами';
-COMMENT ON COLUMN dis_load.hours_ruk_aspirant IS 'Руководство аспирантом';
-COMMENT ON COLUMN dis_load.hours_proj_act IS 'Консультация проекта';
-COMMENT ON COLUMN dis_load.semester_num IS 'Номер семестра (1 или 2)';
-COMMENT ON COLUMN dis_load.discipline_id IS 'ID дисциплины из учебного плана';
-
 
 CREATE TABLE "project_activities"
 (
