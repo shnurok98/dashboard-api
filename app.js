@@ -34,12 +34,16 @@ app.use('/api/debug', debug);
 
 app.use('/api/teachers', passport.authenticate('jwt', { session: false }), teachers);
 app.use('/api/files', passport.authenticate('jwt', { session: false }), files);
+
+
 app.use('/api/dep_load', department_load);
 
-app.use('/api/students', students);
-app.use('/api/groups', groups);
-app.use('/api/specialties', specialties);
-app.use('/api/acad_plan', acad_plan);
+
+
+app.use('/api/students', passport.authenticate('jwt', { session: false }), students);
+app.use('/api/groups', passport.authenticate('jwt', { session: false }), groups);
+app.use('/api/specialties', passport.authenticate('jwt', { session: false }), specialties);
+app.use('/api/acad_plan', passport.authenticate('jwt', { session: false }), acad_plan);
 
 app.post('/api/users/register', auth.register);
 app.post('/api/users/login', auth.logIn);

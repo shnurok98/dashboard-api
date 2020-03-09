@@ -202,15 +202,33 @@ class Teacher {
 	}
 
 	/**
-	 * Получение преподавателя по login
+	 * Получение преподавателя по login (служебная)
 	 * @param {String} login логин искомого пользователя
 	 * @param {Function} cb 
+	 * @todo Сделать её private
 	 */
 	static getByLogin(login, cb){
-		Teacher.getId(login, (err, id) => {
-			if(err) return cb(err);
-			Teacher.get(id, cb);
-		});
+		connection.oneOrNone(`
+		SELECT 
+			T.id,
+			T.login,
+			T.password,
+			T.salt,
+			P.id AS person_id, 
+			P.name, 
+			P.surname, 
+			P.patronymic,
+			P.email,
+			P.status
+		FROM teachers T, personalities P
+		WHERE T.person_id = P.id AND T.login = $1;
+		`, [login])
+		.then((row) => {
+			if (row === undefined) return cb();
+			if (row === null) return cb();
+			cb(null, new Teacher(row));
+		})
+		.catch(err => cb(err));
 	}
 
 	/**
