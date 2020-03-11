@@ -1,18 +1,18 @@
--- v.26 | 11.03.20
+-- v.25 | 09.03.20
 
-INSERT INTO acad_plan (id,action_date) VALUES 
-(1,'2016-09-01 09:00:00.000')
-;INSERT INTO acad_block (id,"name",code) VALUES 
-(1,'БЛОК 1. Дисциплины (модули)','А')
-,(2,'БЛОК 2. Практика','Б')
-,(3,'БЛОК 3. Государственная итоговая аттестация','В')
-;INSERT INTO acad_part (id,"name",code) VALUES 
-(1,'Обязательная часть','А.1')
-,(2,'Часть, формируемая участниками образовательных отношений','А.2')
-;INSERT INTO acad_module (id,"name",code) VALUES 
-(1,'Модуль "Инностранный язык"','А.1.2')
-;INSERT INTO discipline (id,"name",code,hours_lec,hours_lab,hours_sem,hours_self,acad_plan_id,acad_block_id,acad_part_id,acad_module_id,semester_num,is_exam,is_optional) VALUES 
-(1,'Технический перевод','А.1.2.1',32,NULL,32,NULL,1,1,1,1,4,false,false)
+INSERT INTO public.academic_plan (id) VALUES 
+(1)
+;INSERT INTO public.discip_blocks (id,code,"name") VALUES 
+(1,'А1','Обязательная часть')
+;INSERT INTO public.discip_modules (id,code,"name",block_id) VALUES 
+(1,'А.1.1','Модуль "Иностранный язык"',1)
+;INSERT INTO public.disciplines (id,module_id,"name",code,hours_lec,hours_lab,hours_prakt,hours_self) VALUES 
+(2,1,'Технический перевод','А.1.1.1',36,0,72,36)
+;INSERT INTO public.semestr (id,discipline_id,semester,is_exam) VALUES 
+(1,2,1,false)
+,(2,2,4,true)
+;INSERT INTO public.blocks_for_acad_plan (id,acad_plan_id,discip_blocks_id) VALUES 
+(1,1,1)
 ;INSERT INTO public.personalities (id,"name",surname,patronymic,birthday,phone,email,status) VALUES 
 (1,'Игорь','Степаненко','Сергеевич','1998-06-03','8(800)555-3535','stepanenko@mail.ru',1)
 ,(2,'Александр','Буравов','Николаевич','1998-10-25','8(800)555-3535','buravov@mail.ru',1)
