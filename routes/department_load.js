@@ -4,15 +4,30 @@ const router = express.Router();
 const connection = require('../db');
 
 router.get('/', (req, res) => {
-	connection.any(`SELECT * FROM disciplines_year;`)
+	connection.any(`
+	SELECT 
+		l.*,
+		d.name
+	FROM dep_load l, department d 
+	WHERE l.department_id = d.id
+	ORDER BY l.action_date DESC
+	;`)
 	.then(rows => {
 		res.send(rows);
 	})
 	.catch(err => console.log(err));
 });
 
+// Затирает id
 router.get('/:id', (req, res) => {
-	connection.any(`SELECT * FROM disciplines_year WHERE id_department = $1 ORDER BY title;`, [req.params.id])
+	connection.any(`
+	SELECT 
+		l.*,
+		d.name department_name,
+		di.*
+	FROM dep_load l, department d, dis_load di 
+	WHERE l.id = $1 AND l.department_id = d.id AND l.id = di.dep_load_id
+	;`, [+req.params.id])
 	.then(rows => {
 		res.send(rows);
 	})

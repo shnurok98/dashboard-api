@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
     SP.educ_years,
     SP.year_join,
     SP.sub_unit_id
-  FROM academic_plan AS A, specialties AS SP 
+  FROM acad_plan AS A, specialties AS SP 
   WHERE A.id = SP.acad_plan_id
   ORDER BY SP.year_join DESC;
   `)
@@ -45,24 +45,18 @@ router.get('/:id', (req, res) => {
     B1.*,
     B2.*,
     B3.*,
-    D.*,
-    S.*
+    D.*
   FROM 
-    academic_plan AS A, 
+    acad_plan AS A, 
     specialties AS SP, 
-    blocks_for_acad_plan AS B1,
-    discip_blocks AS B2,
-    discip_modules AS B3,
-    disciplines AS D,
-    semestr AS S 
+    acad_block AS B1,
+    acad_part AS B2,
+    acad_module AS B3,
+    discipline AS D
   WHERE 
     A.id = $1 AND
     A.id = SP.acad_plan_id AND
-    A.id = B1.acad_plan_id AND
-    B1.discip_blocks_id = B2.id AND
-    B2.id = B3.block_id AND
-    B3.id = D.module_id AND
-    D.id = S.discipline_id
+    A.id = D.acad_plan_id
   ;
   `, [+req.params.id])
   .then(rows => {
