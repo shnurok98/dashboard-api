@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
   connection.manyOrNone(`
   SELECT 
     A.id,
-    SP.id AS specialty_id,
+    SP.id AS specialties_id,
     SP.code,
     SP.name,
     SP.profile,
@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
     SP.year_join,
     SP.sub_unit_id
   FROM acad_plan AS A, specialties AS SP 
-  WHERE A.id = SP.acad_plan_id
+  WHERE A.specialties_id = SP.id
   ORDER BY SP.year_join DESC;
   `)
   .then(rows => {
@@ -33,7 +33,7 @@ router.get('/:id', (req, res) => {
   connection.manyOrNone(`
   SELECT 
     A.id,
-    SP.id AS specialty_id,
+    SP.id AS specialties_id,
     SP.code,
     SP.name,
     SP.profile,
@@ -52,10 +52,10 @@ router.get('/:id', (req, res) => {
     acad_block AS B1,
     acad_part AS B2,
     acad_module AS B3,
-    discipline AS D
+    acad_discipline AS D
   WHERE 
     A.id = $1 AND
-    A.id = SP.acad_plan_id AND
+    A.specialties_id = SP.id AND
     A.id = D.acad_plan_id
   ;
   `, [+req.params.id])

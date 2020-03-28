@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 		d.name
 	FROM dep_load l, department d 
 	WHERE l.department_id = d.id
-	ORDER BY l.action_date DESC
+	ORDER BY l.modified_date DESC
 	;`)
 	.then(rows => {
 		res.send(rows);
@@ -25,7 +25,7 @@ router.get('/:id', (req, res) => {
 		l.*,
 		d.name department_name,
 		di.*
-	FROM dep_load l, department d, dis_load di 
+	FROM dep_load l, department d, disciplines di 
 	WHERE l.id = $1 AND l.department_id = d.id AND l.id = di.dep_load_id
 	;`, [+req.params.id])
 	.then(rows => {

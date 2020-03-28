@@ -15,7 +15,7 @@ const students = require('./routes/students');
 const groups = require('./routes/groups');
 const specialties = require('./routes/specialties');
 const acad_plan = require('./routes/acad_plan');
-const proj_act = require('./routes/proj_act');
+const projects = require('./routes/projects');
 
 const files = require('./routes/files');
 const department_load = require('./routes/department_load');
@@ -45,7 +45,7 @@ app.use('/api/students', passport.authenticate('jwt', { session: false }), stude
 app.use('/api/groups', passport.authenticate('jwt', { session: false }), groups);
 app.use('/api/specialties', passport.authenticate('jwt', { session: false }), specialties);
 app.use('/api/acad_plan', passport.authenticate('jwt', { session: false }), acad_plan);
-app.use('/api/proj_act', passport.authenticate('jwt', { session: false }), proj_act);
+app.use('/api/projects', passport.authenticate('jwt', { session: false }), projects);
 
 app.post('/api/users/register', auth.register);
 app.post('/api/users/login', auth.logIn);

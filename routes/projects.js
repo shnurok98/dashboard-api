@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
   SELECT 
     p.*,
     count(sp.id) students_count 
-  FROM project_activities p, stud_on_proj sp 
+  FROM projects p, students_projects sp 
   WHERE p.id = sp.project_id 
   GROUP BY p.id
 ;`)
@@ -28,11 +28,11 @@ router.get('/:id', (req, res) => {
     SELECT p.*, (
       SELECT array_to_json(array_agg(row_to_json(child))) from (
         select sp.student_id
-        from stud_on_proj sp
+        from students_projects sp
         where sp.project_id = p.id
       ) child
     ) students
-    FROM project_activities p 
+    FROM projects p 
     WHERE p.id = $1
   ) t 
 ;`, [+req.params.id])
