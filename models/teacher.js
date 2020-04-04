@@ -277,14 +277,17 @@ class Teacher {
 	static get(id, cb){
 		connection.oneOrNone(`
 			SELECT 
-				${fields}
-			FROM teachers AS T 
-			INNER JOIN personalities AS P
-			ON T.person_id = P.id and T.id = $1;
+				${fields},
+				rr.role
+			FROM teachers AS T, personalities AS P, rights_roles rr 
+			where T.person_id = P.id and T.id = $1 and rr.teacher_id = $1
+			order by rr."role" desc
+			limit 1;
 		`, [id])
 		.then((user) => {
 			if (user === undefined) return cb();
 			if (user === null) return cb();
+			user.role = String(user.role);
 			cb(null, new Teacher(user));
 		})
 		.catch((err) => {
@@ -303,6 +306,22 @@ class Teacher {
 			cb(null, rows);
 		})
 		.catch(err => cb(err));
+	}
+
+	/**
+	 * Проверка прав
+	 * @param {Teacher} teacher_id 
+	 * @param {String} method 
+	 * @param {Object} resource 
+	 */
+	static isOwner(teacher, method, resource_id){
+		if (teacher.role < '4'){
+			if (teacher.id == resource_id) return true;
+		}
+		if (teacher.role == '4'){
+			return true;
+		}
+		return false;
 	}
 }
 

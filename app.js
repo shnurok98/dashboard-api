@@ -33,19 +33,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use('/api/debug', debug);
 
-app.use('/api/teachers', passport.authenticate('jwt', { session: false }), teachers);
-app.use('/api/files', passport.authenticate('jwt', { session: false }), files);
-
-
-app.use('/api/dep_load', department_load);
-
-
-
-app.use('/api/students', passport.authenticate('jwt', { session: false }), students);
-app.use('/api/groups', passport.authenticate('jwt', { session: false }), groups);
-app.use('/api/specialties', passport.authenticate('jwt', { session: false }), specialties);
-app.use('/api/acad_plan', passport.authenticate('jwt', { session: false }), acad_plan);
-app.use('/api/projects', passport.authenticate('jwt', { session: false }), projects);
 
 app.post('/api/users/register', auth.register);
 app.post('/api/users/login', auth.logIn);
@@ -53,7 +40,22 @@ app.get('/api/users/logout', auth.logOut);
 
 app.get('/api/', (req, res) => {
 	res.send('<h1>Api is live</h1>')
-})
+});
+
+
+// req.user виден после passport.initialize
+app.use('*', passport.authenticate('jwt', { session: false }) );
+
+app.use('/api/teachers', teachers);
+app.use('/api/files', files);
+
+app.use('/api/dep_load', department_load);
+
+app.use('/api/students', students);
+app.use('/api/groups', groups);
+app.use('/api/specialties', specialties);
+app.use('/api/acad_plan', acad_plan);
+app.use('/api/projects', projects);
 
 app.listen(PORT, () => {
 	console.log('API started on localhost:' + PORT);

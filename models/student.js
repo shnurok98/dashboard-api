@@ -96,6 +96,40 @@ class Student {
 		})
 		.catch(err => cb(err));
 	}
+
+	// isOwner(user_id, resource_id)
+
+	// Лучший вариант
+	/**
+	 * Проверка прав
+	 * @param {Teacher} teacher_id 
+	 * @param {String} method 
+	 * @param {Object} resource 
+	 */
+	static isOwner(teacher_id, method, resource){
+		const roles = "select * from rights_roles rr where rr.teacher_id = " + teacher_id;
+		if (roles.teacher && roles.length == 1) { return false};
+		if (roles.rop) {
+			switch(method){
+				case 'POST':
+					return rop.sub_unit_id == resource.sub_unit_id ? true : false;
+				case 'PUT':
+				case 'DELETE':
+					return sql = `select 
+					(select 1 
+						from 
+						students s, 
+						groups g, 
+						specialties sp 
+						where s.id = ${resource.id} 
+						AND s.group_id = g.id 
+						AND g.specialties_id = sp.id 
+						AND sp.sub_unit_id = ${rop.sub_unit_id}) IS NOT NULL exists`;
+				default: 
+					return false;
+			}
+		}
+	}
 }
 
 module.exports = Student;
