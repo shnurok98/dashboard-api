@@ -21,21 +21,9 @@ router.get('/', (req, res) => {
 
 // Затирает id
 router.get('/:id', (req, res) => {
-	connection.any(`
-	SELECT 
-    row_to_json(t, true) project
-  FROM (
-    SELECT p.*, (
-      SELECT array_to_json(array_agg(row_to_json(child))) from (
-        select sp.student_id
-        from students_projects sp
-        where sp.project_id = p.id
-      ) child
-    ) students
-    FROM projects p 
-    WHERE p.id = $1
-  ) t 
-;`, [+req.params.id])
+	connection.oneOrNone(`
+    select public.pr_projects_s($1) as project;
+  `, [+req.params.id])
 	.then(rows => {
 		res.send(rows);
 	})

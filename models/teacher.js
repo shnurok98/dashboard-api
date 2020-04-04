@@ -40,6 +40,7 @@ const fields = `
 	 * @property {String} login
 	 * @property {String} password
 	 * @property {String} salt
+	 * @property {String} role
 	 */
 
 /**
