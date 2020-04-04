@@ -32,7 +32,22 @@ router.post('/', (req, res) => {
 	const debug = req.user;
 	if ( !Teacher.isOwner(req.user, req.method, req.params) ) return res.status(403).json({ message: 'У вас недостаточно прав для доступа к данному ресурсу', debug: debug });
 	
-	res.status(200).json({ message: 'Есть доступ' })
+	const data = req.body;
+	Teacher.getByLogin(data.login, (err, user) => {
+		if(err) return console.error(err);
+
+		if (user) {
+			res.send({ message: 'Пользователь с данным login уже существует' });
+		}else{
+			user = new Teacher(data);
+			user.save((err) => {
+				if(err) return console.error(err);
+				res.status(200).send({ message: 'Пользователь успешно создан!' });
+			});
+		}
+	});
+
+	// res.status(200).json({ message: 'Есть доступ' })
 });
 
 router.put('/:id', (req, res) => {

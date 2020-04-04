@@ -102,12 +102,12 @@ class Student {
 	// Лучший вариант
 	/**
 	 * Проверка прав
-	 * @param {Teacher} teacher_id 
+	 * @param {Teacher} teacher
 	 * @param {String} method 
 	 * @param {Object} resource 
 	 */
-	static isOwner(teacher_id, method, resource){
-		const roles = "select * from rights_roles rr where rr.teacher_id = " + teacher_id;
+	static isOwner(teacher, method, resource){
+		const roles = "select * from rights_roles rr where rr.teacher_id = " + teacher.id;
 		if (roles.teacher && roles.length == 1) { return false};
 		if (roles.rop) {
 			switch(method){

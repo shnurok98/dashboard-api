@@ -100,11 +100,11 @@ class Teacher {
 					.then(person => {
 						return t.oneOrNone(`
 						INSERT INTO teachers (
-							id_person,
+							person_id,
 							position,
 							rate,
 							hours_worked,
-							"RINC",
+							rinc,
 							web_of_science,
 							scopus,
 							login,
@@ -254,20 +254,20 @@ class Teacher {
 	 * @param {String} login логин искомого пользователя
 	 * @param {Function} cb 
 	 */
-	static getId(login, cb){
-		connection.oneOrNone(`
-			SELECT teachers.id FROM teachers WHERE login = $1;
-		`, [login])
-		.then((rows) => {
-			if (rows === undefined) return cb();
-			if (rows === null) return cb();
-			cb(null, rows.id);
-		})
-		.catch((err) => {
-			cb(err);
-		});
+	// static getId(login, cb){
+	// 	connection.oneOrNone(`
+	// 		SELECT teachers.id FROM teachers WHERE login = $1;
+	// 	`, [login])
+	// 	.then((rows) => {
+	// 		if (rows === undefined) return cb();
+	// 		if (rows === null) return cb();
+	// 		cb(null, rows.id);
+	// 	})
+	// 	.catch((err) => {
+	// 		cb(err);
+	// 	});
 		
-	}
+	// }
 
 	/**
 	 * Получение полной информации о преподавателе
@@ -310,13 +310,13 @@ class Teacher {
 
 	/**
 	 * Проверка прав
-	 * @param {Teacher} teacher_id 
+	 * @param {Teacher} teacher 
 	 * @param {String} method 
 	 * @param {Object} resource 
 	 */
-	static isOwner(teacher, method, resource_id){
+	static isOwner(teacher, method, teacher_id){
 		if (teacher.role < '4'){
-			if (teacher.id == resource_id) return true;
+			if (teacher.id == teacher_id) return true;
 		}
 		if (teacher.role == '4'){
 			return true;

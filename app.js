@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use('/api/debug', debug);
 
 
-app.post('/api/users/register', auth.register);
+// app.post('/api/users/register', auth.register);
 app.post('/api/users/login', auth.logIn);
 app.get('/api/users/logout', auth.logOut);
 
