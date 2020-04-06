@@ -310,6 +310,14 @@ class Teacher {
 	}
 
 	/**
+	 * Метод удаления преподавателя
+	 * @param {Function} cb 
+	 */
+	static delete(cb){
+		// connection.none(`DELETE FROM teachers, personalities`)
+	}
+
+	/**
 	 * Проверка прав
 	 * @param {Teacher} teacher 
 	 * @param {String} method 

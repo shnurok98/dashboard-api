@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const connection = require('../db');
-
 const Teacher = require('../models/teacher');
+
+const accessDenied = 'Недостаточно прав!';
 
 router.get('/', (req, res) => {
 	// console.log(req.user);
@@ -30,7 +30,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
 	const debug = req.user;
-	if ( !Teacher.isOwner(req.user, req.method, req.params) ) return res.status(403).json({ message: 'У вас недостаточно прав для доступа к данному ресурсу', debug: debug });
+	if ( !Teacher.isOwner(req.user, req.method, req.params) ) return res.status(403).json({ message: accessDenied, debug: debug });
 	
 	const data = req.body;
 	Teacher.getByLogin(data.login, (err, user) => {
@@ -47,12 +47,11 @@ router.post('/', (req, res) => {
 		}
 	});
 
-	// res.status(200).json({ message: 'Есть доступ' })
 });
 
 router.put('/:id', (req, res) => {
 	const debug = req.user;
-	if ( !Teacher.isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: 'У вас недостаточно прав для доступа к данному ресурсу', debug: debug });
+	if ( !Teacher.isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
 
 	res.status(200).json({ message: 'Есть доступ' })
 });

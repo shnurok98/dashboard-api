@@ -20,6 +20,10 @@ const projects = require('./routes/projects');
 const files = require('./routes/files');
 const department_load = require('./routes/department_load');
 
+
+const department = require('./routes/department');
+
+
 passport.use(strategy);
 
 const app = express();
@@ -56,6 +60,8 @@ app.use('/api/groups', groups);
 app.use('/api/specialties', specialties);
 app.use('/api/acad_plan', acad_plan);
 app.use('/api/projects', projects);
+
+app.use('/api/department', department);
 
 app.listen(PORT, () => {
 	console.log('API started on localhost:' + PORT);
