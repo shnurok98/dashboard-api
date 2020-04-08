@@ -6,13 +6,18 @@ const connection = require('../db')
 function strUpdate(obj){
   let str = '';
   for (key in obj){
-    str += key + ' = \'' + obj[key] + '\',';
+    str += key + ' = \'' + obj[key] + '\', ';
   }
-  str = str.substring(0, str.length - 1);
+  str = str.substring(0, str.length - 2);
   return str;
 }
 
-const accessDenied = 'Недостаточно прав!';
+const message = {
+  accessDenied: 'Недостаточно прав!',
+  exist: "Данное значение уже существует!",
+  notExist: 'Такой записи не существует!'
+}
+
 
 function isOwner(teacher, method, resource){
   if (teacher.role >= '3') return true;
@@ -43,6 +48,7 @@ router.get('/:id', (req, res) => {
   WHERE sp.sub_unit_id = su.id AND sp.id = $1
   `, [+req.params.id])
   .then(row => {
+    if (!row) return res.json({ message: message.notExist });
     res.json(row);
   })
   .catch(err => {
@@ -53,7 +59,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const debug = req.user;
-	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
   connection.oneOrNone('insert into specialties ( ${this:name} ) values (${this:csv}) returning id;', req.body )
 	.then(rows => {
@@ -61,24 +67,23 @@ router.post('/', (req, res) => {
 	})
 	.catch(err => {
     console.error(err);
-    res.json({message: "Данное значение уже существует"});
+    res.json({message: message.exist});
   });
 });
 
 router.put('/:id', (req, res) => {
   const debug = req.user;
-	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
   const str = strUpdate(req.body);
 
   connection.oneOrNone(`UPDATE specialties SET ${str} where id = ${+req.params.id} returning *;`)
 	.then(rows => {
-    if (!rows) return res.json({ message: 'Такой записи не существует' });
+    if (!rows) return res.json({ message: message.notExist });
 		res.send(rows);
 	})
 	.catch(err => {
     console.error(err);
-    res.json({message: "Данное значение уже существует"});
   });
 });
 
