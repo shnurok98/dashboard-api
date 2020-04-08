@@ -5,6 +5,11 @@ const connection = require('../db');
 
 const accessDenied = 'Недостаточно прав!';
 
+function isOwner(teacher, method, resource){
+  if (teacher.role > '2') return true;
+  return false;
+}
+
 router.get('/', (req, res) => {
   connection.manyOrNone(`
   SELECT *
@@ -49,6 +54,7 @@ router.put('/:id', (req, res) => {
     update department set name = $1 where id = $2 returning *;
   `, [req.body.name, +req.params.id])
 	.then(rows => {
+		if (!rows) return res.json({ message: 'Такой записи не существует' });
 		res.send(rows);
 	})
 	.catch(err => console.error(err));
@@ -66,10 +72,5 @@ router.delete('/:id', (req, res) => {
 	})
 	.catch(err => console.error(err));
 });
-
-function isOwner(teacher, method, resource){
-  if (teacher.role > '2') return true;
-  return false;
-}
 
 module.exports = router;

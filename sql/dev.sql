@@ -24,7 +24,7 @@ CREATE TABLE "specialties"
  "educ_form"     varchar(20) NOT NULL,
  "educ_programm" smallint NOT NULL,
  "educ_years"    int NOT NULL,
- "year_join"     date NOT NULL,
+ "year_join"     timestamp NOT NULL,
  "sub_unit_id"   int REFERENCES sub_unit(id)
 );
 
