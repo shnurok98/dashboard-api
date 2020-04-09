@@ -17,7 +17,7 @@ const specialties = require('./routes/specialties');
 const acad_plan = require('./routes/acad_plan');
 const projects = require('./routes/projects');
 
-const files = require('./routes/files');
+const uploads = require('./routes/uploads');
 const department_load = require('./routes/department_load');
 
 
@@ -51,7 +51,7 @@ app.get('/api/', (req, res) => {
 app.use('*', passport.authenticate('jwt', { session: false }) );
 
 app.use('/api/teachers', teachers);
-app.use('/api/files', files);
+app.use('/api/uploads', uploads);
 
 app.use('/api/dep_load', department_load);
 
