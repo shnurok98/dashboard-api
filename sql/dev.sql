@@ -105,7 +105,7 @@ CREATE TABLE "personalities"
  "name"       varchar(50) NOT NULL,
  "surname"    varchar(50) NOT NULL,
  "patronymic" varchar(50),
- "birthday"   date,
+ "birthday"   timestamp,
  "phone"      varchar(20),
  "email"      varchar(40) UNIQUE,
  "status"     smallint NOT NULL
@@ -141,7 +141,7 @@ CREATE TABLE "teachers"
  "rinc"           real,
  "web_of_science" real,
  "scopus"         real,
- "login"          varchar(25) NOT NULL,
+ "login"          varchar(25) UNIQUE NOT NULL,
  "password"       varchar(200) NOT NULL,
  "salt"           varchar(200) NOT NULL
 );
