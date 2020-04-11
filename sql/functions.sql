@@ -63,3 +63,43 @@ begin
 end;
 $function$
 ;
+
+-- UPDATE teachers
+-- SELECT public.pr_teachers_u(120,'Benedict'::text,'Cemberbetch'::text,'kekovich'::text,'2020-04-09 23:20:27','8 800'::text,'cumberbetxh'::text,'actor'::text,null,null,null,1,1::real,1::real,1::real);
+create or replace function public.pr_teachers_u(
+i_teacher_id integer,
+i_name text, 
+i_surname text, 
+i_patronymic text, 
+i_birthday timestamp, 
+i_phone text, 
+i_email text,
+i_position text,
+i_rank_id integer,
+i_degree_id integer,
+i_rate real,
+i_hours_worked integer,
+i_rinc real,
+i_web_of_science real,
+i_scopus real) 
+returns integer as $$
+declare 
+	v_person_id integer;
+begin 
+	select t.person_id
+	from teachers t
+	where t.id = i_teacher_id 
+	into v_person_id;
+	
+	UPDATE public.personalities
+	SET "name" = i_name, surname = i_surname, patronymic = i_patronymic, birthday = i_birthday, phone = i_phone, email = i_email
+	WHERE id = v_person_id;
+
+	UPDATE public.teachers
+	SET "position" = i_position, rank_id = i_rank_id, degree_id = i_degree_id, rate = i_rate, hours_worked = i_hours_worked, rinc = i_rinc, web_of_science = i_web_of_science, scopus = i_scopus
+	WHERE id = i_teacher_id;
+
+	return i_teacher_id;
+end;
+$$ language plpgsql;
+	

@@ -63,6 +63,7 @@ class Teacher {
 	 */
 	save(cb){
 		if(this.id){
+			// Если есть id, то обновляем
 			this.update(cb);
 		}else{
 			this.hashPassword((err) => {
@@ -70,71 +71,33 @@ class Teacher {
 
 				let obj = this;
 
-				/**
-				 * @see http://vitaly-t.github.io/pg-promise/Database.html#task
-				 * @see http://vitaly-t.github.io/pg-promise/Database.html#tx
-				 */
-				connection.task(t => {
-					return t.oneOrNone(`
-					INSERT INTO personalities (
-						name, 
-						surname, 
-						patronymic, 
-						birthday, 
-						phone, 
-						email, 
-						status
-					) 
-					VALUES (
-						$<obj.name>, 
-						$<obj.surname>, 
-						$<obj.patronymic>, 
-						$<obj.birthday>, 
-						$<obj.phone>, 
-						$<obj.email>, 
-						$<obj.status>
-					)
-					RETURNING id;`, 
-					{
-						obj
-					})
-					.then(person => {
-						return t.oneOrNone(`
-						INSERT INTO teachers (
-							person_id,
-							position,
-							rate,
-							hours_worked,
-							rinc,
-							web_of_science,
-							scopus,
-							login,
-							password,
-							salt
-						) 
-						VALUES (
-							$<person.id>,
-							$<obj.position>,
-							$<obj.rate>,
-							$<obj.hours_worked>,
-							$<obj.RINC>,
-							$<obj.web_of_science>,
-							$<obj.scopus>,
-							$<obj.login>,
-							$<obj.password>,
-							$<obj.salt>
-						) 
-						RETURNING id;`,
-						{
-							obj, 
-							person
-						})
-					});
-
-				})
+				connection.one(`
+					SELECT public.pr_teachers_i(
+						$<obj.name>::text,
+						$<obj.surname>::text,
+						$<obj.patronymic>::text,
+						$<obj.birthday>,
+						$<obj.phone>::text,
+						$<obj.email>::text,
+						2::smallint,
+						$<obj.position>::text,
+						$<obj.rank_id>,
+						$<obj.degree_id>,
+						$<obj.rate>::real,
+						$<obj.hours_worked>,
+						$<obj.rinc>::real,
+						$<obj.web_of_science>::real,
+						$<obj.scopus>::real,
+						$<obj.login>::text,
+						$<obj.password>::text,
+						$<obj.salt>::text, 
+						$<obj.role>::smallint, 
+						$<obj.sub_unit_id>) AS teacher;
+				`, { obj })
 				.then(data => {
 					if (data === undefined) return cb(console.log(new Error('Не удалось создать преподавателя')));
-					this.id = data.id;
+					// this.id = data.id;
+					console.log(data.teacher.id);
 					cb();
 				})
 				.catch((err) => cb(err))
@@ -144,16 +107,28 @@ class Teacher {
 	}
 
 	update(cb){
-		let obj = {
-			id: this.id,
-			login: this.login,  
-			// email: this.email, 
-			password: this.password,  
-			salt: this.salt
-		};
-		connection.oneOrNone('UPDATE teachers SET login = $1, password = $2, salt = $3 WHERE id = $4 RETURNING id;', [obj.login, obj.pass, obj.salt, obj.id])
-		.then((rows) => {
-			if (rows === undefined) return cb(console.log(new Error('Не удалось обновить данные пользователя')));
+		let obj = this;
+		connection.one(`
+		SELECT public.pr_teachers_u(
+			$<obj.id>,
+			$<obj.name>::text,
+			$<obj.surname>::text,
+			$<obj.patronymic>::text,
+			$<obj.birthday>,
+			$<obj.phone>::text,
+			$<obj.email>::text,
+			$<obj.position>::text,
+			$<obj.rank_id>,
+			$<obj.degree_id>,
+			$<obj.rate>::real,
+			$<obj.hours_worked>,
+			$<obj.rinc>::real,
+			$<obj.web_of_science>::real,
+			$<obj.scopus>::real) AS updated_teacher_id;
+		`, { obj })
+		.then( data  => {
+			if ( data === undefined ) return cb(console.log(new Error('Не удалось обновить данные пользователя')));
+			console.log(data)
 			cb();
 		})
 		.catch((err) => {

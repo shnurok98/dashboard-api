@@ -41,7 +41,11 @@ router.post('/', (req, res) => {
 		}else{
 			user = new Teacher(data);
 			user.save((err) => {
-				if(err) return console.error(err);
+				if(err) {
+					res.json({ message: 'Пользователь с данными реквизитами уже существует' });
+					// убрать логи
+					return console.error(err);
+				};
 				res.status(200).send({ message: 'Пользователь успешно создан!' });
 			});
 		}
@@ -53,6 +57,18 @@ router.put('/:id', (req, res) => {
 	const debug = req.user;
 	if ( !Teacher.isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
 
-	res.status(200).json({ message: 'Есть доступ' })
+	const teacher = new Teacher(req.body);
+	
+	teacher.id = +req.params.id;
+	
+	teacher.save((err) => {
+		if(err) {
+			res.json({ message: 'Что-то пошло не так' });
+			// убрать логи
+			return console.error(err);
+		};
+		res.status(200).send({ message: 'Пользователь успешно обновлен!' });
+	});
+
 });
 module.exports = router;
