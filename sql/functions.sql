@@ -103,3 +103,72 @@ begin
 end;
 $$ language plpgsql;
 	
+
+-- INSERT students
+-- SELECT public.pr_students_i('Игорь'::text,'Степаненко'::text,'Сергеевич'::text,'2020-04-09 23:20:27','999'::text,'stepa@twex'::text, 1::smallint, 1);
+create or replace function public.pr_students_i(
+i_name text, 
+i_surname text, 
+i_patronymic text, 
+i_birthday timestamp, 
+i_phone text, 
+i_email text,
+i_status smallint,
+i_group_id integer) 
+returns integer as $$
+declare 
+	v_person_id integer;
+	r_student_id integer;
+begin 
+	INSERT INTO public.personalities 
+		("name", surname, patronymic, birthday, phone, email, status) 
+	VALUES 
+		(i_name, i_surname, i_patronymic, i_birthday, i_phone, i_email, i_status) 
+	RETURNING id 
+	INTO v_person_id;
+	
+	INSERT INTO public.students 
+		(person_id, group_id) 
+	VALUES 
+		(v_person_id, i_group_id) 
+	RETURNING id 
+	INTO r_student_id;
+	
+
+	return r_student_id;
+end;
+$$ language plpgsql;
+
+
+-- UPDATE students
+-- SELECT public.pr_students_u(100,'Не Игорь'::text,'Степаненко'::text,'Сергеевич'::text,'2020-04-09 23:20:27','999'::text,'stepa@twex'::text, 1::smallint, 100);
+create or replace function public.pr_students_u(
+i_student_id integer,
+i_name text, 
+i_surname text, 
+i_patronymic text, 
+i_birthday timestamp, 
+i_phone text, 
+i_email text,
+i_status smallint,
+i_group_id integer) 
+returns integer as $$
+declare 
+	v_person_id integer;
+begin 
+	select s.person_id
+	from students s
+	where s.id = i_student_id
+	into v_person_id;
+	
+	UPDATE public.personalities
+	SET "name" = i_name, surname = i_surname, patronymic = i_patronymic, birthday = i_birthday, phone = i_phone, email = i_email
+	WHERE id = v_person_id;
+
+	UPDATE public.students
+	SET group_id = i_group_id 
+	WHERE id = i_student_id;
+
+	return i_student_id;
+end;
+$$ language plpgsql;
