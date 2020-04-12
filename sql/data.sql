@@ -33,10 +33,10 @@ INSERT INTO acad_plan (id,action_date) VALUES
 ;INSERT INTO public.department (id,"name") VALUES 
 (1,'Информатика и вычислительная техника')
 ,(2,'Проектная деятельность')
-;INSERT INTO public.sub_unit (id,"name",is_project,department_id) VALUES 
-(1,'САПР',false,1)
-,(2,'ВЕБ',false,1)
-,(3,'КИС',false,1)
+;INSERT INTO public.sub_unit (id,"name",department_id) VALUES 
+(1,'САПР',1)
+,(2,'ВЕБ',1)
+,(3,'КИС',1);
 ,(4,'Дашборд',true,2)
 ;INSERT INTO public.specialties (id,code,"name",profile,educ_form,educ_programm,educ_years,year_join,acad_plan_id,sub_unit_id) VALUES 
 (2,'09.03.01','Информатика и вычислительная техника','Интеграция и программирование в САПР','Очная',1,4,'2016-09-01',1,1)
@@ -49,3 +49,12 @@ INSERT INTO acad_plan (id,action_date) VALUES
 ,(4,4,1)
 ,(5,5,1)
 ;
+
+
+insert into rights_roles (role, teacher_id, sub_unit_id) values 
+(1, 5, 1),
+(2, 1, 1),
+(4, 1, 1),
+(2, 3, 1),
+(3, 2, 1),
+(2, 4, 1)

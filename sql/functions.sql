@@ -57,7 +57,7 @@ begin
 
 
 	select row_to_json(v_sql) into r_teacher;
-	select jsonb_set(r_teacher::jsonb, '{role}'::text, v_role::jsonb) into r_teacher;
+
 	
 	return r_teacher;
 end;
