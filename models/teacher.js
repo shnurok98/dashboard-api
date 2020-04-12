@@ -288,8 +288,39 @@ class Teacher {
 	 * Метод удаления преподавателя
 	 * @param {Function} cb 
 	 */
-	static delete(cb){
-		// connection.none(`DELETE FROM teachers, personalities`)
+	delete(id, cb){
+		// Сначала нужно пофиксить ограничения
+		// delete from personalities
+
+		// connection.none(`
+		// DELETE FROM teachers t, personalities p
+		// where
+		// `)
+	}
+
+	/**
+	 * Метод для обновления пароля
+	 * @param {String} pass - новый пароль
+	 * @param {Function} cb 
+	 */
+	updatePass(pass, cb) {
+		this.password = pass;
+		this.hashPassword(err => {
+			if (err) return cb(err);
+
+			connection.one(`
+			UPDATE teachers 
+			SET password = $1, salt = $2 
+			where id = $3
+			returning id;`, [this.password, this.salt, this.id])
+			.then(data => {
+				if (data === undefined) return cb(console.log(new Error('Не удалось обновить пароль')));
+				console.log(data);
+				cb();
+			})
+			.catch((err) => cb(err))
+		})
+
 	}
 
 	/**
@@ -299,7 +330,7 @@ class Teacher {
 	 * @param {Object} resource 
 	 */
 	static isOwner(teacher, method, teacher_id){
-		if (teacher.role < '4'){
+		if (teacher.role < '4' && method != 'DELETE'){
 			if (teacher.id == teacher_id) return true;
 		}
 		if (teacher.role == '4'){

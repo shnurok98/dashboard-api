@@ -71,4 +71,27 @@ router.put('/:id', (req, res) => {
 	});
 
 });
+
+router.put('/:id/password', (req, res) => {
+	const debug = req.user;
+	if ( !Teacher.isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+
+	Teacher.get(+req.params.id, (err, teacher) => {
+		if (err) console.error(err);
+		if (teacher) {
+			teacher.updatePass(req.body.password, (err) => {
+				if(err) {
+					res.json({ message: 'Что-то пошло не так' });
+					// убрать логи
+					return console.error(err);
+				};
+				res.status(200).json({ message: 'Пароль успешно обновлен!' });
+			})
+			
+		}else{
+			res.status(200).json({ message: 'Такого преподавателя нету' });
+		}
+	});
+});
+
 module.exports = router;
