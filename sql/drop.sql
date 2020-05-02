@@ -1,0 +1,26 @@
+--  v.28 
+
+DROP TABLE 
+department,
+sub_unit,
+specialties,
+acad_plan,
+acad_discipline,
+acad_block,
+acad_part,
+acad_module,
+dep_load,
+personalities,
+teachers,
+ranks,
+degree,
+disciplines,
+files_acad_plan,
+rights_roles,
+files_ind_plan,
+files_rpd,
+projects,
+files_projects,
+groups,
+students,
+students_projects;
