@@ -172,3 +172,55 @@ begin
 	return i_student_id;
 end;
 $$ language plpgsql;
+
+-- SELECT acad_dicip
+-- SELECT public.pr_acadplan_s(1);
+CREATE OR REPLACE FUNCTION public.pr_acadplan_s(i_acadplan_id int) returns json
+	LANGUAGE plpgsql
+AS $$
+	declare 
+		v_sql text;
+		v_json json;
+	begin
+		
+		return (SELECT 
+		    row_to_json(t, true) acad_plan
+		  FROM (
+		    SELECT P.*, (
+		      SELECT array_to_json(array_agg(row_to_json(child))) from (
+		        select D.*
+		        from acad_discipline D 
+		        where D.acad_plan_id = P.id
+		      ) child
+		    ) disciplines
+		    FROM acad_plan P 
+		    WHERE P.id = i_acadplan_id
+		  ) t); 
+	END;
+$$;
+
+-- SELECT dep_load
+-- SELECT public.pr_depload_s(1);
+CREATE OR REPLACE FUNCTION public.pr_depload_s(i_depload_id int) returns json
+	LANGUAGE plpgsql
+AS $$
+	declare 
+		v_sql text;
+		v_json json;
+	begin
+		
+		return (SELECT 
+		    row_to_json(t, true) dep_load
+		  FROM (
+		    SELECT L.*, (
+		      SELECT array_to_json(array_agg(row_to_json(child))) from (
+		        select D.*
+		        from disciplines D 
+		        where D.dep_load_id = L.id
+		      ) child
+		    ) disciplines
+		    FROM dep_load L 
+		    WHERE L.id = i_depload_id
+		  ) t); 
+	END;
+$$;

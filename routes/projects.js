@@ -3,44 +3,9 @@ const router = express.Router();
 
 const connection = require('../db');
 
-function strUpdate(obj){
-  let str = '';
-  for (key in obj){
-    str += key + ' = \'' + obj[key] + '\', ';
-  }
-  str = str.substring(0, str.length - 2);
-  return str;
-}
-
-const message = {
-  accessDenied: 'Недостаточно прав!',
-  exist: "Данное значение уже существует!",
-  notExist: 'Такой записи не существует!'
-}
-
-function getRights(teacher, resource_id){
-  return new Promise((resolve, reject) => { 
-    connection.one(`select (select 1 from projects p where p.id = ${resource_id} and p.teacher_id = ${teacher.id}) is not null exist`)
-    .then(row => {
-      resolve(row.exist);
-    })
-    .catch(err => {
-      console.log(err)
-      reject(false);
-    });
-  })
-}
-
-async function isOwner(teacher, method, resource_id){
-  if (teacher.role >= '3') return true;
-  if (teacher.role == '2' && method == 'PUT') {
-
-    return await getRights(teacher, resource_id);
-  } else {
-    return false;
-  }
-}
-
+const Access = require('../rights');
+const message = require('../messages');
+const strSet = require('../utils/db').strSet;
 
 router.get('/', (req, res) => {
   connection.manyOrNone(`
@@ -70,7 +35,7 @@ router.get('/:id', (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const debug = req.user;
-    const access = await isOwner(req.user, req.method, req.params.id);
+    const access = await Access(req.user, req.method, '/projects', req.params.id);
     if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
     connection.oneOrNone('insert into projects ( ${this:name} ) values (${this:csv}) returning id;', req.body )
@@ -90,10 +55,10 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const debug = req.user;
-    const access =  await isOwner(req.user, req.method, req.params.id);
+    const access = await Access(req.user, req.method, '/projects', req.params.id);
     if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
-    const str = strUpdate(req.body);
+    const str = strSet(req.body);
 
     connection.oneOrNone(`UPDATE projects SET ${str} where id = ${+req.params.id} returning *;`)
     .then(rows => {

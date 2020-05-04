@@ -30,35 +30,9 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  connection.manyOrNone(`
-  SELECT 
-    A.id,
-    SP.id AS specialties_id,
-    SP.code,
-    SP.name,
-    SP.profile,
-    SP.educ_form,
-    SP.educ_programm,
-    SP.educ_years,
-    SP.year_join,
-    SP.sub_unit_id,
-    B1.*,
-    B2.*,
-    B3.*,
-    D.*
-  FROM 
-    acad_plan AS A, 
-    specialties AS SP, 
-    acad_block AS B1,
-    acad_part AS B2,
-    acad_module AS B3,
-    acad_discipline AS D
-  WHERE 
-    A.id = $1 AND
-    A.specialties_id = SP.id AND
-    A.id = D.acad_plan_id
-  ;
-  `, [+req.params.id])
+  connection.oneOrNone(`
+  SELECT public.pr_acadplan_s(${+req.params.id}) acad_plan;
+  `, [])
   .then(rows => {
     res.json(rows);
   })

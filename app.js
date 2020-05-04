@@ -39,7 +39,6 @@ app.use('/api/debug', debug);
 
 
 app.post('/api/users/login', auth.logIn);
-app.get('/api/users/logout', auth.logOut);
 
 app.get('/api/', (req, res) => {
 	res.send('<h1>Api is live</h1>')

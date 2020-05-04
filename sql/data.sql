@@ -1,6 +1,5 @@
 -- v.28 | 24.04.20 pd
 
-
 INSERT INTO public.department (id,"name") VALUES 
 (1,'Информатика и вычислительная техника')
 ,(2,'Проектная деятельность');
@@ -40,10 +39,10 @@ INSERT INTO public."acad_discipline" (id, "name", code, hours_lec, hours_lab, ho
 (4, 'Безопасность жизнедеятельности', 'Б.1.1.4', 18, 18, 72, 36, 1, 1, 1, 4, 4, true, false);
 
 INSERT INTO public."dep_load" (id, sub_unit_id, begin_date, end_date, modified_date) VALUES 
-(1, 1, '19-12-31 11:30:45','19-12-31 11:30:46', '19-12-31 11:30:47'),
-(2, 2, '19-12-31 11:30:48','19-12-31 11:30:49', '19-12-31 11:30:50'),
-(3, 3, '19-12-31 11:30:51','19-12-31 11:30:52', '19-12-31 11:30:53'),
-(4, 4, '19-12-31 11:30:54','19-12-31 11:30:55', '19-12-31 11:30:56');
+(1, 1, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
+(2, 2, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
+(3, 3, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
+(4, 4, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000');
  
 INSERT INTO public.personalities (id,"name",surname,patronymic,birthday,phone,email,status) VALUES 
 (1,'Игорь','Степаненко','Сергеевич','1998-06-03','8(800)555-3535','stepanenko@mail.ru',1)
@@ -100,28 +99,33 @@ null, null, null, null, 4,
 
 
 INSERT INTO public."files_acad_plan" (id, "name", "path", ext, modified_date, create_date, acad_plan_id, teacher_id) VALUES 
-(1, 'files_acad_plan_1', 'text_1', '1', '19-12-31 11:30:45', '19-12-31 11:30:44', 1, 1);
+(1, 'files_acad_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1);
 
 INSERT INTO public."files_ind_plan" (id, "name", "path", ext, modified_date, create_date, teacher_id) VALUES 
-(1, 'files_ind_plan_1', 'text_1', '1', '19-12-31 11:30:45', '19-12-31 11:30:44', 1),
-(2, 'files_ind_plan_2', 'text_2', '2', '19-12-31 11:30:47', '19-12-31 11:30:46', 2);
+(1, 'files_ind_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1),
+(2, 'files_ind_plan_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2);
 
 INSERT INTO public."files_rpd" (id, "name", "path", ext, modified_date, create_date, teacher_id, discipline_id) VALUES 
-(1, 'files_rpd_1', 'text_1', '1', '19-12-31 11:30:45', '19-12-31 11:30:44', 1, 1),
-(2, 'files_rpd_2', 'text_2', '2', '19-12-31 11:30:47', '19-12-31 11:30:46', 2, 2);
+(1, 'files_rpd_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1),
+(2, 'files_rpd_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2, 2);
 
 INSERT INTO public."rights_roles" (id, "role", teacher_id, sub_unit_id) VALUES 
-(1, 1, 1, 1),
-(2, 2, 2, 1);
+(1, 2, 1, 1),
+(2, 4, 1, 1),
+(3, 2, 2, 1),
+(4, 3, 2, 1),
+(5, 2, 3, 1),
+(6, 2, 4, 1),
+(7, 1, 5, 1);
 
 
 INSERT INTO public."projects" (id, "name", description, begin_date, end_date, link_trello, sub_unit_id, teacher_id) VALUES 
-(1, 'project_1', 'description_1', '19-12-31 11:30:45', '19-12-31 11:30:44', null, 1, 1),
-(2, 'project_1', 'description_2', '19-12-31 11:30:45', '19-12-31 11:30:44', null, 1, 2);
+(1, 'project_1', 'description_1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', null, 1, 1),
+(2, 'project_1', 'description_2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', null, 1, 2);
 
 INSERT INTO public."files_projects" (id, "name", "path", ext, modified_date, create_date, teacher_id, project_id) VALUES 
-(1, 'files_projects_1', 'text_1', '1', '19-12-31 11:30:45', '19-12-31 11:30:44', 1, 1),
-(2, 'files_projects_2', 'text_2', '2', '19-12-31 11:30:47', '19-12-31 11:30:46', 2, 2);
+(1, 'files_projects_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1),
+(2, 'files_projects_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2, 2);
  
 INSERT INTO public."groups" (id,specialties_id,"name") VALUES 
 (1,2,'161-342');
@@ -134,6 +138,6 @@ INSERT INTO public.students (id,person_id,group_id) VALUES
 ,(5,5,1);
 
 INSERT INTO public."students_projects" (id, student_id, project_id, "date") VALUES 
-(1, 1, 1, '19-12-31 11:30:45'),
-(2, 2, 2, '19-12-31 11:30:46');
+(1, 1, 1, '2016-09-01 09:00:00.000'),
+(2, 2, 2, '2016-09-01 09:00:00.000');
 

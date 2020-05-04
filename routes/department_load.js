@@ -6,11 +6,12 @@ const connection = require('../db');
 router.get('/', (req, res) => {
 	connection.any(`
 	SELECT 
-		l.*,
-		d.name
-	FROM dep_load l, department d 
-	WHERE l.department_id = d.id
-	ORDER BY l.modified_date DESC
+		L.*,
+		D.name department_name,
+		S.name sub_unit_name
+	FROM dep_load L, sub_unit S, department D 
+	WHERE L.sub_unit_id = S.id AND S.department_id = D.id
+	ORDER BY L.modified_date DESC
 	;`)
 	.then(rows => {
 		res.send(rows);
@@ -18,16 +19,10 @@ router.get('/', (req, res) => {
 	.catch(err => console.log(err));
 });
 
-// Затирает id
 router.get('/:id', (req, res) => {
-	connection.any(`
-	SELECT 
-		l.*,
-		d.name department_name,
-		di.*
-	FROM dep_load l, department d, disciplines di 
-	WHERE l.id = $1 AND l.department_id = d.id AND l.id = di.dep_load_id
-	;`, [+req.params.id])
+	connection.oneOrNone(`
+	SELECT public.pr_depload_s(${+req.params.id}) dep_load;
+	`, [])
 	.then(rows => {
 		res.send(rows);
 	})
