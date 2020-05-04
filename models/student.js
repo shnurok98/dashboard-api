@@ -78,7 +78,7 @@ class Student {
 				P.status,
 				G.id AS group_id,
 				G.specialties_id,
-				G.name   
+				G.name AS group_name   
 			FROM students AS S, personalities AS P, groups AS G 
 			WHERE S.id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [id])
@@ -149,43 +149,6 @@ class Student {
 			cb(null, rows);
 		})
 		.catch(err => cb(err));
-	}
-
-	// isOwner(user_id, resource_id)
-
-	// Лучший вариант
-	/**
-	 * Проверка прав
-	 * @param {Teacher} teacher
-	 * @param {String} method 
-	 * @param {Object} resource 
-	 */
-	static isOwner(teacher, method, resource){
-		if (teacher.role >= '3') return true;
-		return false;
-
-		// const roles = "select * from rights_roles rr where rr.teacher_id = " + teacher.id;
-		// if (roles.teacher && roles.length == 1) { return false};
-		// if (roles.rop) {
-		// 	switch(method){
-		// 		case 'POST':
-		// 			return rop.sub_unit_id == resource.sub_unit_id ? true : false;
-		// 		case 'PUT':
-		// 		case 'DELETE':
-		// 			return sql = `select 
-		// 			(select 1 
-		// 				from 
-		// 				students s, 
-		// 				groups g, 
-		// 				specialties sp 
-		// 				where s.id = ${resource.id} 
-		// 				AND s.group_id = g.id 
-		// 				AND g.specialties_id = sp.id 
-		// 				AND sp.sub_unit_id = ${rop.sub_unit_id}) IS NOT NULL exists`;
-		// 		default: 
-		// 			return false;
-		// 	}
-		// }
 	}
 }
 

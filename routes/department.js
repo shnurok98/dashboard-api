@@ -3,12 +3,8 @@ const router = express.Router();
 
 const connection = require('../db');
 
-const accessDenied = 'Недостаточно прав!';
-
-function isOwner(teacher, method, resource){
-  if (teacher.role > '2') return true;
-  return false;
-}
+const Access = require('../rights');
+const message = require('../messages');
 
 router.get('/', (req, res) => {
   connection.manyOrNone(`
@@ -31,46 +27,61 @@ router.get('/:id', (req, res) => {
 	.catch(err => console.error(err));
 });
 
-router.post('/', (req, res) => {
-  const debug = req.user;
-	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+router.post('/', async (req, res) => {
+	try {
+		const debug = req.user;
+		const access = await Access(req.user, req.method, '/department');
+		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
-  connection.oneOrNone(`
-    insert into department (name) values ($1) returning id;
-  `, [req.body.name])
-	.then(rows => {
-		res.send(rows);
-	})
-	.catch(err => {
-    res.json({message: "Данное значение уже существует"});
-  });
+		connection.oneOrNone(`
+			insert into department (name) values ($1) returning id;
+		`, [req.body.name])
+		.then(rows => {
+			res.send(rows);
+		})
+		.catch(err => {
+			res.json({message: message.exist});
+		});
+	} catch (e) {
+    console.error(e);
+  }
 });
 
-router.put('/:id', (req, res) => {
-  const debug = req.user;
-	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+router.put('/:id', async (req, res) => {
+	try {
+		const debug = req.user;
+		const access = await Access(req.user, req.method, '/department', req.params.id);
+		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
-	connection.oneOrNone(`
-    update department set name = $1 where id = $2 returning *;
-  `, [req.body.name, +req.params.id])
-	.then(rows => {
-		if (!rows) return res.json({ message: 'Такой записи не существует' });
-		res.send(rows);
-	})
-	.catch(err => console.error(err));
+		connection.oneOrNone(`
+			update department set name = $1 where id = $2 returning *;
+		`, [req.body.name, +req.params.id])
+		.then(rows => {
+			if (!rows) return res.json({ message: message.notExist });
+			res.send(rows);
+		})
+		.catch(err => console.error(err));
+	} catch (e) {
+    console.error(e);
+  }
 });
 
-router.delete('/:id', (req, res) => {
-  const debug = req.user;
-	if ( !isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+router.delete('/:id', async (req, res) => {
+	try {
+		const debug = req.user;
+		const access = await Access(req.user, req.method, '/department', req.params.id);
+		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
-	connection.none(`
-    delete from department where id = $1;
-  `, [+req.params.id])
-	.then( () => {
-		res.status(200).json({message: "Успешное удаление"});
-	})
-	.catch(err => console.error(err));
+		connection.none(`
+			delete from department where id = $1;
+		`, [+req.params.id])
+		.then( () => {
+			res.status(200).json({message: message.deleteSuccess});
+		})
+		.catch(err => console.error(err));
+	} catch (e) {
+    console.error(e);
+  }
 });
 
 module.exports = router;

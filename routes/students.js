@@ -3,7 +3,8 @@ const router = express.Router();
 
 const Student = require('../models/student');
 
-const accessDenied = 'Недостаточно прав!';
+const Access = require('../rights');
+const message = require('../messages');
 
 router.get('/:id', (req, res) => {
 	Student.get(req.params.id, (err, student) => {
@@ -11,46 +12,54 @@ router.get('/:id', (req, res) => {
 		if (student) {
 			res.status(200).json(student);
 		}else{
-			res.status(200).json({ message: 'Такого студента нету' });
+			res.status(200).json({ message: message.notExist });
 		}
 	});
 });
 
-router.post('/', (req, res) => {
-	const debug = req.user;
-	if ( !Student.isOwner(req.user, req.method, req.params) ) return res.status(403).json({ message: accessDenied, debug: debug });
-	
-	const data = req.body;
-	const student = new Student(data);
-	student.save((err) => {
-		if(err) {
-			res.json({ message: 'Аккаунт с данным email уже существует' });
-			// убрать логи
-			return console.error(err);
-		};
-		res.status(200).send({ message: 'Студент успешно создан!' });
-	});
-	
+router.post('/', async (req, res) => {
+	try {
+		const debug = req.user;
+		const access = await Access(req.user, req.method, '/students');
+		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+		
+		const data = req.body;
+		const student = new Student(data);
+		student.save((err) => {
+			if(err) {
+				res.json({ message: message.emailExist });
+				// убрать логи
+				return console.error(err);
+			};
+			res.status(200).send({ message: message.createSuccess });
+		});
+	} catch (e) {
+    console.error(e);
+  }
 
 });
 
-router.put('/:id', (req, res) => {
-	const debug = req.user;
-	if ( !Student.isOwner(req.user, req.method, req.params.id) ) return res.status(403).json({ message: accessDenied, debug: debug });
+router.put('/:id', async (req, res) => {
+	try {
+		const debug = req.user;
+		const access = await Access(req.user, req.method, '/students', req.params.id);
+		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
 
-	const student = new Student(req.body);
-	
-	student.id = +req.params.id;
-	
-	student.save((err) => {
-		if(err) {
-			res.json({ message: 'Что-то пошло не так' });
-			// убрать логи
-			return console.error(err);
-		};
-		res.status(200).send({ message: 'Student успешно обновлен!' });
-	});
-
+		const student = new Student(req.body);
+		
+		student.id = +req.params.id;
+		
+		student.save((err) => {
+			if(err) {
+				res.json({ message: 'Что-то пошло не так', error: err.detail });
+				// убрать логи
+				return console.error(err);
+			};
+			res.status(200).send({ message: message.updateSuccess });
+		});
+	} catch (e) {
+    console.error(e);
+  }
 });
 
 router.get('/group/:group_id', (req, res) => {

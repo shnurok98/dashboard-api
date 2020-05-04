@@ -323,21 +323,6 @@ class Teacher {
 
 	}
 
-	/**
-	 * Проверка прав
-	 * @param {Teacher} teacher 
-	 * @param {String} method 
-	 * @param {Object} resource 
-	 */
-	static isOwner(teacher, method, teacher_id){
-		if (teacher.role < '4' && method != 'DELETE'){
-			if (teacher.id == teacher_id) return true;
-		}
-		if (teacher.role == '4'){
-			return true;
-		}
-		return false;
-	}
 }
 
 module.exports = Teacher;
