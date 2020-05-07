@@ -5,9 +5,19 @@
  */
 exports.strSet = (obj) => {
   let str = '';
+  
   for (key in obj){
+    if (Array.isArray(obj[key])){
+      str += key + ' = \'{' + obj[key] + '}\', ';
+      continue;
+    }
+    if (obj[key] == null || isFinite(obj[key]) ) {
+      str += key + ' = ' + obj[key] + ', ';
+      continue;
+    }
     str += key + ' = \'' + obj[key] + '\', ';
   }
+  
   str = str.substring(0, str.length - 2);
   return str;
 }
