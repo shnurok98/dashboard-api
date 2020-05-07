@@ -42,4 +42,18 @@ router.get('/:id', (req, res) => {
   })
 });
 
+router.post('/', async (req, res) => {
+  // 'insert into acad_discipline ( ${this:name} ) values (${this:csv}) returning id;', req.body 
+  // SELECT public.pr_acadplan_i($1::jsonb);
+// select $1::jsonb->\'disciplines\'
+  try {
+    connection.any('SELECT public.pr_acadplan_i($1::jsonb) acad_plan_id;', [req.body ])
+    .then(rows => {
+      res.json(rows);
+    })
+  } catch(e) {
+    console.error(e);
+  }
+});
+
 module.exports = router;

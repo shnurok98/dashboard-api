@@ -27,8 +27,8 @@ function getRights(teacher, table, resource_id){
  * Проверяет доступ к роуту и к ресурсу
  * @param {Teacher} user - пользователь от которого запрос
  * @param {String} method - метод HTTP
- * @param {String} url - ссылка на ресурс
- * @param {*} resource_id - id ресурса в виде '/link'
+ * @param {String} url - ссылка на ресурс в виде '/link'
+ * @param {*} resource_id - id ресурса 
  */
 async function access(user, method, url, resource_id){
   console.log({role: user.role, method, url, resource_id})

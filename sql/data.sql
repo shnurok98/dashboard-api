@@ -32,11 +32,11 @@ INSERT INTO acad_module (id,"name",code) VALUES
 (3,'Модуль "Навыки эффективной презентации"','Б.1.1.3'),
 (4,'Модуль "Безопасность жизнедеятельности"','Б.1.1.4');
 
-INSERT INTO public."acad_discipline" (id, "name", code, hours_lec, hours_lab, hours_sem, hours_self, acad_plan_id, acad_block_id, acad_part_id, acad_module_id, semester_num, is_exam, is_optional) VALUES 
-(1, 'Инностранный язык', 'Б.1.1.1', null, null, 324, 162, 1, 1, 1, 1, 1, false, false),
-(2, 'Русский язык и культура речи', 'Б.1.1.2', null, 36, 72, 36, 1, 1, 1, 2, 1, true, false),
-(3, 'Навыки эффективной презентации', 'Б.1.1.3', null, 36, 72, 36, 1, 1, 1, 3, 2, true, false),
-(4, 'Безопасность жизнедеятельности', 'Б.1.1.4', 18, 18, 72, 36, 1, 1, 1, 4, 4, true, false);
+INSERT INTO public."acad_discipline" (id, "name", code, zet, hours_lec, hours_lab, hours_sem, acad_plan_id, acad_block_id, acad_part_id, acad_module_id, exams, zachets, semesters, is_optional) VALUES 
+(1, 'Инностранный язык', 'Б.1.1.1',              9, null, null,  162, 1, 1, 1,  1, null, '{1,2,3}', '{54,54,54}', false),
+(2, 'Русский язык и культура речи', 'Б.1.1.2',   2, null, 36,    null, 1, 1, 1, 2, null, '{1}', '{36}', false),
+(3, 'Навыки эффективной презентации', 'Б.1.1.3', 2, null, 36,    null, 1, 1, 1, 3, null, '{2}', '{null, 36}', false),
+(4, 'Безопасность жизнедеятельности', 'Б.1.1.4', 2, 18,   18,    null, 1, 1, 1, 4, null, '{4}', '{null, null, null, 36}', false);
 
 INSERT INTO public."dep_load" (id, sub_unit_id, begin_date, end_date, modified_date) VALUES 
 (1, 1, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),

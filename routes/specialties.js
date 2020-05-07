@@ -7,27 +7,6 @@ const Access = require('../rights');
 const message = require('../messages');
 const strSet = require('../utils/db').strSet;
 
-// function strUpdate(obj){
-//   let str = '';
-//   for (key in obj){
-//     str += key + ' = \'' + obj[key] + '\', ';
-//   }
-//   str = str.substring(0, str.length - 2);
-//   return str;
-// }
-
-// const message = {
-//   accessDenied: 'Недостаточно прав!',
-//   exist: "Данное значение уже существует!",
-//   notExist: 'Такой записи не существует!'
-// }
-
-
-// function isOwner(teacher, method, resource){
-//   if (teacher.role >= '3') return true;
-//   return false;
-// }
-
 router.get('/', (req, res) => {
   connection.manyOrNone(`
   SELECT sp.*, su.name sub_unit_name 

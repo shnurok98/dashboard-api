@@ -224,3 +224,94 @@ AS $$
 		  ) t); 
 	END;
 $$;
+
+-- insert acad_plan
+-- SELECT public.pr_acadplan_i($1::jsonb) acad_plan_id;
+create or replace function public.pr_acadplan_i(
+i_acadplan jsonb
+) 
+returns integer as $$
+declare 
+	v_acadplan_id integer;
+	v_disciplines jsonb;
+	v_arr_cnt int;
+
+	v_acadblock_id integer;
+	v_acadpart_id integer;
+	v_acadmodule_id integer;
+
+	v_exams integer[];
+	v_zachets integer[];
+	v_semesters integer[];
+begin 
+	INSERT INTO acad_plan
+	(modified_date, specialties_id)
+	values ( (i_acadplan->>'modified_date')::timestamp ,(i_acadplan->>'specialties_id')::integer)
+	returning id into v_acadplan_id;
+
+	select i_acadplan->'disciplines' into v_disciplines;
+
+	v_arr_cnt = jsonb_array_length(v_disciplines);
+
+	for i in 0..(v_arr_cnt-1) loop
+	
+		insert into acad_block ("name", "code") 
+		values ( (v_disciplines->i)->>'acad_block_name', (v_disciplines->i)->>'acad_block_code' )
+		on conflict ("name", "code") do update set "name" = (v_disciplines->i)->>'acad_block_name' 
+		returning id into v_acadblock_id;
+		
+		insert into acad_part ("name", "code") 
+		values ( (v_disciplines->i)->>'acad_part_name', (v_disciplines->i)->>'acad_part_code' )
+		on conflict ("name", "code") do update set "name" = (v_disciplines->i)->>'acad_part_name' 
+		returning id into v_acadpart_id;
+	
+		insert into acad_module ("name", "code") 
+		values ( (v_disciplines->i)->>'acad_module_name', (v_disciplines->i)->>'acad_module_code' )
+		on conflict ("name", "code") do update set "name" = (v_disciplines->i)->>'acad_module_name' 
+		returning id into v_acadmodule_id;
+	
+--		string_to_array(  trim( both '[]' from ('[68, 68, 34, 34]'::jsonb)::text ) , ',', 'null' )
+	
+		select string_to_array( trim(both '[]' from ((v_disciplines->i)->>'exams')::text ), ', ', 'null' ),
+			string_to_array( trim(both '[]' from ((v_disciplines->i)->>'zachets')::text ), ', ', 'null' ),
+			string_to_array( trim(both '[]' from ((v_disciplines->i)->>'semesters')::text ), ', ', 'null' )
+			into v_exams, v_zachets, v_semesters;
+	
+		insert into acad_discipline (
+			"name",
+			"code",
+			"zet",
+		 	"hours_lec",
+		 	"hours_lab",
+		 	"hours_sem",
+		 	"acad_plan_id",
+		 	"acad_block_id",
+		 	"acad_part_id",
+		 	"acad_module_id",
+		 	"exams",
+		 	"zachets",
+		 	"semesters",
+		 	"is_optional"
+		) 
+		values ( 
+			(v_disciplines->i)->>'name', 
+			(v_disciplines->i)->>'code', 
+			((v_disciplines->i)->>'zet')::integer,
+			((v_disciplines->i)->>'hours_lec')::integer,
+			((v_disciplines->i)->>'hours_lab')::integer,
+			((v_disciplines->i)->>'hours_sem')::integer,
+			v_acadplan_id,
+			v_acadblock_id,
+			v_acadpart_id,
+			v_acadmodule_id,
+			v_exams,
+			v_zachets,
+			v_semesters,
+			((v_disciplines->i)->>'is_optional')::boolean
+		);
+	
+	end loop;
+
+	return v_acadplan_id;
+end;
+$$ language plpgsql;

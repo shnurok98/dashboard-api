@@ -1,9 +1,9 @@
---  v.28 | 29.03.20 | New scheme.
+--  v.29 | 06.05.20 | Changes in acad_discipline
 
 CREATE TABLE "department"
 (
  "id"    serial PRIMARY KEY,
- "name" varchar(50) UNIQUE NOT NULL
+ "name" varchar(100) UNIQUE NOT NULL
 );
 
 CREATE TABLE "sub_unit"
@@ -19,7 +19,7 @@ CREATE TABLE "specialties"
 (
  "id"            serial PRIMARY KEY,
  "code"          varchar(20) NOT NULL,
- "name"          varchar(50) NOT NULL,
+ "name"          varchar(100) NOT NULL,
  "profile"       varchar(100) NOT NULL,
  "educ_form"     varchar(20) NOT NULL,
  "educ_programm" smallint NOT NULL,
@@ -70,23 +70,24 @@ CREATE TABLE "acad_module"
 
 CREATE TABLE "acad_discipline"
 (
- "id"          serial PRIMARY KEY,
- "name"        varchar(150) NOT NULL,
- "code"        varchar(25) NOT NULL,
- "hours_lec"   int,
- "hours_lab"   int,
- "hours_sem" 	 int,
- "hours_self"  int,
- "acad_plan_id" int REFERENCES acad_plan(id) NOT NULL,
- "acad_block_id" int REFERENCES acad_block(id) NOT NULL,
- "acad_part_id" int REFERENCES acad_part(id),
- "acad_module_id"   int REFERENCES acad_module(id),
- "semester_num" int NOT NULL,
- "is_exam" boolean NOT NULL,
- "is_optional" boolean NOT NULL
+ "id"          		serial PRIMARY KEY,
+ "name"        		varchar(150) NOT NULL,
+ "code"        		varchar(25) NOT NULL,
+ "zet"						int,
+ "hours_lec"   		int,
+ "hours_lab"  	 	int,
+ "hours_sem" 	 		int,
+ "acad_plan_id" 	int REFERENCES acad_plan(id) NOT NULL,
+ "acad_block_id" 	int REFERENCES acad_block(id) NOT NULL,
+ "acad_part_id" 	int REFERENCES acad_part(id),
+ "acad_module_id" int REFERENCES acad_module(id),
+ "exams" 					integer[],
+ "zachets" 				integer[],
+ "semesters" 			integer[] NOT NULL,
+ "is_optional"	 	boolean NOT NULL
 );
 
-
+COMMENT ON COLUMN "acad_discipline"."zet" IS 'Всего ЗЕТ';
 
 
 CREATE TABLE "dep_load"
@@ -133,7 +134,7 @@ CREATE TABLE "teachers"
 (
  "id"             serial PRIMARY KEY,
  "person_id"      int UNIQUE NOT NULL REFERENCES personalities(id),
- "position"       varchar(70) NOT NULL,
+ "position"       varchar(100) NOT NULL,
  "rank_id"        integer REFERENCES ranks(id),
  "degree_id"      integer REFERENCES degree(id),
  "rate"           real,
@@ -168,7 +169,7 @@ CREATE TABLE "disciplines"
  "hours_ruk_aspirant" int,
  "hours_proj_act"     int,
  "semester_num" 			int NOT NULL,
- "acad_discipline_id" int UNIQUE NOT NULL REFERENCES acad_discipline(id),
+ "acad_discipline_id" int REFERENCES acad_discipline(id),
  "dep_load_id" 				int NOT NULL REFERENCES dep_load(id),
  "is_approved" 				boolean NOT NULL,
  "teacher_id"					int REFERENCES teachers(id)
@@ -190,11 +191,11 @@ COMMENT ON COLUMN disciplines.semester_num IS 'Номер семестра (1 и
 COMMENT ON COLUMN disciplines.acad_discipline_id IS 'ID дисциплины из учебного плана';
 COMMENT ON COLUMN disciplines.teacher_id IS 'ID преподавателя назначенного на дисциплину';
 
-
+-- Мб sub_unit вместо acad_plan
 CREATE TABLE "files_acad_plan"
 (
  "id"         		serial PRIMARY KEY,
- "name"		  			varchar(50) NOT NULL,
+ "name"		  			varchar(100) NOT NULL,
  "path"       		text NOT NULL,
  "ext" 	  				varchar(10) NOT NULL,
  "modified_date"  timestamp,
@@ -207,7 +208,7 @@ CREATE TABLE "files_acad_plan"
 CREATE TABLE "files_ind_plan"
 (
  "id"         			serial PRIMARY KEY,
- "name"		  				varchar(50) NOT NULL,
+ "name"		  				varchar(100) NOT NULL,
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
  "modified_date"    timestamp,
@@ -218,7 +219,7 @@ CREATE TABLE "files_ind_plan"
 CREATE TABLE "files_rpd"
 (
  "id"         			serial PRIMARY KEY,
- "name"		  				varchar(50) NOT NULL,
+ "name"		  				varchar(100) NOT NULL,
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
  "modified_date"    timestamp,
@@ -239,7 +240,7 @@ CREATE TABLE "rights_roles"
 
 COMMENT ON TABLE "rights_roles" IS 'Права выданные определенным преподавателям к определенным подразделениям';
 
-COMMENT ON COLUMN "rights_roles"."role" IS '1 - преподаватель, 2 - РОП';
+COMMENT ON COLUMN "rights_roles"."role" IS '1 - пользователь, 2 - преподаватель, 3 - РОП, 4 - админ';
 
 
 
@@ -248,19 +249,19 @@ COMMENT ON COLUMN "rights_roles"."role" IS '1 - преподаватель, 2 - 
 CREATE TABLE "projects"
 (
  "id"         	bigserial PRIMARY KEY,
- "name"     		varchar(50) NOT NULL,
+ "name"     		varchar(250) NOT NULL,
  "description" 	text NOT NULL,
- "begin_date"   date NOT NULL,
- "end_date"     date NOT NULL,
- "link_trello" varchar(250),
- "sub_unit_id" int NOT NULL REFERENCES sub_unit(id),
- "teacher_id"  int REFERENCES teachers(id)
+ "begin_date"   timestamp NOT NULL,
+ "end_date"     timestamp NOT NULL,
+ "link_trello" 	text,
+ "sub_unit_id" 	int NOT NULL REFERENCES sub_unit(id),
+ "teacher_id"  	int REFERENCES teachers(id)
 );
 
 CREATE TABLE "files_projects"
 (
  "id"         			bigserial PRIMARY KEY,
- "name"		  				varchar(50) NOT NULL,
+ "name"		  				varchar(100) NOT NULL,
  "path"       			text NOT NULL,
  "ext" 	  					varchar(10) NOT NULL,
  "modified_date"    timestamp,
