@@ -11,10 +11,9 @@ router.get('/', (req, res) => {
 	connection.any(`
 	SELECT 
 		L.*,
-		D.name department_name,
-		S.name sub_unit_name
-	FROM dep_load L, sub_unit S, department D 
-	WHERE L.sub_unit_id = S.id AND S.department_id = D.id
+		D.name department_name
+	FROM dep_load L, department D 
+	WHERE L.department_id = D.id
 	ORDER BY L.modified_date DESC
 	;`)
 	.then(rows => {
@@ -31,6 +30,22 @@ router.get('/:id', (req, res) => {
 		res.send(rows);
 	})
 	.catch(err => console.error(err));
+});
+
+router.get('/group/:group_id/semester/:semester_num', (req, res) => {
+	// тут нужно подхватывать год или dep_load_id
+	connection.any(`
+	SELECT 
+		L.*,
+		D.name department_name
+	FROM dep_load L, department D 
+	WHERE L.department_id = D.id
+	ORDER BY L.modified_date DESC
+	;`)
+	.then(rows => {
+		res.send(rows);
+	})
+	.catch(err => console.log(err));
 });
 
 router.post('/', async (req, res) => {
@@ -50,6 +65,29 @@ router.post('/', async (req, res) => {
   } catch(e) {
     console.error(e);
     res.json(e);
+  }
+});
+
+router.put('/discipline/:discipline_id', async (req, res) => {
+  try {
+    const debug = req.user;
+    const access = await Access(req.user, req.method, '/projects', req.params.id);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+
+    // const str = strSet(req.body);
+
+    connection.oneOrNone(`SELECT public.pr_discipline_u($1, $2) id;`, [+req.params.discipline_id, req.body])
+    .then(rows => {
+      if (!rows) return res.json({ message: message.notExist });
+      res.send(rows);
+		})
+		.catch(e => {
+			console.error(e);
+			res.json(e);
+		});
+    
+  } catch (e) {
+    console.error(e);
   }
 });
 

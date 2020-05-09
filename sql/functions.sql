@@ -216,8 +216,8 @@ AS $$
 		      SELECT array_to_json(array_agg(row_to_json(child))) from (
 		        select D.*, (
 							select array_to_json(array_agg(row_to_json(gr_child))) from (
-								select G.id, G."name"
-								from groups G, disciplines_groups DG
+								select G.id, G."name", (select count(S.id) from students S where S.group_id = G.id)
+								from "groups" G, disciplines_groups DG
 								where G.id = DG.group_id AND DG.discipline_id = D.id
 							) gr_child
 						) "groups"
@@ -413,5 +413,58 @@ begin
 	end loop;
 
 	return v_depload_id;
+end;
+$$ language plpgsql;
+
+-- UPDATE discipline
+-- SELECT public.pr_discipline_u(${+req.params.discipline_id}, ${req.body});
+create or replace function public.pr_discipline_u(
+	i_discipline_id integer,
+	i_discipline jsonb
+) 
+returns integer as $$
+declare 
+	v_groups jsonb;
+
+	v_gr_cnt int;
+
+	v_gr_id int;
+begin 
+	
+	UPDATE disciplines
+	SET 
+		"name" = 				i_discipline->>'name', 
+		hours_con_project = 	(i_discipline->>'hours_con_project')::real, 
+		hours_lec = 			(i_discipline->>'hours_lec')::real,
+		hours_sem = 			(i_discipline->>'hours_sem')::real, 
+		hours_lab = 			(i_discipline->>'hours_lab')::real,
+		hours_con_exam = 		(i_discipline->>'hours_con_exam')::real,
+		hours_zachet = 			(i_discipline->>'hours_zachet')::real,
+		hours_exam = 			(i_discipline->>'hours_exam')::real,
+		hours_kurs_project = 	(i_discipline->>'hours_kurs_project')::real,
+		hours_gek = 			(i_discipline->>'hours_gek')::real,
+		hours_ruk_prakt = 		(i_discipline->>'hours_ruk_prakt')::real,
+		hours_ruk_vkr = 		(i_discipline->>'hours_ruk_vkr')::real,
+		hours_ruk_mag = 		(i_discipline->>'hours_ruk_mag')::real, 
+		hours_ruk_aspirant = 	(i_discipline->>'hours_ruk_aspirant')::real,
+		semester_num = 			(i_discipline->>'semester_num')::integer,
+		acad_discipline_id = 	(i_discipline->>'acad_discipline_id')::integer,
+		is_approved = 			(i_discipline->>'is_approved')::boolean
+	WHERE id = i_discipline_id;
+	
+	delete from disciplines_groups where discipline_id = i_discipline_id ;
+
+	select i_discipline->'groups' into v_groups;
+	
+	v_gr_cnt = jsonb_array_length(v_groups);
+
+	for j in 0..(v_gr_cnt-1) loop
+		
+		select id from "groups" where "name" = v_groups->>j into v_gr_id;
+		insert into disciplines_groups (discipline_id, group_id) values (i_discipline_id, v_gr_id);
+	
+	end loop;
+
+	return i_discipline_id;
 end;
 $$ language plpgsql;

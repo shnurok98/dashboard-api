@@ -1,4 +1,4 @@
---  v.28 
+--  v.30 
 
 DROP TABLE 
 department,
@@ -23,4 +23,6 @@ projects,
 files_projects,
 groups,
 students,
-students_projects;
+students_projects,
+disciplines_groups,
+disciplines_teachers;
