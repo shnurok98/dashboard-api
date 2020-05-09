@@ -1,4 +1,4 @@
---  v.28 
+--  v.30 
 
 alter sequence acad_module_id_seq restart with 100;
 alter sequence department_id_seq restart with 100;
@@ -23,3 +23,5 @@ alter sequence files_projects_id_seq restart with 100;
 alter sequence groups_id_seq restart with 100;
 alter sequence students_id_seq restart with 100;
 alter sequence students_projects_id_seq restart with 100;
+alter sequence disciplines_groups_id_seq restart with 100;
+alter sequence disciplines_teachers_id_seq restart with 100;

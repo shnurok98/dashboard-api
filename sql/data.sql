@@ -1,4 +1,4 @@
--- v.28 | 24.04.20 pd
+-- v.30 | 08.05.20 
 
 INSERT INTO public.department (id,"name") VALUES 
 (1,'Информатика и вычислительная техника')
@@ -38,11 +38,11 @@ INSERT INTO public."acad_discipline" (id, "name", code, zet, hours_lec, hours_la
 (3, 'Навыки эффективной презентации', 'Б.1.1.3', 2, null, 36,    null, 1, 1, 1, 3, null, '{2}', '{null, 36}', false),
 (4, 'Безопасность жизнедеятельности', 'Б.1.1.4', 2, 18,   18,    null, 1, 1, 1, 4, null, '{4}', '{null, null, null, 36}', false);
 
-INSERT INTO public."dep_load" (id, sub_unit_id, begin_date, end_date, modified_date) VALUES 
+INSERT INTO public."dep_load" (id, department_id, begin_date, end_date, modified_date) VALUES 
 (1, 1, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
 (2, 2, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
-(3, 3, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
-(4, 4, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000');
+(3, 1, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000'),
+(4, 2, '2016-09-01 09:00:00.000','2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000');
  
 INSERT INTO public.personalities (id,"name",surname,patronymic,birthday,phone,email,status) VALUES 
 (1,'Игорь','Степаненко','Сергеевич','1998-06-03','8(800)555-3535','stepanenko@mail.ru',1)
@@ -76,27 +76,12 @@ INSERT INTO public.teachers (id,person_id,"position",rank_id,degree_id,rate,hour
 ,(4,56,'Преподаватель',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'djunkovski','$2b$12$Qh.8rPRjF.eYOiGPo6F.ReKE32vdJmHdvifhQTvxzKTv.8ycU73IC','$2b$12$Qh.8rPRjF.eYOiGPo6F.Re')
 ,(5,57,'Преподаватель',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'lyang','$2b$12$S6ARaLllzdaHhpMPLTvn8uU9ycBlW92zxuO.R1ImCULrMoWkqyn0u','$2b$12$S6ARaLllzdaHhpMPLTvn8u');
 
-INSERT INTO disciplines (id, "name", code, hours_lec, hours_lab, hours_sem, hours_self, 
-hours_con_exam, hours_exam, hours_zachet, hours_kursovoy, hours_gek, hours_ruk_prakt, 
-hours_ruk_vkr, hours_ruk_magic, hours_ruk_aspirant, hours_proj_act, semester_num, 
-acad_discipline_id, dep_load_id, is_approved, teacher_id) VALUES 
-(1, 'Инностранный язык', 'Б.1.1.1', null, null, 324, 162, 
-null, null, null, null, null, null,
-null, null, null, null, 1,
-1, 1, true, 1),
-(2, 'Русский язык и культура речи', 'Б.1.1.2', null, 36, 72, 36, 
-null, null, null, null, null, null,
-null, null, null, null, 1,
-2, 2, true, 2),
-(3, 'Навыки эффективной презентации', 'Б.1.1.3', null, 36, 72, 36, 
-null, null, null, null, null, null,
-null, null, null, null, 2,
-3, 3, false, 3),
-(4, 'Безопасность жизнедеятельности', 'Б.1.1.4', 18, 18, 72, 36, 
-null, null, null, null, null, null,
-null, null, null, null, 4,
-4, 4, true, 4);
-
+INSERT INTO public.disciplines (id,"name",hours_con_project,hours_lec,hours_sem,hours_lab,hours_con_exam,hours_zachet,hours_exam,hours_kurs_project,hours_gek,hours_ruk_prakt,hours_ruk_vkr,hours_ruk_mag,hours_ruk_aspirant,semester_num,acad_discipline_id,dep_load_id,is_approved) VALUES 
+(1,'Инностранный язык',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,1,false)
+,(2,'Русский язык и культура речи',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,2,false)
+,(3,'Навыки эффективной презентации',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,3,false)
+,(4,'Безопасность жизнедеятельности',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,4,false)
+;
 
 INSERT INTO public."files_acad_plan" (id, "name", "path", ext, modified_date, create_date, acad_plan_id, teacher_id) VALUES 
 (1, 'files_acad_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1);

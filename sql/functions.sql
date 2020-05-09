@@ -214,7 +214,13 @@ AS $$
 		  FROM (
 		    SELECT L.*, (
 		      SELECT array_to_json(array_agg(row_to_json(child))) from (
-		        select D.*
+		        select D.*, (
+							select array_to_json(array_agg(row_to_json(gr_child))) from (
+								select G.id, G."name"
+								from groups G, disciplines_groups DG
+								where G.id = DG.group_id AND DG.discipline_id = D.id
+							) gr_child
+						) "groups"
 		        from disciplines D 
 		        where D.dep_load_id = L.id
 		      ) child
@@ -313,5 +319,99 @@ begin
 	end loop;
 
 	return v_acadplan_id;
+end;
+$$ language plpgsql;
+
+-- INSERT DEP LOAD
+-- SELECT public.pr_depload_i($1::jsonb) id;
+create or replace function public.pr_depload_i(
+i_depload jsonb
+) 
+returns integer as $$
+declare 
+	v_depload_id integer;
+	v_disciplines jsonb;
+	v_groups jsonb;
+
+	v_dis_cnt int;
+	v_gr_cnt int;
+
+	v_dis_id int;
+	v_gr_id int;
+begin 
+	INSERT INTO dep_load
+	(department_id, begin_date, end_date, modified_date)
+	VALUES(
+		(i_depload->>'department_id')::integer, 
+		(i_depload->>'begin_date')::timestamp, 
+		(i_depload->>'end_date')::timestamp, 
+		(i_depload->>'modified_date')::timestamp)
+	returning id into v_depload_id;
+
+	
+
+	select i_depload->'disciplines' into v_disciplines;
+	v_dis_cnt = jsonb_array_length(v_disciplines);
+
+	
+
+	for i in 0..(v_dis_cnt-1) loop
+	
+		insert into disciplines (
+			"name",
+			hours_con_project,
+			hours_lec,
+			hours_sem,
+			hours_lab,
+			hours_con_exam,
+			hours_zachet,
+			hours_exam,
+			hours_kurs_project,
+			hours_gek,
+			hours_ruk_prakt,
+			hours_ruk_vkr,
+			hours_ruk_mag,
+			hours_ruk_aspirant,
+			semester_num,
+			acad_discipline_id,
+			dep_load_id,
+			is_approved
+		) 
+		values ( 
+			(v_disciplines->i)->>'name', 
+			((v_disciplines->i)->>'hours_con_project')::real, 
+			((v_disciplines->i)->>'hours_lec')::real,
+			((v_disciplines->i)->>'hours_sem')::real,
+			((v_disciplines->i)->>'hours_lab')::real,
+			((v_disciplines->i)->>'hours_con_exam')::real,
+			((v_disciplines->i)->>'hours_zachet')::real,
+			((v_disciplines->i)->>'hours_exam')::real,
+			((v_disciplines->i)->>'hours_kurs_project')::real,
+			((v_disciplines->i)->>'hours_gek')::real,
+			((v_disciplines->i)->>'hours_ruk_prakt')::real,
+			((v_disciplines->i)->>'hours_ruk_vkr')::real,
+			((v_disciplines->i)->>'hours_ruk_mag')::real,
+			((v_disciplines->i)->>'hours_ruk_aspirant')::real,
+			((v_disciplines->i)->>'semester_num')::integer,
+			((v_disciplines->i)->>'acad_discipline_id')::integer,
+			v_depload_id,
+			((v_disciplines->i)->>'is_approved')::boolean
+		)
+		returning id into v_dis_id;
+	
+		select (v_disciplines->i)->'groups' into v_groups;
+	
+		v_gr_cnt = jsonb_array_length(v_groups);
+	
+		for j in 0..(v_gr_cnt-1) loop
+			
+			select id from "groups" where "name" = v_groups->>j into v_gr_id;
+			insert into disciplines_groups (discipline_id, group_id) values (v_dis_id, v_gr_id);
+		
+		end loop;
+	
+	end loop;
+
+	return v_depload_id;
 end;
 $$ language plpgsql;

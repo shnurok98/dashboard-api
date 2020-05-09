@@ -3,6 +3,10 @@ const router = express.Router();
 
 const connection = require('../db');
 
+const Access = require('../rights');
+const message = require('../messages');
+const strSet = require('../utils/db').strSet;
+
 router.get('/', (req, res) => {
 	connection.any(`
 	SELECT 
@@ -27,6 +31,26 @@ router.get('/:id', (req, res) => {
 		res.send(rows);
 	})
 	.catch(err => console.error(err));
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const debug = req.user;
+    const access = await Access(req.user, req.method, '/dep_load', req.params.id);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+
+    connection.one('SELECT public.pr_depload_i($1::jsonb) id;', [req.body ])
+    .then(rows => {
+      res.status(200).json(rows);
+		})
+		.catch(e => {
+			// if e.table ...
+			res.json({message: 'Oops!', error: e});
+		})
+  } catch(e) {
+    console.error(e);
+    res.json(e);
+  }
 });
 
 module.exports = router;
