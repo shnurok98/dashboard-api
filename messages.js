@@ -8,7 +8,10 @@ const message = {
   createSuccess: 'Запись успешно создана!',
   updateSuccess: 'Запись успешно обновлена!',
   loginExist: 'Аккаунт с данным login уже существует!',
-  passwordSuccess: 'Пароль успешно обновлен!'
+  passwordSuccess: 'Пароль успешно обновлен!',
+  smthWentWrong: 'Что-то пошло не так!',
+  invalidCredentials: 'Неверные учетные данные!',
+  logInSuccess: 'Успешный вход!'
 }
 
 module.exports = message;

@@ -14,7 +14,9 @@ router.get('/', (req, res) => {
 	.then(rows => {
 		res.send(rows);
 	})
-	.catch(err => console.log(err));
+	.catch(err => {
+		res.status(500).json({ message: message.smthWentWrong, error: err });
+	});
 });
 
 router.get('/:id', (req, res) => {
@@ -24,14 +26,15 @@ router.get('/:id', (req, res) => {
 	.then(rows => {
 		res.send(rows);
 	})
-	.catch(err => console.error(err));
+	.catch(err => {
+		res.status(500).json({ message: message.smthWentWrong, error: err });
+	});
 });
 
 router.post('/', async (req, res) => {
 	try {
-		const debug = req.user;
 		const access = await Access(req.user, req.method, '/department');
-		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+		if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
 		connection.oneOrNone(`
 			insert into department (name) values ($1) returning id;
@@ -49,9 +52,8 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
 	try {
-		const debug = req.user;
 		const access = await Access(req.user, req.method, '/department', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+		if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
 		connection.oneOrNone(`
 			update department set name = $1 where id = $2 returning *;
@@ -60,7 +62,9 @@ router.put('/:id', async (req, res) => {
 			if (!rows) return res.json({ message: message.notExist });
 			res.send(rows);
 		})
-		.catch(err => console.error(err));
+		.catch(err => {
+			res.status(500).json({ message: message.smthWentWrong, error: err });
+		});
 	} catch (e) {
     console.error(e);
   }
@@ -68,9 +72,8 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const debug = req.user;
 		const access = await Access(req.user, req.method, '/department', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+		if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
 		connection.none(`
 			delete from department where id = $1;
@@ -78,7 +81,9 @@ router.delete('/:id', async (req, res) => {
 		.then( () => {
 			res.status(200).json({message: message.deleteSuccess});
 		})
-		.catch(err => console.error(err));
+		.catch(err => {
+			res.json({ message: message.smthWentWrong, error: err });
+		});
 	} catch (e) {
     console.error(e);
   }

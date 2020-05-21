@@ -19,19 +19,17 @@ router.get('/:id', (req, res) => {
 
 router.post('/', async (req, res) => {
 	try {
-		const debug = req.user;
 		const access = await Access(req.user, req.method, '/students');
-		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+		if ( !access ) return res.status(403).json({ message: message.accessDenied });
 		
 		const data = req.body;
 		const student = new Student(data);
 		student.save((err) => {
 			if(err) {
 				res.json({ message: message.emailExist });
-				// убрать логи
-				return console.error(err);
+				return ;
 			};
-			res.status(200).send({ message: message.createSuccess });
+			res.status(201).send({ message: message.createSuccess });
 		});
 	} catch (e) {
     console.error(e);
@@ -41,9 +39,8 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
 	try {
-		const debug = req.user;
 		const access = await Access(req.user, req.method, '/students', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+		if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
 		const student = new Student(req.body);
 		
@@ -51,9 +48,8 @@ router.put('/:id', async (req, res) => {
 		
 		student.save((err) => {
 			if(err) {
-				res.json({ message: 'Что-то пошло не так', error: err.detail });
-				// убрать логи
-				return console.error(err);
+				res.json({ message: message.smthWentWrong, error: err.detail });
+				return ;
 			};
 			res.status(200).send({ message: message.updateSuccess });
 		});

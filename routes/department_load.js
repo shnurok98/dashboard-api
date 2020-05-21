@@ -19,19 +19,24 @@ router.get('/', (req, res) => {
 	.then(rows => {
 		res.send(rows);
 	})
-	.catch(err => console.log(err));
+	.catch(err => {
+		res.status(500).json({ message: message.smthWentWrong, error: err });
+	});
 });
 
 router.get('/:id', (req, res) => {
 	connection.oneOrNone(`
 	SELECT public.pr_depload_s(${+req.params.id}) dep_load;
-	`, [])
+	`)
 	.then(rows => {
 		res.send(rows);
 	})
-	.catch(err => console.error(err));
+	.catch(err => {
+		res.status(500).json({ message: message.smthWentWrong, error: err });
+	});
 });
 
+/* Not worked */ 
 router.get('/group/:group_id/semester/:semester_num', (req, res) => {
 	// тут нужно подхватывать год или dep_load_id
 	connection.any(`
@@ -50,9 +55,8 @@ router.get('/group/:group_id/semester/:semester_num', (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const debug = req.user;
-    const access = await Access(req.user, req.method, '/dep_load', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    const access = await Access(req.user, req.method, '/dep_load');
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     connection.one('SELECT public.pr_depload_i($1::jsonb) id;', [req.body ])
     .then(rows => {
@@ -60,21 +64,18 @@ router.post('/', async (req, res) => {
 		})
 		.catch(e => {
 			// if e.table ...
-			res.json({message: 'Oops!', error: e});
+			res.json({message: message.smthWentWrong, error: e});
 		})
   } catch(e) {
     console.error(e);
-    res.json(e);
+    res.status(500).json({ message: message.smthWentWrong, error: e });
   }
 });
 
 router.put('/discipline/:discipline_id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/projects', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
-
-    // const str = strSet(req.body);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
     connection.oneOrNone(`SELECT public.pr_discipline_u($1, $2) id;`, [+req.params.discipline_id, req.body])
     .then(rows => {
@@ -83,11 +84,12 @@ router.put('/discipline/:discipline_id', async (req, res) => {
 		})
 		.catch(e => {
 			console.error(e);
-			res.json(e);
+			res.json({ message: message.smthWentWrong });
 		});
     
   } catch (e) {
-    console.error(e);
+		console.error(e);
+		res.status(500).json({ message: message.smthWentWrong });
   }
 });
 

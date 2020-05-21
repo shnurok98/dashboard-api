@@ -28,21 +28,19 @@ router.get('/', (req, res) => {
     res.json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
 router.get('/:id', (req, res) => {
   connection.oneOrNone(`
   SELECT public.pr_acadplan_s(${+req.params.id}) acad_plan;
-  `, [])
+  `)
   .then(rows => {
     res.json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/:id' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
@@ -55,8 +53,7 @@ router.get('/:id/semester/:num', (req, res) => {
     res.status(200).json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/:id/smester' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
@@ -81,16 +78,14 @@ router.get('/filter/year/:year', (req, res) => {
     res.status(200).json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/filter' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
 router.put('/discipline/:id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
     const str = strSet(req.body);
     
@@ -109,17 +104,15 @@ router.put('/discipline/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
     connection.one('SELECT public.pr_acadplan_i($1::jsonb) id;', [req.body ])
     .then(rows => {
       res.status(200).json(rows);
     })
   } catch(e) {
-    console.error(e);
-    res.json(e.detail);
+    res.status(500).json({ message: message.smthWentWrong, error: e });
   }
 });
 
@@ -133,8 +126,7 @@ router.get('/module/:id', (req, res) => {
     res.status(200).json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/части' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
@@ -146,8 +138,7 @@ router.get('/block/:id', (req, res) => {
     res.status(200).json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/части' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
@@ -159,18 +150,14 @@ router.get('/part/:id', (req, res) => {
     res.status(200).json(rows);
   })
   .catch(err => {
-    console.error(err);
-    res.json({ message: 'Error: /acad_plan/части' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
 router.put('/module/:id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
-
-    // const str = strSet(req.body);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
     
     connection.oneOrNone(`
     insert into acad_module ("name", "code") 
@@ -179,27 +166,22 @@ router.put('/module/:id', async (req, res) => {
 		returning *;
     `, [req.body.name, req.body.code])
     .then(rows => {
-      // if (!rows) return res.json({ message: message.notExist });
       res.send(rows);
     })
     .catch(e => {
-      console.log(e);
-      res.json('Oops!');
+      res.status(500).json({ message: message.smthWentWrong, error: e });
     })
     
   } catch (e) {
-    res.json('Oops!');
+    res.status(500).json({ message: message.smthWentWrong, error: e });
     console.error(e);
   }
 });
 
 router.put('/block/:id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
-
-    // const str = strSet(req.body);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
     
     connection.oneOrNone(`
     insert into acad_block ("name", "code") 
@@ -208,28 +190,23 @@ router.put('/block/:id', async (req, res) => {
 		returning *;
     `, [req.body.name, req.body.code])
     .then(rows => {
-      // if (!rows) return res.json({ message: message.notExist });
       res.send(rows);
     })
     .catch(e => {
-      console.log(e);
-      res.json('Oops!');
+      res.status(500).json({ message: message.smthWentWrong, error: e });
     })
     
   } catch (e) {
-    res.json('Oops!');
+    res.status(500).json({ message: message.smthWentWrong, error: err });
     console.error(e);
   }
 });
 
 router.put('/part/:id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
-    // const str = strSet(req.body);
-    
     connection.oneOrNone(`
     insert into acad_part ("name", "code") 
 		values ( $1, $2 )
@@ -237,16 +214,14 @@ router.put('/part/:id', async (req, res) => {
 		returning *;
     `, [req.body.name, req.body.code])
     .then(rows => {
-      // if (!rows) return res.json({ message: message.notExist });
       res.send(rows);
     })
     .catch(e => {
-      console.log(e);
-      res.json('Oops!');
+      res.status(500).json({ message: message.smthWentWrong, error: e });
     })
     
   } catch (e) {
-    res.json('Oops!');
+    res.status(500).json({ message: message.smthWentWrong, error: e });
     console.error(e);
   }
 });

@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
   })
   .catch(err => {
     console.error(err);
-    res.json({ message: 'Error: /specialties/' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
@@ -36,15 +36,14 @@ router.get('/:id', (req, res) => {
   })
   .catch(err => {
     console.error(err);
-    res.json({ message: 'Error: /specialties/' });
+    res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
 
 router.post('/', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/specialties');
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     connection.oneOrNone('insert into specialties ( ${this:name} ) values (${this:csv}) returning id;', req.body )
     .then(rows => {
@@ -61,9 +60,8 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/specialties', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     const str = strSet(req.body);
 
@@ -74,6 +72,7 @@ router.put('/:id', async (req, res) => {
     })
     .catch(err => {
       console.error(err);
+      res.json({ message: message.smthWentWrong, error: err });
     });
   } catch (e) {
     console.error(e);

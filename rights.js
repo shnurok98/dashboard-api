@@ -37,10 +37,7 @@ async function access(user, method, url, resource_id){
     return true;
   }
   else if ( rights[user.role][method][url] === 'self' ){
-    // Проходимся по ролям
-    // Админу полный доступ (его вообще не должно быть здесь)
-    if (user.role == 4) return true;
-    //Сразу откидываем ситуацию с изменением своего аккаунта
+    // Сразу откидываем ситуацию с изменением своего аккаунта
     if (url === '/teachers' && method === 'PUT') {
       return user.id == resource_id ? true : false
     };
@@ -54,10 +51,6 @@ async function access(user, method, url, resource_id){
     if (user.role == 2) {
       const table = mapping[url];
       return await getRights(user, table, resource_id);
-    }
-    // Вьюер
-    if (user.role == 1) {
-      // Не требует доплнительных проверок
     }
   }
 

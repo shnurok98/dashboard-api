@@ -19,7 +19,10 @@ router.get('/', (req, res) => {
 	.then(rows => {
 		res.send(rows);
 	})
-	.catch(err => console.log(err));
+	.catch(err => {
+    console.log(err);
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  });
 });
 
 router.get('/:id', (req, res) => {
@@ -29,14 +32,16 @@ router.get('/:id', (req, res) => {
 	.then(rows => {
 		res.send(rows);
 	})
-	.catch(err => console.error(err));
+	.catch(err => {
+    console.error(err);
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  });
 });
 
 router.post('/', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/projects', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     connection.oneOrNone('insert into projects ( ${this:name} ) values (${this:csv}) returning id;', req.body )
     .then(rows => {
@@ -54,9 +59,8 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const debug = req.user;
     const access = await Access(req.user, req.method, '/projects', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied, debug: debug });
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     const str = strSet(req.body);
 

@@ -13,8 +13,7 @@ class Student {
 
 	save(cb){
 		if(this.id){
-			// Если есть id, то обновляем
-			this.update(cb);
+			this.update(cb); // если есть id, то обновляем
 		}else{
 				let obj = this;
 
@@ -31,11 +30,10 @@ class Student {
 				`, { obj })
 				.then(data => {
 					if (data === undefined) return cb(console.log(new Error('Не удалось создать student')));
-					// this.id = data.id;
-					console.log(data);
+					this.id = data.student.id; // присваиваем экземпляру id возвращенный из бд
 					cb();
 				})
-				.catch((err) => cb(err))
+				.catch(err => cb(err))
 
 		}
 	}
@@ -56,7 +54,6 @@ class Student {
 		`, { obj })
 		.then( data  => {
 			if ( data === undefined ) return cb(console.log(new Error('Не удалось обновить данные student')));
-			console.log(data)
 			cb();
 		})
 		.catch((err) => {
@@ -83,8 +80,7 @@ class Student {
 			WHERE S.id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [id])
 		.then(rows => {
-			if (rows === undefined) return cb();
-			if (rows === null) return cb();
+			if (rows === undefined || rows === null) return cb();
 			cb(null, new Student(rows));
 		})
 		.catch(err => cb(err));
@@ -109,8 +105,7 @@ class Student {
 			WHERE S.group_id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [group_id])
 		.then(rows => {
-			if (rows === undefined) return cb();
-			if (rows === null) return cb();
+			if (rows === undefined || rows === null) return cb();
 			cb(null, rows);
 		})
 		.catch(err => cb(err));
@@ -144,8 +139,7 @@ class Student {
 			WHERE G.specialties_id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [specialty_id])
 		.then(rows => {
-			if (rows === undefined) return cb();
-			if (rows === null) return cb();
+			if (rows === undefined || rows === null) return cb();
 			cb(null, rows);
 		})
 		.catch(err => cb(err));
