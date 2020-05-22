@@ -195,10 +195,10 @@ CREATE TABLE "files_acad_plan"
  "name"		  			varchar(100) NOT NULL,
  "path"       		text NOT NULL,
  "ext" 	  				varchar(10) NOT NULL,
- "modified_date"  timestamp,
- "create_date"		timestamp NOT NULL,
- "acad_plan_id" 	int REFERENCES acad_plan(id) UNIQUE NOT NULL,
- "teacher_id" 		int NOT NULL REFERENCES teachers(id)
+ "modified_date"  timestamp NOT NULL,
+ "teacher_id" 		int NOT NULL REFERENCES teachers(id),
+ "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
+ "acad_plan_id" 	int REFERENCES acad_plan(id) NOT NULL
 );
 
 
@@ -208,9 +208,9 @@ CREATE TABLE "files_ind_plan"
  "name"		  				varchar(100) NOT NULL,
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
- "modified_date"    timestamp,
- "create_date"			timestamp NOT NULL,
- "teacher_id" 			int REFERENCES teachers(id) NOT NULL
+ "modified_date"    timestamp NOT NULL,
+ "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
+ "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id)
 );
 
 CREATE TABLE "files_rpd"
@@ -219,13 +219,23 @@ CREATE TABLE "files_rpd"
  "name"		  				varchar(100) NOT NULL,
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
- "modified_date"    timestamp,
- "create_date"			timestamp NOT NULL,
+ "modified_date"    timestamp NOT NULL,
  "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
- "discipline_id"		int REFERENCES disciplines(id) UNIQUE NOT NULL
+ "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
+ "discipline_id"		int REFERENCES disciplines(id) NOT NULL
 );
 
-
+CREATE TABLE "files_dep_load"
+(
+ "id"         			serial PRIMARY KEY,
+ "name"		  				varchar(100) NOT NULL,
+ "path"       			text NOT NULL,
+ "ext" 	 						varchar(10) NOT NULL,
+ "modified_date"    timestamp NOT NULL,
+ "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
+ "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
+ "dep_load_id"			int REFERENCES dep_load(id) NOT NULL
+);
 
 CREATE TABLE "rights_roles"
 (
@@ -261,10 +271,10 @@ CREATE TABLE "files_projects"
  "name"		  				varchar(100) NOT NULL,
  "path"       			text NOT NULL,
  "ext" 	  					varchar(10) NOT NULL,
- "modified_date"    timestamp,
- "create_date"			timestamp NOT NULL,
+ "modified_date"    timestamp NOT NULL,
  "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
- "project_id" 			int REFERENCES projects(id) UNIQUE NOT NULL
+ "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
+ "project_id" 			int REFERENCES projects(id) NOT NULL
 );
 
 CREATE TABLE "groups"

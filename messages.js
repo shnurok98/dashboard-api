@@ -11,7 +11,8 @@ const message = {
   passwordSuccess: 'Пароль успешно обновлен!',
   smthWentWrong: 'Что-то пошло не так!',
   invalidCredentials: 'Неверные учетные данные!',
-  logInSuccess: 'Успешный вход!'
+  logInSuccess: 'Успешный вход!',
+  loadFailed: 'Загрузка файла не удалась!'
 }
 
 module.exports = message;

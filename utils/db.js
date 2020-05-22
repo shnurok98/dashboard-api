@@ -22,10 +22,8 @@ exports.strSet = (obj) => {
   return str;
 }
 
-// UPLOADS ???
 /**
  * Маппинг точек входа на таблицы БД
- * @todo Что делать с uploads???
  */
 exports.mapping = {
   '/teachers': 'teachers', 
@@ -36,5 +34,9 @@ exports.mapping = {
   '/dep_load': 'disciplines', 
   '/projects': 'projects', 
   '/department': 'department',
-  '/uploads': '???'
+  '/uploads/ind_plan': 'files_ind_plan',
+  '/uploads/projects': 'files_projects',
+  '/uploads/rpd': 'files_rpd',
+  '/uploads/acad_plan': 'files_acad_plan',
+  '/uploads/dep_load': 'files_dep_load',
 };

@@ -83,16 +83,16 @@ INSERT INTO public.disciplines (id,"name",hours_con_project,hours_lec,hours_sem,
 ,(4,'Безопасность жизнедеятельности',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,4,false)
 ;
 
-INSERT INTO public."files_acad_plan" (id, "name", "path", ext, modified_date, create_date, acad_plan_id, teacher_id) VALUES 
-(1, 'files_acad_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1);
+-- INSERT INTO public."files_acad_plan" (id, "name", "path", ext, modified_date, create_date, acad_plan_id, teacher_id) VALUES 
+-- (1, 'files_acad_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1);
 
-INSERT INTO public."files_ind_plan" (id, "name", "path", ext, modified_date, create_date, teacher_id) VALUES 
-(1, 'files_ind_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1),
-(2, 'files_ind_plan_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2);
+-- INSERT INTO public."files_ind_plan" (id, "name", "path", ext, modified_date, create_date, teacher_id) VALUES 
+-- (1, 'files_ind_plan_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1),
+-- (2, 'files_ind_plan_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2);
 
-INSERT INTO public."files_rpd" (id, "name", "path", ext, modified_date, create_date, teacher_id, discipline_id) VALUES 
-(1, 'files_rpd_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1),
-(2, 'files_rpd_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2, 2);
+-- INSERT INTO public."files_rpd" (id, "name", "path", ext, modified_date, create_date, teacher_id, discipline_id) VALUES 
+-- (1, 'files_rpd_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1),
+-- (2, 'files_rpd_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2, 2);
 
 INSERT INTO public."rights_roles" (id, "role", teacher_id, sub_unit_id) VALUES 
 (1, 2, 1, 1),
@@ -108,9 +108,9 @@ INSERT INTO public."projects" (id, "name", description, begin_date, end_date, li
 (1, 'project_1', 'description_1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', null, 1, 1),
 (2, 'project_1', 'description_2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', null, 1, 2);
 
-INSERT INTO public."files_projects" (id, "name", "path", ext, modified_date, create_date, teacher_id, project_id) VALUES 
-(1, 'files_projects_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1),
-(2, 'files_projects_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2, 2);
+-- INSERT INTO public."files_projects" (id, "name", "path", ext, modified_date, create_date, teacher_id, project_id) VALUES 
+-- (1, 'files_projects_1', 'text_1', '1', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 1, 1),
+-- (2, 'files_projects_2', 'text_2', '2', '2016-09-01 09:00:00.000', '2016-09-01 09:00:00.000', 2, 2);
  
 INSERT INTO public."groups" (id,specialties_id,"name") VALUES 
 (1,2,'161-342');

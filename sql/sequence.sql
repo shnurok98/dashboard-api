@@ -17,6 +17,7 @@ alter sequence disciplines_id_seq restart with 100;
 alter sequence files_acad_plan_id_seq restart with 100;
 alter sequence files_ind_plan_id_seq restart with 100;
 alter sequence files_rpd_id_seq restart with 100;
+alter sequence files_dep_load_id_seq restart with 100;
 alter sequence projects_id_seq restart with 100;
 alter sequence rights_roles_id_seq restart with 100;
 alter sequence files_projects_id_seq restart with 100;

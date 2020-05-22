@@ -38,6 +38,21 @@ router.get('/:id', (req, res) => {
   });
 });
 
+router.get('/:id/files', (req, res) => {
+  connection.manyOrNone(`
+  SELECT id, name, ext, modified_date, teacher_id, sub_unit_id, project_id
+  FROM files_projects
+  WHERE project_id = ${+req.params.id}
+  ORDER BY modified_date DESC;
+  `)
+  .then(rows => {
+    res.json(rows);
+  })
+  .catch(err => {
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  })
+});
+
 router.post('/', async (req, res) => {
   try {
     const access = await Access(req.user, req.method, '/projects', req.params.id);

@@ -44,6 +44,21 @@ router.get('/:id', (req, res) => {
   })
 });
 
+router.get('/:id/files', (req, res) => {
+  connection.manyOrNone(`
+  SELECT id, name, ext, modified_date, teacher_id, sub_unit_id, acad_plan_id 
+  FROM files_acad_plan 
+  WHERE acad_plan_id = ${+req.params.id}
+  ORDER BY modified_date DESC;
+  `)
+  .then(rows => {
+    res.json(rows);
+  })
+  .catch(err => {
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  })
+});
+
 router.get('/:id/semester/:num', (req, res) => {
   connection.manyOrNone(`
   SELECT * from acad_discipline D 

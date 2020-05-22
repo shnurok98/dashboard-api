@@ -203,7 +203,8 @@ class Teacher {
 		connection.oneOrNone(`
 			SELECT 
 				${fields},
-				rr.role
+				rr.role,
+				sub_unit_id
 			FROM teachers AS T, personalities AS P, rights_roles rr 
 			where T.person_id = P.id and T.id = $1 and rr.teacher_id = $1
 			order by rr."role" desc

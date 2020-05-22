@@ -15,7 +15,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow',
+      '/uploads/dep_load': 'allow',
       '/department': 'allow'
     },
     'POST': {
@@ -26,7 +30,11 @@ const rights = {
       '/acad_plan': 'forbid', 
       '/dep_load': 'forbid', 
       '/projects': 'forbid', 
-      '/uploads': 'forbid', 
+      '/uploads/ind_plan': 'forbid',
+      '/uploads/projects': 'forbid',
+      '/uploads/rpd': 'forbid',
+      '/uploads/acad_plan': 'forbid',
+      '/uploads/dep_load': 'forbid', 
       '/department': 'forbid'
     },
     'PUT': {
@@ -37,7 +45,11 @@ const rights = {
       '/acad_plan': 'forbid', 
       '/dep_load': 'forbid', 
       '/projects': 'forbid', 
-      '/uploads': 'forbid', 
+      '/uploads/ind_plan': 'forbid',
+      '/uploads/projects': 'forbid',
+      '/uploads/rpd': 'forbid',
+      '/uploads/acad_plan': 'forbid',
+      '/uploads/dep_load': 'forbid', 
       '/department': 'forbid'
     },
     'DELETE': {
@@ -48,7 +60,11 @@ const rights = {
       '/acad_plan': 'forbid', 
       '/dep_load': 'forbid', 
       '/projects': 'forbid', 
-      '/uploads': 'forbid', 
+      '/uploads/ind_plan': 'forbid',
+      '/uploads/projects': 'forbid',
+      '/uploads/rpd': 'forbid',
+      '/uploads/acad_plan': 'forbid',
+      '/uploads/dep_load': 'forbid', 
       '/department': 'forbid'
     }
   },
@@ -61,7 +77,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow',
+      '/uploads/dep_load': 'allow', 
       '/department': 'allow'
     },
     'POST': {
@@ -72,7 +92,11 @@ const rights = {
       '/acad_plan': 'forbid', 
       '/dep_load': 'forbid', 
       '/projects': 'forbid', 
-      '/uploads': 'self', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'forbid'
     },
     'PUT': {
@@ -83,7 +107,11 @@ const rights = {
       '/acad_plan': 'forbid', 
       '/dep_load': 'forbid', 
       '/projects': 'self', 
-      '/uploads': 'self', 
+      '/uploads/ind_plan': 'self',
+      '/uploads/projects': 'self',
+      '/uploads/rpd': 'self',
+      '/uploads/acad_plan': 'self',
+      '/uploads/dep_load': 'self', 
       '/department': 'forbid'
     },
     'DELETE': {
@@ -94,7 +122,11 @@ const rights = {
       '/acad_plan': 'forbid', 
       '/dep_load': 'forbid', 
       '/projects': 'forbid', 
-      '/uploads': 'self', 
+      '/uploads/ind_plan': 'self',
+      '/uploads/projects': 'self',
+      '/uploads/rpd': 'self',
+      '/uploads/acad_plan': 'self', 
+      '/uploads/dep_load': 'self', 
       '/department': 'forbid'
     }
   },
@@ -107,7 +139,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'allow'
     },
     'POST': {
@@ -118,7 +154,11 @@ const rights = {
       '/acad_plan': 'self', 
       '/dep_load': 'self', 
       '/projects': 'self', 
-      '/uploads': 'self', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'self'
     },
     'PUT': {
@@ -129,7 +169,11 @@ const rights = {
       '/acad_plan': 'self', 
       '/dep_load': 'self', 
       '/projects': 'self', 
-      '/uploads': 'self', 
+      '/uploads/ind_plan': 'self',
+      '/uploads/projects': 'self',
+      '/uploads/rpd': 'self',
+      '/uploads/acad_plan': 'self', 
+      '/uploads/dep_load': 'self',
       '/department': 'self'
     },
     'DELETE': {
@@ -140,7 +184,11 @@ const rights = {
       '/acad_plan': 'self', 
       '/dep_load': 'self', 
       '/projects': 'self', 
-      '/uploads': 'self', 
+      '/uploads/ind_plan': 'self',
+      '/uploads/projects': 'self',
+      '/uploads/rpd': 'self',
+      '/uploads/acad_plan': 'self', 
+      '/uploads/dep_load': 'self',
       '/department': 'self'
     }
   },
@@ -153,7 +201,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'allow'
     },
     'POST': {
@@ -164,7 +216,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'allow'
     },
     'PUT': {
@@ -175,7 +231,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'allow'
     },
     'DELETE': {
@@ -186,7 +246,11 @@ const rights = {
       '/acad_plan': 'allow', 
       '/dep_load': 'allow', 
       '/projects': 'allow', 
-      '/uploads': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'allow'
     }
   }

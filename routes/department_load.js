@@ -36,6 +36,21 @@ router.get('/:id', (req, res) => {
 	});
 });
 
+router.get('/:id/files', (req, res) => {
+  connection.manyOrNone(`
+  SELECT id, name, ext, modified_date, teacher_id, sub_unit_id, dep_load_id
+  FROM files_dep_load 
+  WHERE dep_load_id = ${+req.params.id}
+  ORDER BY modified_date DESC;
+  `)
+  .then(rows => {
+    res.json(rows);
+  })
+  .catch(err => {
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  })
+});
+
 /* Not worked */ 
 router.get('/group/:group_id/semester/:semester_num', (req, res) => {
 	// тут нужно подхватывать год или dep_load_id
