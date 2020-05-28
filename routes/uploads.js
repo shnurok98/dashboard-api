@@ -23,7 +23,7 @@ router.get('/ind_plan/:id', (req, res) => {
     }
     if (file){
       res.writeHead(200, {
-        'Content-Type': 'text/plain'
+        'Content-Disposition': `attachment; filename=${file.name}`
       });
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
@@ -42,7 +42,7 @@ router.get('/rpd/:id', (req, res) => {
     }
     if (file){
       res.writeHead(200, {
-        'Content-Type': 'text/plain'
+        'Content-Disposition': `attachment; filename=${file.name}`
       });
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
@@ -61,7 +61,7 @@ router.get('/acad_plan/:id', (req, res) => {
     }
     if (file){
       res.writeHead(200, {
-        'Content-Type': 'text/plain'
+        'Content-Disposition': `attachment; filename=${file.name}`
       });
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
@@ -80,7 +80,7 @@ router.get('/dep_load/:id', (req, res) => {
     }
     if (file){
       res.writeHead(200, {
-        'Content-Type': 'text/plain'
+        'Content-Disposition': `attachment; filename=${file.name}`
       });
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
@@ -99,7 +99,7 @@ router.get('/projects/:id', (req, res) => {
     }
     if (file){
       res.writeHead(200, {
-        'Content-Type': 'text/plain'
+        'Content-Disposition': `attachment; filename=${file.name}`
       });
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
