@@ -11,8 +11,12 @@ const mapping = require('./utils/db').mapping;
  */
 function getRights(teacher, table, resource_id){
   console.log('Проверка владельца ресурса');
+  let sql;
+  if (teacher.role == 3) sql = `select (select 1 from ${table} p where p.id = ${resource_id} and p.sub_unit_id = ${teacher.sub_unit_id}) is not null exist`;
+  if (teacher.role == 2) sql = `select (select 1 from ${table} p where p.id = ${resource_id} and p.teacher_id = ${teacher.id}) is not null exist`;
+
   return new Promise((resolve, reject) => { 
-    connection.one(`select (select 1 from ${table} p where p.id = ${resource_id} and p.teacher_id = ${teacher.id}) is not null exist`)
+    connection.one(sql)
     .then(row => {
       resolve(row.exist);
     })
@@ -44,8 +48,8 @@ async function access(user, method, url, resource_id){
 
     // РОП
     if (user.role == 3) {
-      // РОП пока что меняет все направления
-      return true;
+      const table = mapping[url];
+      return await getRights(user, table, resource_id);
     }
     // Преподаватель
     if (user.role == 2) {

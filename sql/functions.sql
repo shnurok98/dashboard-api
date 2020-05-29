@@ -11,9 +11,9 @@ AS $$
 		  FROM (
 		    SELECT p.*, (
 		      SELECT array_to_json(array_agg(row_to_json(child))) from (
-		        select sp.student_id
-		        from students_projects sp
-		        where sp.project_id = p.id
+		        select sp.student_id, ps."name" , ps.surname
+		        from students_projects sp, students S, personalities ps
+		        where sp.project_id = p.id AND sp.student_id = S.id AND S.person_id = ps.id
 		      ) child
 		    ) students
 		    FROM projects p 
@@ -466,5 +466,32 @@ begin
 	end loop;
 
 	return i_discipline_id;
+end;
+$$ language plpgsql;
+
+-- Добавление студентов к проекту
+
+create or replace function public.pr_projects_students_i(
+i_project_id integer,
+i_students jsonb
+) 
+returns integer as $$
+declare 
+	v_arr_cnt int;
+	v_students jsonb;
+begin 
+	select i_students->'students_ids' into v_students;
+	
+	v_arr_cnt = jsonb_array_length(v_students);
+
+	for i in 0..(v_arr_cnt-1) loop
+	
+		INSERT INTO students_projects
+		(student_id, project_id, "date")
+		VALUES((v_students->>i)::integer, i_project_id, current_timestamp);
+
+	end loop;
+
+	return i_project_id;
 end;
 $$ language plpgsql;

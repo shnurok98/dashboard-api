@@ -90,4 +90,21 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id/students', async (req, res) => {
+  try {
+    const access = await Access(req.user, req.method, '/projects', req.params.id);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
+
+    connection.one(`SELECT public.pr_projects_students_i(${+req.params.id}, $1)`, [req.body])
+    .then(rows => {
+      if (!rows) return res.json({ message: message.smthWentWrong });
+      res.send(rows);
+    })
+    .catch(e => res.json({ message: message.smthWentWrong, error: e }))
+    
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 module.exports = router;
