@@ -5,7 +5,6 @@ const connection = require('../db');
 
 const Access = require('../rights');
 const message = require('../messages');
-const strSet = require('../utils/db').strSet;
 
 router.get('/', (req, res) => {
 	connection.any(`
@@ -17,7 +16,7 @@ router.get('/', (req, res) => {
 	ORDER BY L.modified_date DESC
 	;`)
 	.then(rows => {
-		res.send(rows);
+		res.status(200).send(rows);
 	})
 	.catch(err => {
 		res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -29,7 +28,7 @@ router.get('/:id', (req, res) => {
 	SELECT public.pr_depload_s(${+req.params.id}) dep_load;
 	`)
 	.then(rows => {
-		res.send(rows);
+		res.status(200).send(rows);
 	})
 	.catch(err => {
 		res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -106,6 +105,39 @@ router.put('/discipline/:discipline_id', async (req, res) => {
 		console.error(e);
 		res.status(500).json({ message: message.smthWentWrong });
   }
+});
+
+router.post('/discipline/teacher', async (req, res) => {
+  try {
+    const access = await Access(req.user, req.method, '/dep_load');
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
+
+    connection.one('INSERT INTO disciplines_teachers (discipline_id, teacher_id) VALUES ($1, $2);', [+req.body.discipline_id, +req.body.teacher_id ])
+    .then(rows => {
+      res.status(201).json(rows);
+		})
+		.catch(e => {
+			res.status(500).json({message: message.smthWentWrong, error: e});
+		})
+  } catch(e) {
+    console.error(e);
+    res.status(500).json({ message: message.smthWentWrong, error: e });
+  }
+});
+
+router.get('/discipline/teacher/:teacher_id', (req, res) => {
+  connection.manyOrNone(`
+	SELECT D.*
+	FROM disciplines D, disciplines_teachers DT
+	WHERE DT.teacher_id = ${+req.params.teacher_id} AND DT.discipline_id = D.id
+	ORDER BY D.id DESC;
+  `)
+  .then(rows => {
+    res.status(200).json(rows);
+  })
+  .catch(err => {
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  })
 });
 
 module.exports = router;

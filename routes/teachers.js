@@ -25,7 +25,7 @@ router.get('/:id', (req, res) => {
 		if (teacher) {
 			res.status(200).json(teacher);
 		}else{
-			res.status(200).json({ message: message.notExist });
+			res.status(404).json({ message: message.notExist });
 		}
 	});
 });
@@ -38,9 +38,10 @@ router.get('/:id/files', (req, res) => {
   ORDER BY modified_date DESC;
   `)
   .then(rows => {
-    res.json(rows);
+    res.status(200).json(rows);
   })
   .catch(err => {
+	  console.error(err);
     res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
@@ -55,12 +56,12 @@ router.post('/', async (req, res) => {
 			if(err) return console.error(err);
 
 			if (user) {
-				res.status(200).json({ message: message.loginExist });
+				res.status(400).json({ message: message.loginExist });
 			}else{
 				user = new Teacher(data);
 				user.save((err) => {
 					if(err) {
-						res.status(200).json({ message: message.emailExist, error: err.detail });
+						res.status(400).json({ message: message.emailExist, error: err.detail });
 						return;
 					};
 					res.status(201).send({ message: message.createSuccess });
@@ -83,10 +84,10 @@ router.put('/:id', async (req, res) => {
 		
 		teacher.save((err) => {
 			if(err) {
-				res.json({ message: message.smthWentWrong, error: err.detail });
+				res.status(400).json({ message: message.badData, error: err.detail });
 				return ;
 			};
-			res.status(200).send({ message: message.updateSuccess });
+			res.status(204).send({ message: message.updateSuccess });
 		});
 	} catch (e) {
     console.error(e);
@@ -103,14 +104,14 @@ router.put('/:id/password', async (req, res) => {
 			if (teacher) {
 				teacher.updatePass(req.body.password, (err) => {
 					if(err) {
-						res.json({ message: message.smthWentWrong, error: err.detail });
+						res.status(400).json({ message: message.badData, error: err.detail });
 						return ;
 					};
-					res.status(200).json({ message: message.passwordSuccess });
+					res.status(204).json({ message: message.passwordSuccess });
 				})
 				
 			}else{
-				res.status(200).json({ message: message.notExist });
+				res.status(404).json({ message: message.notExist });
 			}
 		});
 	} catch (e) {

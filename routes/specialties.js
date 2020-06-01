@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
   ORDER BY id
   `)
   .then(row => {
-    res.json(row);
+    res.status(200).json(row);
   })
   .catch(err => {
     console.error(err);
@@ -31,8 +31,8 @@ router.get('/:id', (req, res) => {
   WHERE sp.sub_unit_id = su.id AND sp.id = $1
   `, [+req.params.id])
   .then(row => {
-    if (!row) return res.json({ message: message.notExist });
-    res.json(row);
+    if (!row) return res.status(404).json({ message: message.notExist });
+    res.status(200).json(row);
   })
   .catch(err => {
     console.error(err);
@@ -47,11 +47,11 @@ router.post('/', async (req, res) => {
 
     connection.oneOrNone('insert into specialties ( ${this:name} ) values (${this:csv}) returning id;', req.body )
     .then(rows => {
-      res.send(rows);
+      res.status(200).send(rows);
     })
     .catch(err => {
       console.error(err);
-      res.json({message: message.exist});
+      res.status(400).json({message: message.badData});
     });
   } catch (e) {
     console.error(e);
@@ -67,12 +67,12 @@ router.put('/:id', async (req, res) => {
 
     connection.oneOrNone(`UPDATE specialties SET ${str} where id = ${+req.params.id} returning *;`)
     .then(rows => {
-      if (!rows) return res.json({ message: message.notExist });
-      res.send(rows);
+      if (!rows) return res.status(404).json({ message: message.notExist });
+      res.status(204).send(rows);
     })
     .catch(err => {
       console.error(err);
-      res.json({ message: message.smthWentWrong, error: err });
+      res.status(500).json({ message: message.smthWentWrong, error: err });
     });
   } catch (e) {
     console.error(e);

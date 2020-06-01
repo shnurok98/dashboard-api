@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
   ORDER BY g.id DESC
   `)
   .then(rows => {
-    res.json(rows);
+    res.status(200).json(rows);
   })
   .catch(err => {
     console.error(err);
@@ -41,8 +41,8 @@ router.get('/:id', (req, res) => {
   where g.id = $1
   `, [+req.params.id])
   .then(row => {
-    if (!row) return res.json({ message: message.notExist });
-    res.json(row);
+    if (!row) return res.status(404).json({ message: message.notExist });
+    res.status(200).json(row);
   })
   .catch(err => {
     console.error(err);
@@ -57,11 +57,11 @@ router.post('/', async (req, res) => {
 
     connection.oneOrNone('insert into groups ( ${this:name} ) values (${this:csv}) returning id;', req.body )
     .then(rows => {
-      res.send(rows);
+      res.status(201).send(rows);
     })
     .catch(err => {
       console.error(err);
-      res.json({message: message.exist, error: err.detail});
+      res.status(400).json({message: message.exist, error: err.detail});
     });
   } catch (e) {
     console.error(e);
@@ -77,8 +77,8 @@ router.put('/:id', async (req, res) => {
 
     connection.oneOrNone(`UPDATE groups SET ${str} where id = ${+req.params.id} returning *;`)
     .then(rows => {
-      if (!rows) return res.json({ message: message.notExist });
-      res.send(rows);
+      if (!rows) return res.status(404).json({ message: message.notExist });
+      res.status(204).send(rows);
     })
     .catch(err => {
       console.error(err);

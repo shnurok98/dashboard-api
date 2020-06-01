@@ -100,7 +100,7 @@ class Student {
 				P.status,
 				G.id AS group_id,
 				G.specialties_id,
-				G.name   
+				G.name AS group_name  
 			FROM students AS S, personalities AS P, groups AS G 
 			WHERE S.group_id = $1 AND S.person_id = P.id AND S.group_id = G.id
 		`, [group_id])
@@ -125,15 +125,14 @@ class Student {
 				P.status,
 				G.id AS group_id,
 				G.specialties_id,
-				G.name,
+				G.name AS group_name,
 				SP.code,
-				SP.name,
+				SP.name AS specialty_name,
 				SP.profile,
 				SP.educ_form,
 				SP.educ_programm,
 				SP.educ_years,
 				SP.year_join,
-				SP.acad_plan_id,
 				SP.sub_unit_id   
 			FROM students AS S, personalities AS P, groups AS G, specialties AS SP 
 			WHERE G.specialties_id = $1 AND S.person_id = P.id AND S.group_id = G.id

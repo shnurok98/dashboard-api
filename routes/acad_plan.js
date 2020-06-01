@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
   ORDER BY SP.year_join DESC;
   `)
   .then(rows => {
-    res.json(rows);
+    res.status(200).json(rows);
   })
   .catch(err => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -36,8 +36,9 @@ router.get('/:id', (req, res) => {
   connection.oneOrNone(`
   SELECT public.pr_acadplan_s(${+req.params.id}) acad_plan;
   `)
-  .then(rows => {
-    res.json(rows);
+  .then(row => {
+    if (!row.acad_plan) return res.status(404).json({ message: message.notExist });
+    res.status(200).json(row);
   })
   .catch(err => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -52,7 +53,7 @@ router.get('/:id/files', (req, res) => {
   ORDER BY modified_date DESC;
   `)
   .then(rows => {
-    res.json(rows);
+    res.status(200).json(rows);
   })
   .catch(err => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -108,8 +109,8 @@ router.put('/discipline/:id', async (req, res) => {
     UPDATE acad_discipline SET ${str} where id = ${+req.params.id} returning *;
     `)
     .then(rows => {
-      if (!rows) return res.json({ message: message.notExist });
-      res.send(rows);
+      if (!rows) return res.status(404).json({ message: message.notExist });
+      res.status(204).send(rows);
     })
     
   } catch (e) {
@@ -124,7 +125,7 @@ router.post('/', async (req, res) => {
 
     connection.one('SELECT public.pr_acadplan_i($1::jsonb) id;', [req.body ])
     .then(rows => {
-      res.status(200).json(rows);
+      res.status(201).json(rows);
     })
   } catch(e) {
     res.status(500).json({ message: message.smthWentWrong, error: e });
@@ -181,7 +182,7 @@ router.put('/module/:id', async (req, res) => {
 		returning *;
     `, [req.body.name, req.body.code])
     .then(rows => {
-      res.send(rows);
+      res.status(204).send(rows);
     })
     .catch(e => {
       res.status(500).json({ message: message.smthWentWrong, error: e });
@@ -205,7 +206,7 @@ router.put('/block/:id', async (req, res) => {
 		returning *;
     `, [req.body.name, req.body.code])
     .then(rows => {
-      res.send(rows);
+      res.status(204).send(rows);
     })
     .catch(e => {
       res.status(500).json({ message: message.smthWentWrong, error: e });
@@ -229,7 +230,7 @@ router.put('/part/:id', async (req, res) => {
 		returning *;
     `, [req.body.name, req.body.code])
     .then(rows => {
-      res.send(rows);
+      res.status(204).send(rows);
     })
     .catch(e => {
       res.status(500).json({ message: message.smthWentWrong, error: e });

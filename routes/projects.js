@@ -53,6 +53,21 @@ router.get('/:id/files', (req, res) => {
   })
 });
 
+router.get('/teacher/:teacher_id', (req, res) => {
+  connection.manyOrNone(`
+  SELECT p.*
+  FROM projects p
+  WHERE p.teacher_id = ${+req.params.teacher_id}
+;`)
+	.then(rows => {
+		res.status(200).send(rows);
+	})
+	.catch(err => {
+    console.log(err);
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  });
+});
+
 router.post('/', async (req, res) => {
   try {
     const access = await Access(req.user, req.method, '/projects', req.params.id);

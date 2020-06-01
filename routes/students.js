@@ -12,7 +12,7 @@ router.get('/:id', (req, res) => {
 		if (student) {
 			res.status(200).json(student);
 		}else{
-			res.status(200).json({ message: message.notExist });
+			res.status(404).json({ message: message.notExist });
 		}
 	});
 });
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
 		const student = new Student(data);
 		student.save((err) => {
 			if(err) {
-				res.json({ message: message.emailExist });
+				res.status(400).json({ message: message.emailExist });
 				return ;
 			};
 			res.status(201).send({ message: message.createSuccess });
@@ -48,10 +48,10 @@ router.put('/:id', async (req, res) => {
 		
 		student.save((err) => {
 			if(err) {
-				res.json({ message: message.smthWentWrong, error: err.detail });
+				res.status(400).json({ message: message.badData, error: err.detail });
 				return ;
 			};
-			res.status(200).send({ message: message.updateSuccess });
+			res.status(204).send({ message: message.updateSuccess });
 		});
 	} catch (e) {
     console.error(e);
@@ -65,7 +65,7 @@ router.get('/group/:group_id', (req, res) => {
 		if (students.length) {
 			res.status(200).json(students);
 		}else{
-			res.status(200).json({ message: 'Такой группы нету, либо в ней нету студентов' });
+			res.status(404).json({ message: 'Такой группы нету, либо в ней нету студентов' });
 		}
 	});
 });
@@ -77,7 +77,7 @@ router.get('/specialty/:specialty_id', (req, res) => {
 		if (students.length) {
 			res.status(200).json(students);
 		}else{
-			res.status(200).json({ message: 'Такой спец нету, либо в ней нету студентов' });
+			res.status(404).json({ message: 'Такой специальности нету, либо в ней нету студентов' });
 		}
 	});
 });
