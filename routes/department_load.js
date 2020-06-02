@@ -74,11 +74,11 @@ router.post('/', async (req, res) => {
 
     connection.one('SELECT public.pr_depload_i($1::jsonb) id;', [req.body ])
     .then(rows => {
-      res.status(200).json(rows);
+      res.status(201).json(rows);
 		})
 		.catch(e => {
 			// if e.table ...
-			res.json({message: message.smthWentWrong, error: e});
+			res.status(400).json({message: message.badData, error: e});
 		})
   } catch(e) {
     console.error(e);
@@ -93,12 +93,12 @@ router.put('/discipline/:discipline_id', async (req, res) => {
 
     connection.oneOrNone(`SELECT public.pr_discipline_u($1, $2) id;`, [+req.params.discipline_id, req.body])
     .then(rows => {
-      if (!rows) return res.json({ message: message.notExist });
-      res.send(rows);
+      if (!rows) return res.status(404).json({ message: message.notExist });
+      res.status(204).send(rows);
 		})
 		.catch(e => {
 			console.error(e);
-			res.json({ message: message.smthWentWrong });
+			res.status(400).json({ message: message.badData });
 		});
     
   } catch (e) {

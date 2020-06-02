@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
   GROUP BY p.id
 ;`)
 	.then(rows => {
-		res.send(rows);
+		res.status(200).send(rows);
 	})
 	.catch(err => {
     console.log(err);
@@ -30,7 +30,8 @@ router.get('/:id', (req, res) => {
     select public.pr_projects_s($1) as project;
   `, [+req.params.id])
 	.then(rows => {
-		res.send(rows);
+    if (!rows) return res.status(404).json({ message: message.notExist });
+		res.status(200).send(rows);
 	})
 	.catch(err => {
     console.error(err);
@@ -46,7 +47,7 @@ router.get('/:id/files', (req, res) => {
   ORDER BY modified_date DESC;
   `)
   .then(rows => {
-    res.json(rows);
+    res.status(200).json(rows);
   })
   .catch(err => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -75,14 +76,15 @@ router.post('/', async (req, res) => {
 
     connection.oneOrNone('insert into projects ( ${this:name} ) values (${this:csv}) returning id;', req.body )
     .then(rows => {
-      res.send(rows);
+      res.status(201).send(rows);
     })
     .catch(err => {
       console.error(err);
-      res.json({message: message.exist});
+      res.status(400).json({message: message.badData});
     });
   } catch (e) {
     console.error(e);
+    res.status(500).json({ message: message.smthWentWrong, error: e });
   }
   
 });
@@ -96,8 +98,8 @@ router.put('/:id', async (req, res) => {
 
     connection.oneOrNone(`UPDATE projects SET ${str} where id = ${+req.params.id} returning *;`)
     .then(rows => {
-      if (!rows) return res.json({ message: message.notExist });
-      res.send(rows);
+      if (!rows) return res.status(404).json({ message: message.notExist });
+      res.status(204).send(rows);
     })
     
   } catch (e) {
@@ -112,10 +114,10 @@ router.put('/:id/students', async (req, res) => {
 
     connection.one(`SELECT public.pr_projects_students_i(${+req.params.id}, $1)`, [req.body])
     .then(rows => {
-      if (!rows) return res.json({ message: message.smthWentWrong });
-      res.send(rows);
+      if (!rows) return res.status(400).json({ message: message.badData });
+      res.status(204).send(rows);
     })
-    .catch(e => res.json({ message: message.smthWentWrong, error: e }))
+    .catch(e => res.status(500).json({ message: message.smthWentWrong, error: e }))
     
   } catch (e) {
     console.error(e);
