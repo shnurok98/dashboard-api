@@ -112,7 +112,7 @@ router.post('/discipline/teacher', async (req, res) => {
     const access = await Access(req.user, req.method, '/dep_load');
     if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
-    connection.one('INSERT INTO disciplines_teachers (discipline_id, teacher_id) VALUES ($1, $2);', [+req.body.discipline_id, +req.body.teacher_id ])
+    connection.one('INSERT INTO disciplines_teachers (discipline_id, teacher_id) VALUES ($1, $2) RETURNING id;', [+req.body.discipline_id, +req.body.teacher_id ])
     .then(rows => {
       res.status(201).json(rows);
 		})
@@ -131,6 +131,21 @@ router.get('/discipline/teacher/:teacher_id', (req, res) => {
 	FROM disciplines D, disciplines_teachers DT
 	WHERE DT.teacher_id = ${+req.params.teacher_id} AND DT.discipline_id = D.id
 	ORDER BY D.id DESC;
+  `)
+  .then(rows => {
+    res.status(200).json(rows);
+  })
+  .catch(err => {
+    res.status(500).json({ message: message.smthWentWrong, error: err });
+  })
+});
+
+router.get('/discipline/teacher/:teacher_id/files', (req, res) => {
+  connection.manyOrNone(`
+	SELECT R.*
+	FROM files_rpd R
+	WHERE R.teacher_id = ${+req.params.teacher_id}
+	ORDER BY R.id DESC;
   `)
   .then(rows => {
     res.status(200).json(rows);

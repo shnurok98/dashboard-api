@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   FROM department
 ;`)
 	.then(rows => {
-		res.send(rows);
+		res.status(200).send(rows);
 	})
 	.catch(err => {
 		res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -24,7 +24,8 @@ router.get('/:id', (req, res) => {
     select * from department where id = $1;
   `, [+req.params.id])
 	.then(rows => {
-		res.send(rows);
+		if (!rows) return res.status(404).json({ message: message.notExist });
+		res.status(200).send(rows);
 	})
 	.catch(err => {
 		res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -40,10 +41,10 @@ router.post('/', async (req, res) => {
 			insert into department (name) values ($1) returning id;
 		`, [req.body.name])
 		.then(rows => {
-			res.send(rows);
+			res.status(201).send(rows);
 		})
 		.catch(err => {
-			res.json({message: message.exist});
+			res.status(400).json({message: message.badData, error: err});
 		});
 	} catch (e) {
     console.error(e);
@@ -59,8 +60,8 @@ router.put('/:id', async (req, res) => {
 			update department set name = $1 where id = $2 returning *;
 		`, [req.body.name, +req.params.id])
 		.then(rows => {
-			if (!rows) return res.json({ message: message.notExist });
-			res.send(rows);
+			if (!rows) return res.status(404).json({ message: message.notExist });
+			res.status(204).send(rows);
 		})
 		.catch(err => {
 			res.status(500).json({ message: message.smthWentWrong, error: err });
@@ -79,10 +80,10 @@ router.delete('/:id', async (req, res) => {
 			delete from department where id = $1;
 		`, [+req.params.id])
 		.then( () => {
-			res.status(200).json({message: message.deleteSuccess});
+			res.status(204).json({message: message.deleteSuccess});
 		})
 		.catch(err => {
-			res.json({ message: message.smthWentWrong, error: err });
+			res.status(500).json({ message: message.smthWentWrong, error: err });
 		});
 	} catch (e) {
     console.error(e);

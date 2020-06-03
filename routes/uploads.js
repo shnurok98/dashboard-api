@@ -28,7 +28,7 @@ router.get('/ind_plan/:id', (req, res) => {
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
     } else {
-      res.json({ message: message.notExist });
+      res.status(404).json({ message: message.notExist });
     }
   })
 });
@@ -47,7 +47,7 @@ router.get('/rpd/:id', (req, res) => {
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
     } else {
-      res.json({ message: message.notExist });
+      res.status(404).json({ message: message.notExist });
     }
   })
 });
@@ -66,7 +66,7 @@ router.get('/acad_plan/:id', (req, res) => {
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
     } else {
-      res.json({ message: message.notExist });
+      res.status(404).json({ message: message.notExist });
     }
   })
 });
@@ -85,7 +85,7 @@ router.get('/dep_load/:id', (req, res) => {
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
     } else {
-      res.json({ message: message.notExist });
+      res.status(404).json({ message: message.notExist });
     }
   })
 });
@@ -104,7 +104,7 @@ router.get('/projects/:id', (req, res) => {
       let readStream = fs.createReadStream(file.path);
       readStream.pipe(res);
     } else {
-      res.json({ message: message.notExist });
+      res.status(404).json({ message: message.notExist });
     }
   })
 });
@@ -124,7 +124,7 @@ router.post('/ind_plan', async (req, res) => {
       }
 
       if (files.file == undefined) {
-        res.status(200).json({message: 'Не был передан файл'});
+        res.status(400).json({message: 'Не был передан файл'});
         return
       }
 
@@ -137,7 +137,7 @@ router.post('/ind_plan', async (req, res) => {
           res.status(500).json({message: message.loadFailed});
           return
         }
-        res.status(200).json(row)
+        res.status(201).json(row)
       });
 
     });
@@ -161,10 +161,10 @@ router.post('/projects', async (req, res) => {
       }
 
       if (files.file == undefined) {
-        res.status(200).json({message: 'Не был передан файл'});
+        res.status(400).json({message: 'Не был передан файл'});
         return
       } else if (fields.project_id == undefined){
-        res.status(200).json({message: 'Не был передан project_id'});
+        res.status(400).json({message: 'Не был передан project_id'});
         return
       }
       fields.teacher_id = req.user.id;
@@ -176,7 +176,7 @@ router.post('/projects', async (req, res) => {
           res.status(500).json({message: message.loadFailed});
           return
         }
-        res.status(200).json(row)
+        res.status(201).json(row)
       });
 
     });
@@ -200,10 +200,10 @@ router.post('/rpd', async (req, res) => {
       }
 
       if (files.file == undefined) {
-        res.status(200).json({message: 'Не был передан файл'});
+        res.status(400).json({message: 'Не был передан файл'});
         return
       } else if (fields.discipline_id == undefined){
-        res.status(200).json({message: 'Не был передан discipline_id'});
+        res.status(400).json({message: 'Не был передан discipline_id'});
         return
       }
       fields.teacher_id = req.user.id;
@@ -215,7 +215,7 @@ router.post('/rpd', async (req, res) => {
           res.status(500).json({message: message.loadFailed});
           return
         }
-        res.status(200).json(row)
+        res.status(201).json(row)
       });
 
     });
@@ -240,10 +240,10 @@ router.post('/acad_plan', async (req, res) => {
       }
 
       if (files.file == undefined) {
-        res.status(200).json({message: 'Не был передан файл'});
+        res.status(400).json({message: 'Не был передан файл'});
         return
       } else if (fields.acad_plan_id == undefined){
-        res.status(200).json({message: 'Не был передан acad_plan_id'});
+        res.status(400).json({message: 'Не был передан acad_plan_id'});
         return
       }
       fields.teacher_id = req.user.id;
@@ -255,7 +255,7 @@ router.post('/acad_plan', async (req, res) => {
           res.status(500).json({message: message.loadFailed});
           return
         }
-        res.status(200).json(row)
+        res.status(201).json(row)
       });
 
     });
@@ -279,10 +279,10 @@ router.post('/dep_load', async (req, res) => {
       }
 
       if (files.file == undefined) {
-        res.status(200).json({message: 'Не был передан файл'});
+        res.status(400).json({message: 'Не был передан файл'});
         return
       } else if (fields.dep_load_id == undefined){
-        res.status(200).json({message: 'Не был передан dep_load_id'});
+        res.status(400).json({message: 'Не был передан dep_load_id'});
         return
       }
       fields.teacher_id = req.user.id;
@@ -294,7 +294,7 @@ router.post('/dep_load', async (req, res) => {
           res.status(500).json({message: message.loadFailed});
           return
         }
-        res.status(200).json(row)
+        res.status(201).json(row)
       });
 
     });
