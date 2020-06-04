@@ -5,7 +5,7 @@
 const config = {};
 
 config.connectionString = {
-	host: 'localhost',
+	host: process.env.POSTGRES_HOST || 'localhost',
 	port: 5432,
 	database: 'db',
 	user: 'user',

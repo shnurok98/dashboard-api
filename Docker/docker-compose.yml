@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  db:
+    image: shnurok/dash-db
+    container_name: dash-db
+    ports:
+      - 5432
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data/pgdata  
+    environment:
+      # POSTGRES_PASSWORD: mospolytech
+      # POSTGRES_USER: diplom_user
+      # POSTGRES_DB: diplom_database
+      PGDATA: /var/lib/postgresql/data/pgdata
+    restart: always
+  api:
+    image: shnurok/dash-api
+    container_name: dash-api
+    ports:
+      - 3000
+    environment:
+      POSTGRES_HOST: db
+    volumes:
+      - ./uploads:/uploads
+    restart: always
+    links:
+      - db
+  nginx:
+    image: nginx:latest
+    container_name: dash-nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - ./client:/servers/dashboard/public
+    links:
+     - api
+    ports:
+      - 80:80
