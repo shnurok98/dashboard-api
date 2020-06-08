@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 12; // длина соли
 
+const { strFilter } = require('../utils/db');
 
 const fields = `
 	T.id,
@@ -218,12 +219,25 @@ class Teacher {
 		.catch(err =>	cb(err));
 	}
 
-	static getAll(cb){
-		connection.many(`
+	static getAll(query, cb){
+		const limit = (query.limit <= 100 ? query.limit : false) || 25;
+		const offset = query.offset || 0;
+		let filter = query.filter || '';
+		if (filter !== '') filter = strFilter('T', filter);
+
+		connection.manyOrNone(`
 			SELECT 
-				${fields}
-			FROM teachers AS T, personalities AS P
-			WHERE T.person_id = P.id ORDER BY P.surname;
+				${fields},
+				SU.id AS sub_unit_id,
+				SU.name AS sub_unit_name,
+				DE.id AS department_id,
+				DE.name AS department_name
+			FROM teachers AS T, personalities AS P, rights_roles RR, sub_unit SU, department DE
+			WHERE T.person_id = P.id AND RR.teacher_id = T.id AND RR.sub_unit_id = SU.id AND SU.department_id = DE.id
+			${filter}
+			ORDER BY T.id 
+			LIMIT ${limit}
+			OFFSET ${offset};
 			`)
 		.then((rows) => {
 			cb(null, rows);

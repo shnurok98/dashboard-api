@@ -9,7 +9,7 @@ const message = require('../messages');
 const connection = require('../db');
 
 router.get('/', (req, res) => {
-	Teacher.getAll((err, teachers) => {
+	Teacher.getAll(req.query, (err, teachers) => {
 		if (err) console.error(err);
 		if (teachers) {
 			res.status(200).json(teachers);

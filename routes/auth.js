@@ -12,7 +12,7 @@ exports.logIn = (req, res, next) => {
 		if (user) {
 			const payload = { id: user.id };
 			const token = jwt.sign(payload, SECRET);
-			res.status(200).send({ message: messages.logInSuccess, token: token });
+			res.status(200).send({ token: token });
 		}else{
 			res.status(403).json({ message: messages.invalidCredentials });
 		}

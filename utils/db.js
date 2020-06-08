@@ -23,6 +23,31 @@ exports.strSet = (obj) => {
 }
 
 /**
+ * Применяет фильтр с помощью дополнения для WHERE
+ * @param {String} self алиас для основной таблицы
+ * @param {Object} filter строка req.query
+ * @returns {String} готовая строка
+ */
+exports.strFilter = (self, filter) => {
+  let arr = filter.split(' ');
+
+  let mark = arr[0].lastIndexOf('_');
+    let con = arr[0].substring(mark + 1);
+    if (mark !== -1 && ( con === 'id' || con === 'name' ) ){
+      // значит это внешняя таблица
+      arr[0] = alias[arr[0].substring(0, mark)] + '.' + con // если таблица
+    } else {
+      // значит это поле данной сущности
+      arr[0] = self + '.' + arr[0]; // если поле
+    }
+
+  arr[1] = operators[arr[1]];
+  filter = ' AND ' + arr.join(' ') + ' ';
+
+  return filter;
+}
+
+/**
  * Маппинг точек входа на таблицы БД
  */
 exports.mapping = {
@@ -39,4 +64,21 @@ exports.mapping = {
   '/uploads/rpd': 'files_rpd',
   '/uploads/acad_plan': 'files_acad_plan',
   '/uploads/dep_load': 'files_dep_load',
+};
+
+const alias = {
+  'teacher': 'T',
+  'person': 'P',
+  'rights_roles': 'RR',
+  'sub_unit': 'SU',
+  'department': 'DE'
+}
+
+const operators = {
+  'eq': '=',
+  'ne': '<>',
+  'gt': '>',
+  'ge': '>=',
+  'lt': '<',
+  'le': '<='
 };

@@ -30,7 +30,7 @@ app.use(bodyParser.urlencoded({limit: '10mb', extended: true})); // парсин
 
 app.use('/api/debug', debug);
 
-app.post('/api/users/login', auth.logIn);
+app.post('/api/auth', auth.logIn);
 
 app.get('/api/', (req, res) => {
 	res.send('<h1>Api is live</h1>')
