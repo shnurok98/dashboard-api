@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const Teacher = require('../models/teacher');
+const Upload = require('../models/upload');
 
 const Access = require('../rights');
 const message = require('../messages');
@@ -30,20 +31,19 @@ router.get('/:id', (req, res) => {
 	});
 });
 
-router.get('/:id/files', (req, res) => {
-  connection.manyOrNone(`
-  SELECT id, name, ext, modified_date, teacher_id, sub_unit_id 
-  FROM files_ind_plan 
-  WHERE teacher_id = ${+req.params.id}
-  ORDER BY modified_date DESC;
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-	  console.error(err);
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
+// /:id/files_ind_plan ИЛИ /:id/files_rpd
+router.get('/:id' + /files_(ind_plan|rpd)/, (req, res) => {
+	// получаем таблицу из url по регулярке
+	const table = req.url.match(/files_(ind_plan|rpd)/)[0];
+	
+	Upload.getList(table, +req.params.id, req.query, (err, rows) => {
+		if (err) console.error(err);
+		if (rows) {
+			res.status(200).json(rows);
+		} else {
+			res.status(500).json({ message: message.smthWentWrong });
+		}
+	});
 });
 
 router.post('/', async (req, res) => {

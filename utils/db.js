@@ -31,7 +31,9 @@ exports.strSet = (obj) => {
 exports.strFilter = (self, filter) => {
   let arr = filter.split(' ');
 
-  let mark = arr[0].lastIndexOf('_');
+  // если алиас !== null то нужна подстановка алиаса 
+  if (self !== null){
+    let mark = arr[0].lastIndexOf('_');
     let con = arr[0].substring(mark + 1);
     if (mark !== -1 && ( con === 'id' || con === 'name' ) ){
       // значит это внешняя таблица
@@ -39,12 +41,38 @@ exports.strFilter = (self, filter) => {
     } else {
       // значит это поле данной сущности
       arr[0] = self + '.' + arr[0]; // если поле
+      
     }
+  }
 
+  // подмена оператора на SQL
   arr[1] = operators[arr[1]];
   filter = ' AND ' + arr.join(' ') + ' ';
 
+  // console.log(filter);
   return filter;
+}
+
+exports.strOrderBy = (self, orderBy) => {
+  let arr = orderBy.split(' ');
+
+  // если алиас !== null то нужна подстановка алиаса 
+  if (self !== null){
+    let mark = arr[0].lastIndexOf('_');
+    let con = arr[0].substring(mark + 1);
+    if (mark !== -1 && ( con === 'id' || con === 'name' ) ){
+      // значит это внешняя таблица
+      arr[0] = alias[arr[0].substring(0, mark)] + '.' + con // если таблица
+    } else {
+      // значит это поле данной сущности
+      arr[0] = self + '.' + arr[0]; // если поле
+      
+    }
+  }
+
+  orderBy = arr.join(' ')
+  // console.log(orderBy)
+  return orderBy;
 }
 
 /**

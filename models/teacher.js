@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 12; // длина соли
 
-const { strFilter } = require('../utils/db');
+const { strFilter, strOrderBy } = require('../utils/db');
 
 const fields = `
 	T.id,
@@ -222,6 +222,10 @@ class Teacher {
 	static getAll(query, cb){
 		const limit = (query.limit <= 100 ? query.limit : false) || 25;
 		const offset = query.offset || 0;
+
+		let orderBy = query.orderBy || 'T.id';
+		if (orderBy !== 'T.id') orderBy = strOrderBy('T', orderBy);
+
 		let filter = query.filter || '';
 		if (filter !== '') filter = strFilter('T', filter);
 
@@ -235,7 +239,7 @@ class Teacher {
 			FROM teachers AS T, personalities AS P, rights_roles RR, sub_unit SU, department DE
 			WHERE T.person_id = P.id AND RR.teacher_id = T.id AND RR.sub_unit_id = SU.id AND SU.department_id = DE.id
 			${filter}
-			ORDER BY T.id 
+			ORDER BY ${orderBy} 
 			LIMIT ${limit}
 			OFFSET ${offset};
 			`)
