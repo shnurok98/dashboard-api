@@ -22,12 +22,8 @@ exports.strSet = (obj) => {
   return str;
 }
 
-/**
- * Применяет фильтр с помощью дополнения для WHERE
- * @param {String} self алиас для основной таблицы
- * @param {Object} filter строка req.query
- * @returns {String} готовая строка
- */
+
+/*
 exports.strFilter = (self, filter) => {
   let arr = filter.split(' ');
 
@@ -73,6 +69,38 @@ exports.strOrderBy = (self, orderBy) => {
   orderBy = arr.join(' ')
   // console.log(orderBy)
   return orderBy;
+}*/
+
+exports.strFilter = (fields, filter) => {
+  let arr = filter.split(' ');
+
+  // меняем на поле с алиасом
+  if (fields[arr[0]]) {
+    arr[0] = fields[arr[0]];
+  } else {
+    return null; // такого фильтра нет
+  }
+  // подмена оператора на SQL
+  arr[1] = operators[arr[1]];
+  filter = ' AND ' + arr.join(' ') + ' ';
+
+  
+  return filter;
+}
+
+exports.strOrderBy = (fields, orderBy) => {
+  let arr = orderBy.split(' ');
+
+  // меняем на поле с алиасом
+  if (fields[arr[0]]) {
+    arr[0] = fields[arr[0]];
+  } else {
+    return null; // такой сортировки нет
+  }
+
+  orderBy = arr.join(' ')
+  
+  return orderBy;
 }
 
 /**
@@ -99,7 +127,11 @@ const alias = {
   'person': 'P',
   'rights_roles': 'RR',
   'sub_unit': 'SU',
-  'department': 'DE'
+  'department': 'DE',
+  'disciplines': 'D',
+  'disciplines_teachers': 'DT',
+  'rank': 'RA',
+  'degree': 'DG'
 }
 
 const operators = {

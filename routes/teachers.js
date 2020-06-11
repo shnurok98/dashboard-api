@@ -11,7 +11,10 @@ const connection = require('../db');
 
 router.get('/', (req, res) => {
 	Teacher.getAll(req.query, (err, teachers) => {
-		if (err) console.error(err);
+		if (err) {
+			res.status(400).json(err);
+			return
+		};
 		if (teachers) {
 			res.status(200).json(teachers);
 		}else{
@@ -41,6 +44,17 @@ router.get('/:id' + /files_(ind_plan|rpd)/, (req, res) => {
 		if (rows) {
 			res.status(200).json(rows);
 		} else {
+			res.status(500).json({ message: message.smthWentWrong });
+		}
+	});
+});
+
+router.get('/:id/disciplines', (req, res) => {
+	Teacher.getDisciplines(+req.params.id, req.query, (err, disciplines) => {
+		if (err) return res.status(400).json(err);
+		if (disciplines) {
+			res.status(200).json(disciplines);
+		}else{
 			res.status(500).json({ message: message.smthWentWrong });
 		}
 	});

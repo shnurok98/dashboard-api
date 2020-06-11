@@ -13,7 +13,9 @@ const message = {
   invalidCredentials: 'Неверные учетные данные!',
   logInSuccess: 'Успешный вход!',
   loadFailed: 'Загрузка файла не удалась!',
-  badData: 'Неверные или невалидные данные!'
+  badData: 'Неверные или невалидные данные!',
+  badFilter: 'Неправильно задан фильтр',
+  badOrder: 'Неправильно задана сортировка'
 }
 
 module.exports = message;

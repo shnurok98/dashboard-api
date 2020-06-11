@@ -5,6 +5,8 @@ const saltRounds = 12; // длина соли
 
 const { strFilter, strOrderBy } = require('../utils/db');
 
+const message = require('../messages');
+
 const fields = `
 	T.id,
 	T.position,
@@ -223,12 +225,30 @@ class Teacher {
 		const limit = (query.limit <= 100 ? query.limit : false) || 25;
 		const offset = query.offset || 0;
 
+		const fieldsList = {
+			'id': 'T.id',
+			'position': 'T.position',
+			'rank_name': 'RA.name',
+			'degree_name': 'DG.name',
+			'rate': 'T.rate',
+			'hours_worked': 'T.hours_worked',
+			'rinc': 'T.rinc',
+			'web_of_science': 'T.web_of_science',
+			'scopus': 'T.scopus',
+			'surname': 'P.surname',
+			'sub_unit_name': 'SU.name',
+			'department_name': 'DE.name'
+		}
+
 		let orderBy = query.orderBy || 'T.id';
-		if (orderBy !== 'T.id') orderBy = strOrderBy('T', orderBy);
+		if (orderBy !== 'T.id') orderBy = strOrderBy(fieldsList, orderBy);
+		if (orderBy === null) return cb({message: message.badOrder})
 
 		let filter = query.filter || '';
-		if (filter !== '') filter = strFilter('T', filter);
+		if (filter !== '') filter = strFilter(fieldsList, filter);
+		if (filter === null) return cb({message: message.badFilter})
 
+		// последние 2 строки в селект и вере
 		connection.manyOrNone(`
 			SELECT 
 				${fields},
@@ -236,8 +256,21 @@ class Teacher {
 				SU.name AS sub_unit_name,
 				DE.id AS department_id,
 				DE.name AS department_name
-			FROM teachers AS T, personalities AS P, rights_roles RR, sub_unit SU, department DE
-			WHERE T.person_id = P.id AND RR.teacher_id = T.id AND RR.sub_unit_id = SU.id AND SU.department_id = DE.id
+			FROM 
+				teachers AS T, 
+				personalities AS P, 
+				rights_roles RR, 
+				sub_unit SU, 
+				department DE,
+				ranks RA,
+				degree DG
+			WHERE 
+				T.person_id = P.id AND 
+				RR.teacher_id = T.id AND 
+				RR.sub_unit_id = SU.id AND 
+				SU.department_id = DE.id AND
+				T.rank_id = RA.id AND
+				T.degree_id = DG.id 
 			${filter}
 			ORDER BY ${orderBy} 
 			LIMIT ${limit}
@@ -274,6 +307,48 @@ class Teacher {
 
 	}
 
+	static getDisciplines(id, query, cb){
+		const limit = (query.limit <= 100 ? query.limit : false) || 25;
+		const offset = query.offset || 0;
+
+		const fieldsList = {
+			'id': 'D.id',
+			'name': 'D.name',
+			'rank_name': 'T.rank_name',
+			'degree_name': 'T.degree_name',
+			'rate': 'T.rate',
+			'hours_worked': 'T.hours_worked',
+			'rinc': 'T.rinc',
+			'web_of_science': 'T.web_of_science',
+			'scopus': 'T.scopus',
+			'surname': 'P.surname',
+			'sub_unit_name': 'SU.name',
+			'department_name': 'DE.name'
+		}
+
+		let orderBy = query.orderBy || 'D.id';
+		if (orderBy !== 'D.id') orderBy = strOrderBy(fieldsList, orderBy);
+		if (orderBy === null) return cb({message: message.badOrder})
+
+		let filter = query.filter || '';
+		if (filter !== '') filter = strFilter(fieldsList, filter);
+		if (filter === null) return cb({message: message.badFilter})
+
+		connection.manyOrNone(`
+			SELECT D.*
+			FROM disciplines D, disciplines_teachers DT
+			WHERE DT.teacher_id = ${id} AND DT.discipline_id = D.id
+			${filter}
+			ORDER BY ${orderBy} 
+			LIMIT ${limit}
+			OFFSET ${offset};
+			`)
+		.then((rows) => {
+			cb(null, rows);
+		})
+		.catch(err => cb(err));
+	
+	}
 }
 
 module.exports = Teacher;
