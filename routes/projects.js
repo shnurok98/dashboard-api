@@ -53,7 +53,7 @@ router.get('/:id/files', (req, res) => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
-
+/*
 router.get('/teacher/:teacher_id', (req, res) => {
   connection.manyOrNone(`
   SELECT p.*
@@ -68,7 +68,7 @@ router.get('/teacher/:teacher_id', (req, res) => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
   });
 });
-
+*/
 router.post('/', async (req, res) => {
   try {
     const access = await Access(req.user, req.method, '/projects', req.params.id);

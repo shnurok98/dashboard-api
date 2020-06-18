@@ -7,14 +7,9 @@ const Upload = require('../models/upload');
 const Access = require('../rights');
 const message = require('../messages');
 
-const connection = require('../db');
-
 router.get('/', (req, res) => {
 	Teacher.getAll(req.query, (err, teachers) => {
-		if (err) {
-			res.status(400).json(err);
-			return
-		};
+		if (err) return res.status(400).json(err);
 		if (teachers) {
 			res.status(200).json(teachers);
 		}else{
@@ -29,7 +24,7 @@ router.get('/:id', (req, res) => {
 		if (teacher) {
 			res.status(200).json(teacher);
 		}else{
-			res.status(404).json({ message: message.notExist });
+			res.sendStatus(404)
 		}
 	});
 });
@@ -40,7 +35,7 @@ router.get('/:id' + /files_(ind_plan|rpd)/, (req, res) => {
 	const table = req.url.match(/files_(ind_plan|rpd)/)[0];
 	
 	Upload.getList(table, +req.params.id, req.query, (err, rows) => {
-		if (err) console.error(err);
+		if (err) return res.status(400).json(err);
 		if (rows) {
 			res.status(200).json(rows);
 		} else {
@@ -60,30 +55,34 @@ router.get('/:id/disciplines', (req, res) => {
 	});
 });
 
+router.get('/:id/projects', (req, res) => {
+	Teacher.getProjects(+req.params.id, req.query, (err, projects) => {
+		if (err) return res.status(400).json(err);
+		if (projects) {
+			res.status(200).json(projects);
+		}else{
+			res.status(500).json({ message: message.smthWentWrong });
+		}
+	});
+});
+
 router.post('/', async (req, res) => {
 	try {
 		const access = await Access(req.user, req.method, '/teachers');
 		if ( !access ) return res.status(403).json({ message: message.accessDenied });
 		
 		const data = req.body;
-		Teacher.getByLogin(data.login, (err, user) => {
-			if(err) return console.error(err);
-
-			if (user) {
-				res.status(400).json({ message: message.loginExist });
-			}else{
-				user = new Teacher(data);
-				user.save((err) => {
-					if(err) {
-						res.status(400).json({ message: message.emailExist, error: err.detail });
-						return;
-					};
-					res.status(201).send({ message: message.createSuccess });
-				});
-			}
+	  teacher = new Teacher(data);
+		teacher.save((err, id) => {
+			if ( err ) return res.status(400).json(err);
+			if ( id ) {
+				res.location(`/api/teachers/${id}`);
+				res.sendStatus(201)
+			} 
 		});
 	} catch (e) {
-    console.error(e);
+		console.error(e);
+		res.sendStatus(500);
   }
 });
 
@@ -96,15 +95,20 @@ router.put('/:id', async (req, res) => {
 		
 		teacher.id = +req.params.id;
 		
-		teacher.save((err) => {
-			if(err) {
-				res.status(400).json({ message: message.badData, error: err.detail });
-				return ;
-			};
-			res.status(204).send({ message: message.updateSuccess });
+		teacher.save((err, id) => {
+			if ( err ) {
+				return res.status(400).json(err);
+			}
+			if ( id ) {
+				res.sendStatus(204)
+			} else {
+				res.sendStatus(404)
+			}
+			
 		});
 	} catch (e) {
-    console.error(e);
+		console.error(e);
+		res.sendStatus(500);
   }
 });
 
@@ -114,22 +118,23 @@ router.put('/:id/password', async (req, res) => {
 		if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
 		Teacher.get(+req.params.id, (err, teacher) => {
-			if (err) console.error(err);
-			if (teacher) {
-				teacher.updatePass(req.body.password, (err) => {
-					if(err) {
-						res.status(400).json({ message: message.badData, error: err.detail });
-						return ;
-					};
-					res.status(204).json({ message: message.passwordSuccess });
+			if ( err ) return res.status(400).json(err);
+			if ( teacher ) {
+				teacher.updatePass(req.body.password, (err, id) => {
+					if ( err ) return res.status(400).json(err);
+					if ( id ) {
+						res.sendStatus(204);
+					} else {
+						res.sendStatus(404);
+					}
 				})
-				
-			}else{
-				res.status(404).json({ message: message.notExist });
+			} else {
+				res.sendStatus(404);
 			}
 		});
 	} catch (e) {
-    console.error(e);
+		console.error(e);
+		res.sendStatus(500);
   }
 });
 

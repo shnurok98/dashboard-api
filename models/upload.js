@@ -2,6 +2,7 @@ const connection = require('../db');
 const path = require('path');
 
 const { strFilter, strOrderBy } = require('../utils/db');
+const message = require('../messages');
 
 class Upload {
 
@@ -70,21 +71,40 @@ class Upload {
       }
     };
 
+    const fieldsList = {
+      'id': 'id',
+      'name': 'name',
+      'ext': 'ext',
+      'modified_date': 'modified_date',
+      'teacher_id': 'teacher_id',
+      'sub_unit_id': 'sub_unit_id',
+      'discipline_id': 'discipline_id',
+      'acad_plan_id': 'acad_plan_id',
+      'dep_load_id': 'dep_load_id',
+      'project_id': 'project_id'
+    }
+
     const limit = (query.limit <= 100 ? query.limit : false) || 25;
     const offset = query.offset || 0;
     
-    let orderBy = query.orderBy || 'modified_date DESC';
-		if (orderBy !== 'modified_date DESC') orderBy = strOrderBy(null, orderBy);
+    let orderBy = query.orderBy || ' ORDER BY modified_date DESC ';
+		if (orderBy !== ' ORDER BY modified_date DESC ') orderBy = strOrderBy(fieldsList, orderBy);
+    if (orderBy === null) return cb({message: message.badOrder})
 
 		let filter = query.filter || '';
-		if (filter !== '') filter = strFilter(null, filter);
+		if (filter !== '') {
+      filter = strFilter(fieldsList, filter);
+      if (filter === null) return cb({message: message.badFilter})
+      filter += ` AND ${fields[table].link} = ${link_id} `;
+    } else {
+      filter = ` WHERE ${fields[table].link} = ${link_id} `;
+    }
 
     connection.manyOrNone(`
     SELECT ${fields[table].select} 
     FROM ${table} 
-    WHERE ${fields[table].link} = ${link_id}
     ${filter}
-    ORDER BY ${orderBy}
+    ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset};
     `)

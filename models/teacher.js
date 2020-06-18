@@ -8,23 +8,29 @@ const { strFilter, strOrderBy } = require('../utils/db');
 const message = require('../messages');
 
 const fields = `
-	T.id,
-	T.position,
-	T.rank_id,
-	T.degree_id,
-	T.rate,
-	T.hours_worked,
-	T.rinc,
-	T.web_of_science,
-	T.scopus, 
-	P.id AS person_id, 
-	P.name, 
-	P.surname, 
-	P.patronymic,
-	P.birthday,
-	P.phone,
-	P.email,
-	P.status
+	t.id,
+	t.position,
+	t.rank_id,
+	ra."name" as rank_name,
+	t.degree_id,
+	dg."name" as degree_name, 
+	t.rate,
+	t.hours_worked,
+	t.rinc,
+	t.web_of_science,
+	t.scopus, 
+	p.id AS person_id, 
+	p."name", 
+	p.surname, 
+	p.patronymic,
+	p.birthday,
+	p.phone,
+	p.email,
+	rr."role",
+	su.id as sub_unit_id,
+	su."name" as sub_unit_name,
+	de.id as department_id,
+	de."name" as department_name
 `;
 
 /**
@@ -100,9 +106,13 @@ class Teacher {
 				.then(data => {
 					if (data === undefined) return cb(console.log(new Error('Не удалось создать преподавателя')));
 					this.id = data.teacher.id; // присваиваем экземпляру id возвращенный из бд
-					cb();
+					cb(null, this.id);
 				})
-				.catch(err => cb(err))
+				.catch(err => {
+					if ( err.constraint === "teachers_login_key" ) return cb({message: message.loginExist});
+					if ( err.constraint === "personalities_email_key" ) return cb({message: message.emailExist});
+					cb(err)
+				})
 			});
 		}
 	}
@@ -125,13 +135,16 @@ class Teacher {
 			$<obj.hours_worked>,
 			$<obj.rinc>::real,
 			$<obj.web_of_science>::real,
-			$<obj.scopus>::real) AS updated_teacher_id;
+			$<obj.scopus>::real) AS id;
 		`, { obj })
 		.then( data  => {
-			if ( data === undefined ) return cb(console.log(new Error('Не удалось обновить данные пользователя')));
-			cb();
+			if ( data.id === null ) return cb();
+			cb(null, data.id);
 		})
-		.catch(err => cb(err));
+		.catch(err => {
+			if ( err.constraint === "personalities_email_key" ) return cb({message: message.emailExist});
+			cb(err)
+		});
 	}
 
 	/**
@@ -205,20 +218,31 @@ class Teacher {
 	static get(id, cb){
 		connection.oneOrNone(`
 			SELECT 
-				${fields},
-				rr.role,
-				sub_unit_id
-			FROM teachers AS T, personalities AS P, rights_roles rr 
-			where T.person_id = P.id and T.id = $1 and rr.teacher_id = $1
-			order by rr."role" desc
-			limit 1;
-		`, [id])
+				${fields}
+			FROM 
+				teachers t
+			left join 
+				personalities p on t.person_id = p.id
+			left join 
+				rights_roles rr on t.id = rr.teacher_id
+			left join 
+				sub_unit su on rr.sub_unit_id = su.id
+			left join 
+				department de on su.department_id = de.id 
+			left join 
+				"ranks" ra on t.rank_id = ra.id 
+			left join 
+				"degree" dg on t.degree_id = dg.id
+			where 
+				t.id = $1;`, [id])
 		.then((user) => {
 			if (user === undefined || user === null) return cb();
 			// user.role = String(user.role);
 			cb(null, new Teacher(user));
 		})
-		.catch(err =>	cb(err));
+		.catch(err =>	{
+			cb(err)
+		});
 	}
 
 	static getAll(query, cb){
@@ -226,53 +250,47 @@ class Teacher {
 		const offset = query.offset || 0;
 
 		const fieldsList = {
-			'id': 'T.id',
-			'position': 'T.position',
-			'rank_name': 'RA.name',
-			'degree_name': 'DG.name',
-			'rate': 'T.rate',
-			'hours_worked': 'T.hours_worked',
-			'rinc': 'T.rinc',
-			'web_of_science': 'T.web_of_science',
-			'scopus': 'T.scopus',
-			'surname': 'P.surname',
-			'sub_unit_name': 'SU.name',
-			'department_name': 'DE.name'
+			'id': 't.id',
+			'position': 't.position',
+			'rank_name': 'ra.name',
+			'degree_name': 'dg.name',
+			'rate': 't.rate',
+			'hours_worked': 't.hours_worked',
+			'rinc': 't.rinc',
+			'web_of_science': 't.web_of_science',
+			'scopus': 't.scopus',
+			'surname': 'p.surname',
+			'sub_unit_name': 'su.name',
+			'department_name': 'de.name'
 		}
 
-		let orderBy = query.orderBy || 'T.id';
-		if (orderBy !== 'T.id') orderBy = strOrderBy(fieldsList, orderBy);
+		let orderBy = query.orderBy || ' ORDER BY t.id ';
+		if (orderBy !== ' ORDER BY t.id ') orderBy = strOrderBy(fieldsList, orderBy);
 		if (orderBy === null) return cb({message: message.badOrder})
 
 		let filter = query.filter || '';
 		if (filter !== '') filter = strFilter(fieldsList, filter);
 		if (filter === null) return cb({message: message.badFilter})
 
-		// последние 2 строки в селект и вере
 		connection.manyOrNone(`
 			SELECT 
-				${fields},
-				SU.id AS sub_unit_id,
-				SU.name AS sub_unit_name,
-				DE.id AS department_id,
-				DE.name AS department_name
+				${fields}
 			FROM 
-				teachers AS T, 
-				personalities AS P, 
-				rights_roles RR, 
-				sub_unit SU, 
-				department DE,
-				ranks RA,
-				degree DG
-			WHERE 
-				T.person_id = P.id AND 
-				RR.teacher_id = T.id AND 
-				RR.sub_unit_id = SU.id AND 
-				SU.department_id = DE.id AND
-				T.rank_id = RA.id AND
-				T.degree_id = DG.id 
+				teachers t
+			left join 
+				personalities p on t.person_id = p.id
+			left join 
+				rights_roles rr on t.id = rr.teacher_id
+			left join 
+				sub_unit su on rr.sub_unit_id = su.id
+			left join 
+				department de on su.department_id = de.id 
+			left join 
+				"ranks" ra on t.rank_id = ra.id 
+			left join 
+				"degree" dg on t.degree_id = dg.id
 			${filter}
-			ORDER BY ${orderBy} 
+			${orderBy} 
 			LIMIT ${limit}
 			OFFSET ${offset};
 			`)
@@ -298,9 +316,8 @@ class Teacher {
 			where id = $3
 			returning id;`, [this.password, this.salt, this.id])
 			.then(data => {
-				if (data === undefined) return cb(console.log(new Error('Не удалось обновить пароль')));
-				console.log(data);
-				cb();
+				if (data === undefined) return cb();
+				cb(null, data.id);
 			})
 			.catch(err => cb(err))
 		})
@@ -312,22 +329,27 @@ class Teacher {
 		const offset = query.offset || 0;
 
 		const fieldsList = {
-			'id': 'D.id',
-			'name': 'D.name',
-			'rank_name': 'T.rank_name',
-			'degree_name': 'T.degree_name',
-			'rate': 'T.rate',
-			'hours_worked': 'T.hours_worked',
-			'rinc': 'T.rinc',
-			'web_of_science': 'T.web_of_science',
-			'scopus': 'T.scopus',
-			'surname': 'P.surname',
-			'sub_unit_name': 'SU.name',
-			'department_name': 'DE.name'
+			'id': 'd.id',
+			'name': 'd.name',
+			"hours_con_project": 'd.hours_con_project',
+			"hours_lec": 'd.hours_lec',
+			"hours_sem": 'd.hours_sem',
+			"hours_lab": 'd.hours_lab',
+			"hours_con_exam": 'd.hours_con_exam',
+			"hours_zachet": 'd.hours_zachet',
+			"hours_exam": 'd.hours_exam',
+			"hours_kurs_project": 'd.hours_kurs_project',
+			"hours_gek": 'd.hours_gek',
+			"hours_ruk_prakt": 'd.hours_ruk_prakt',
+			"hours_ruk_vkr": 'd.hours_ruk_vkr',
+			"hours_ruk_mag": 'd.hours_ruk_mag',
+			"hours_ruk_aspirant": 'd.hours_ruk_aspirant',
+			"semester_num": 'd.semester_num',
+			"is_approved": 'd.is_approved'
 		}
 
-		let orderBy = query.orderBy || 'D.id';
-		if (orderBy !== 'D.id') orderBy = strOrderBy(fieldsList, orderBy);
+		let orderBy = query.orderBy || ' ORDER BY d.id ';
+		if (orderBy !== ' ORDER BY d.id ') orderBy = strOrderBy(fieldsList, orderBy);
 		if (orderBy === null) return cb({message: message.badOrder})
 
 		let filter = query.filter || '';
@@ -335,11 +357,59 @@ class Teacher {
 		if (filter === null) return cb({message: message.badFilter})
 
 		connection.manyOrNone(`
-			SELECT D.*
-			FROM disciplines D, disciplines_teachers DT
-			WHERE DT.teacher_id = ${id} AND DT.discipline_id = D.id
+			SELECT 
+				d.*
+			FROM 
+				disciplines d
+			INNER JOIN
+				disciplines_teachers dt ON dt.discipline_id = d.id AND dt.teacher_id = ${id}
 			${filter}
-			ORDER BY ${orderBy} 
+			${orderBy} 
+			LIMIT ${limit}
+			OFFSET ${offset};
+			`)
+		.then((rows) => {
+			cb(null, rows);
+		})
+		.catch(err => cb(err));
+	
+	}
+
+	static getProjects(id, query, cb){
+		const limit = (query.limit <= 100 ? query.limit : false) || 25;
+		const offset = query.offset || 0;
+
+		const fieldsList = {
+			'id': 'pj.id',
+			'name': 'pj.name',
+			'begin_date': 'pj.begin_date',
+			'end_date': 'pj.end_date',
+			'link_trello': 'pj.link_trello',
+			'sub_unit_id': 'pj.sub_unit_id',
+			'teacher_id': 'pj.teacher_id'
+		}
+
+		let orderBy = query.orderBy || ' ORDER BY pj.id ';
+		if (orderBy !== ' ORDER BY pj.id ') orderBy = strOrderBy(fieldsList, orderBy);
+		if (orderBy === null) return cb({message: message.badOrder})
+
+		let filter = query.filter || '';
+		if (filter !== '') {
+			filter = strFilter(fieldsList, filter);
+			if (filter === null) return cb({message: message.badFilter});
+			filter += ` AND pj.teacher_id = ${id} `;
+		} else {
+			filter = ` WHERE pj.teacher_id = ${id} `;
+		}
+		
+
+		connection.manyOrNone(`
+			SELECT 
+				pj.*
+			FROM 
+				projects pj
+			${filter}
+			${orderBy} 
 			LIMIT ${limit}
 			OFFSET ${offset};
 			`)

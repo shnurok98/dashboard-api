@@ -124,7 +124,7 @@ router.post('/discipline/teacher', async (req, res) => {
     res.status(500).json({ message: message.smthWentWrong, error: e });
   }
 });
-
+/*
 router.get('/discipline/teacher/:teacher_id', (req, res) => {
   connection.manyOrNone(`
 	SELECT D.*
@@ -154,5 +154,5 @@ router.get('/discipline/teacher/:teacher_id/files', (req, res) => {
     res.status(500).json({ message: message.smthWentWrong, error: err });
   })
 });
-
+*/
 module.exports = router;

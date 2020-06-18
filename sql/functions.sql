@@ -85,11 +85,12 @@ i_scopus real)
 returns integer as $$
 declare 
 	v_person_id integer;
+	v_teacher_id integer;
 begin 
-	select t.person_id
+	select t.person_id, t.id
 	from teachers t
 	where t.id = i_teacher_id 
-	into v_person_id;
+	into v_person_id, v_teacher_id;
 	
 	UPDATE public.personalities
 	SET "name" = i_name, surname = i_surname, patronymic = i_patronymic, birthday = i_birthday, phone = i_phone, email = i_email
@@ -99,7 +100,7 @@ begin
 	SET "position" = i_position, rank_id = i_rank_id, degree_id = i_degree_id, rate = i_rate, hours_worked = i_hours_worked, rinc = i_rinc, web_of_science = i_web_of_science, scopus = i_scopus
 	WHERE id = i_teacher_id;
 
-	return i_teacher_id;
+	return v_teacher_id;
 end;
 $$ language plpgsql;
 	

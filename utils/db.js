@@ -22,72 +22,47 @@ exports.strSet = (obj) => {
   return str;
 }
 
-
-/*
-exports.strFilter = (self, filter) => {
-  let arr = filter.split(' ');
-
-  // если алиас !== null то нужна подстановка алиаса 
-  if (self !== null){
-    let mark = arr[0].lastIndexOf('_');
-    let con = arr[0].substring(mark + 1);
-    if (mark !== -1 && ( con === 'id' || con === 'name' ) ){
-      // значит это внешняя таблица
-      arr[0] = alias[arr[0].substring(0, mark)] + '.' + con // если таблица
-    } else {
-      // значит это поле данной сущности
-      arr[0] = self + '.' + arr[0]; // если поле
-      
-    }
-  }
-
-  // подмена оператора на SQL
-  arr[1] = operators[arr[1]];
-  filter = ' AND ' + arr.join(' ') + ' ';
-
-  // console.log(filter);
-  return filter;
-}
-
-exports.strOrderBy = (self, orderBy) => {
-  let arr = orderBy.split(' ');
-
-  // если алиас !== null то нужна подстановка алиаса 
-  if (self !== null){
-    let mark = arr[0].lastIndexOf('_');
-    let con = arr[0].substring(mark + 1);
-    if (mark !== -1 && ( con === 'id' || con === 'name' ) ){
-      // значит это внешняя таблица
-      arr[0] = alias[arr[0].substring(0, mark)] + '.' + con // если таблица
-    } else {
-      // значит это поле данной сущности
-      arr[0] = self + '.' + arr[0]; // если поле
-      
-    }
-  }
-
-  orderBy = arr.join(' ')
-  // console.log(orderBy)
-  return orderBy;
-}*/
-
+/**
+ * Формирует предложение WHERE
+ * @param {Object} fields объект с полями и алиасами для них
+ * @param {String} filter поле для фильтрации
+ * @example
+ * strFilter({'field': 'alias.field'}, 'field eq 100')
+ * // где alias - алиас для таблицы 
+ * // returns ' WHERE alias.field = 100 '
+ */
 exports.strFilter = (fields, filter) => {
   let arr = filter.split(' ');
 
   // меняем на поле с алиасом
-  if (fields[arr[0]]) {
+  if ( fields[arr[0]] ) {
     arr[0] = fields[arr[0]];
   } else {
     return null; // такого фильтра нет
   }
-  // подмена оператора на SQL
-  arr[1] = operators[arr[1]];
-  filter = ' AND ' + arr.join(' ') + ' ';
 
+  // подмена оператора на SQL
+  if ( operators[arr[1]] ) {
+    arr[1] = operators[arr[1]];
+  } else {
+    return null; // такого оператора нет
+  }
   
+  // составляем предложение SQL
+  filter = ' WHERE ' + arr.join(' ') + ' ';
+
   return filter;
 }
 
+/**
+ * Формирует предложение ORDER BY
+ * @param {Object} fields объект с полями и алиасами для них
+ * @param {String} orderBy поле для сортировки
+ * @example
+ * strOrder({'field': 'alias.field'}, 'field DESC')
+ * // где alias - алиас для таблицы 
+ * // returns ' ORDER BY alias.field DESC '
+ */
 exports.strOrderBy = (fields, orderBy) => {
   let arr = orderBy.split(' ');
 
@@ -98,7 +73,7 @@ exports.strOrderBy = (fields, orderBy) => {
     return null; // такой сортировки нет
   }
 
-  orderBy = arr.join(' ')
+  orderBy = ' ORDER BY ' + arr.join(' ') + ' ';
   
   return orderBy;
 }
@@ -123,15 +98,17 @@ exports.mapping = {
 };
 
 const alias = {
-  'teacher': 'T',
-  'person': 'P',
-  'rights_roles': 'RR',
-  'sub_unit': 'SU',
-  'department': 'DE',
-  'disciplines': 'D',
-  'disciplines_teachers': 'DT',
-  'rank': 'RA',
-  'degree': 'DG'
+  'teacher': 't',
+  'person': 'p',
+  'rights_roles': 'rr',
+  'sub_unit': 'su',
+  'department': 'de',
+  'disciplines': 'd',
+  'disciplines_teachers': 'dt',
+  'rank': 'ra',
+  'degree': 'dg',
+  'dep_load': 'dl',
+  'projects': 'pj'
 }
 
 const operators = {
