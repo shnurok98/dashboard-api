@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
 		if (teachers) {
 			res.status(200).json(teachers);
 		}else{
-			res.status(500).json({ message: message.smthWentWrong });
+			res.sendStatus(500);
 		}
 	});
 });
@@ -24,7 +24,7 @@ router.get('/:id', (req, res) => {
 		if (teacher) {
 			res.status(200).json(teacher);
 		}else{
-			res.sendStatus(404)
+			res.sendStatus(404);
 		}
 	});
 });
@@ -39,7 +39,7 @@ router.get('/:id' + /files_(ind_plan|rpd)/, (req, res) => {
 		if (rows) {
 			res.status(200).json(rows);
 		} else {
-			res.status(500).json({ message: message.smthWentWrong });
+			res.sendStatus(500);
 		}
 	});
 });
@@ -50,7 +50,7 @@ router.get('/:id/disciplines', (req, res) => {
 		if (disciplines) {
 			res.status(200).json(disciplines);
 		}else{
-			res.status(500).json({ message: message.smthWentWrong });
+			res.sendStatus(500);
 		}
 	});
 });
@@ -61,7 +61,7 @@ router.get('/:id/projects', (req, res) => {
 		if (projects) {
 			res.status(200).json(projects);
 		}else{
-			res.status(500).json({ message: message.smthWentWrong });
+			res.sendStatus(500);
 		}
 	});
 });

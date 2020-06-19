@@ -159,7 +159,7 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'self'
+      '/department': 'forbid'
     },
     'PUT': {
       '/teachers': 'self',
@@ -255,5 +255,11 @@ const rights = {
     }
   }
 };
+
+const queries = {
+  2: {
+    '/projects': 'sql'
+  }
+}
 
 module.exports = rights;

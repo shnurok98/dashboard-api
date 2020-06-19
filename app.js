@@ -15,8 +15,8 @@ const specialties = require('./routes/specialties');
 const acad_plan = require('./routes/acad_plan');
 const projects = require('./routes/projects');
 const uploads = require('./routes/uploads');
-const department_load = require('./routes/department_load');
-const department = require('./routes/department');
+const dep_load = require('./routes/dep_load');
+const dictionaries = require('./routes/dictionaries');
 
 passport.use(strategy);
 
@@ -42,13 +42,16 @@ app.use('*', passport.authenticate('jwt', { session: false }) );
 
 app.use('/api/teachers', teachers);
 app.use('/api/uploads', uploads);
-app.use('/api/dep_load', department_load);
+app.use('/api/dep_load', dep_load);
 app.use('/api/students', students);
 app.use('/api/groups', groups);
 app.use('/api/specialties', specialties);
 app.use('/api/acad_plan', acad_plan);
 app.use('/api/projects', projects);
-app.use('/api/department', department);
+
+app.use('/api/department', dictionaries);
+app.use('/api/ranks', dictionaries);
+// degree, sub_unit
 
 app.listen(PORT, () => {
 	console.log('API started on localhost:' + PORT);

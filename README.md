@@ -14,6 +14,9 @@ config.connectionString = {
 
 config.port = 3000;
 config.secret = 'secret';
+config.api = {
+	prefix: '/api'
+}
 
 module.exports = config;
 ```

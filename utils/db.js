@@ -1,5 +1,6 @@
 /**
- * Формирует SQL предложение для оператора SET
+ * Формирует SQL предложение для оператора SET. 
+ * Игнорирует поле id
  * @param {Object} obj - объект с данными
  * @returns {String} готовая строка
  */
@@ -7,17 +8,23 @@ exports.strSet = (obj) => {
   let str = '';
   
   for (key in obj){
+    // игнорируем поле id
+    if (key === 'id') continue;
+    // если это массив, то делаем из него массив postgres
     if (Array.isArray(obj[key])){
       str += key + ' = \'{' + obj[key] + '}\', ';
       continue;
     }
+    // если null или число, то вставляем как есть
     if (obj[key] == null || isFinite(obj[key]) ) {
       str += key + ' = ' + obj[key] + ', ';
       continue;
     }
+    // все остальное всегда строкой
     str += key + ' = \'' + obj[key] + '\', ';
   }
   
+  // удаляем ', ' в конце
   str = str.substring(0, str.length - 2);
   return str;
 }
