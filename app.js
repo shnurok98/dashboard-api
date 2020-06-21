@@ -32,10 +32,11 @@ app.use('/api/debug', debug);
 
 app.post('/api/auth', auth.logIn);
 
-app.get('/api/', (req, res) => {
-	res.send('<h1>Api is live</h1>')
-});
+// app.get('/api/', (req, res) => {
+// 	res.send('<h1>Api is live</h1>')
+// });
 
+app.use('/api', express.static(__dirname + '/api-doc'));
 
 // req.user виден после passport.initialize
 app.use('*', passport.authenticate('jwt', { session: false }) );
@@ -51,7 +52,8 @@ app.use('/api/projects', projects);
 
 app.use('/api/department', dictionaries);
 app.use('/api/ranks', dictionaries);
-// degree, sub_unit
+app.use('/api/degree', dictionaries);
+app.use('/api/sub_unit', dictionaries);
 
 app.listen(PORT, () => {
 	console.log('API started on localhost:' + PORT);

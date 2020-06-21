@@ -20,7 +20,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow',
       '/uploads/dep_load': 'allow',
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     },
     'POST': {
       '/teachers': 'forbid',
@@ -35,7 +38,10 @@ const rights = {
       '/uploads/rpd': 'forbid',
       '/uploads/acad_plan': 'forbid',
       '/uploads/dep_load': 'forbid', 
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     },
     'PUT': {
       '/teachers': 'self',
@@ -50,7 +56,10 @@ const rights = {
       '/uploads/rpd': 'forbid',
       '/uploads/acad_plan': 'forbid',
       '/uploads/dep_load': 'forbid', 
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     },
     'DELETE': {
       '/teachers': 'forbid',
@@ -65,7 +74,10 @@ const rights = {
       '/uploads/rpd': 'forbid',
       '/uploads/acad_plan': 'forbid',
       '/uploads/dep_load': 'forbid', 
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     }
   },
   2: {
@@ -82,7 +94,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow',
       '/uploads/dep_load': 'allow', 
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     },
     'POST': {
       '/teachers': 'forbid',
@@ -97,7 +112,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     },
     'PUT': {
       '/teachers': 'self',
@@ -112,7 +130,10 @@ const rights = {
       '/uploads/rpd': 'self',
       '/uploads/acad_plan': 'self',
       '/uploads/dep_load': 'self', 
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     },
     'DELETE': {
       '/teachers': 'forbid',
@@ -127,7 +148,10 @@ const rights = {
       '/uploads/rpd': 'self',
       '/uploads/acad_plan': 'self', 
       '/uploads/dep_load': 'self', 
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     }
   },
   3: {
@@ -144,7 +168,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     },
     'POST': {
       '/teachers': 'forbid',
@@ -159,7 +186,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'forbid'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     },
     'PUT': {
       '/teachers': 'self',
@@ -174,7 +204,10 @@ const rights = {
       '/uploads/rpd': 'self',
       '/uploads/acad_plan': 'self', 
       '/uploads/dep_load': 'self',
-      '/department': 'self'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     },
     'DELETE': {
       '/teachers': 'forbid',
@@ -189,7 +222,10 @@ const rights = {
       '/uploads/rpd': 'self',
       '/uploads/acad_plan': 'self', 
       '/uploads/dep_load': 'self',
-      '/department': 'self'
+      '/department': 'forbid',
+      '/ranks': 'forbid',
+      '/degree': 'forbid',
+      '/sub_unit': 'forbid'
     }
   },
   4: {
@@ -206,7 +242,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     },
     'POST': {
       '/teachers': 'allow',
@@ -221,7 +260,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     },
     'PUT': {
       '/teachers': 'allow',
@@ -236,7 +278,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     },
     'DELETE': {
       '/teachers': 'allow',
@@ -251,7 +296,10 @@ const rights = {
       '/uploads/rpd': 'allow',
       '/uploads/acad_plan': 'allow', 
       '/uploads/dep_load': 'allow',
-      '/department': 'allow'
+      '/department': 'allow',
+      '/ranks': 'allow',
+      '/degree': 'allow',
+      '/sub_unit': 'allow'
     }
   }
 };

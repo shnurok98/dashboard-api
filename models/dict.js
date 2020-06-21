@@ -28,6 +28,8 @@ class Dict {
 					cb(null, this.id);
 				})
 				.catch(err => {
+					// нулевое значение в одном из полей записи (нарушает СЦ)
+					if (err.code == '23502') return cb({message: message.badData});
 					if (err.constraint === `${table}_name_key`) return cb({message: message.exist});
 					console.error(err);
 					cb(err);

@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 const Access = require('../rights');
-const message = require('../messages');
 const Dict = require('../models/dict');
 
 const { prefix } = require('../config').api;
 
 router.use('*', async (req, res, next) => {
 	try {
-		const table = req.baseUrl.match(/department|ranks/)[0];
+		const table = req.baseUrl.match(/department|ranks|degree|sub_unit/)[0];
 
 		const url = req.baseUrl.replace(prefix, '');
 		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
