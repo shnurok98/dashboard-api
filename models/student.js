@@ -1,5 +1,29 @@
 const connection = require('../db');
 
+const { strFilter, strOrderBy } = require('../utils/db');
+const message = require('../messages');
+
+const fields = `
+	s.*, 
+	p.name, 
+	p.surname, 
+	p.patronymic,
+	p.birthday,
+	p.phone,
+	p.email,
+	g.specialties_id,
+	g.name AS group_name,
+	sp.name AS specialties_name
+`;
+
+const conf = {
+	limit: {
+		max: 1000,
+		default: 25
+	},
+	orderBy: ' ORDER BY s.id '
+}
+
 /**
  * Класс описывающий студента
  */
@@ -30,10 +54,13 @@ class Student {
 				`, { obj })
 				.then(data => {
 					if (data === undefined) return cb(console.log(new Error('Не удалось создать student')));
-					this.id = data.student.id; // присваиваем экземпляру id возвращенный из бд
-					cb();
+					this.id = data.student; // присваиваем экземпляру id возвращенный из бд
+					cb(null, this.id);
 				})
-				.catch(err => cb(err))
+				.catch(err => {
+					if ( err.constraint === "personalities_email_key" ) return cb({message: message.emailExist});
+					cb(err)
+				})
 
 		}
 	}
@@ -50,35 +77,31 @@ class Student {
 			$<obj.phone>::text,
 			$<obj.email>::text,
 			1::smallint,
-			$<obj.group_id>) AS updated_student_id;
+			$<obj.group_id>) AS id;
 		`, { obj })
 		.then( data  => {
-			if ( data === undefined ) return cb(console.log(new Error('Не удалось обновить данные student')));
-			cb();
+			if ( data.id === undefined || data.id === null) return cb();
+			cb(null, data.id);
 		})
 		.catch((err) => {
-			cb(err);
+			if ( err.constraint === "personalities_email_key" ) return cb({message: message.emailExist});
+			cb(err)
 		});
 	}
 
 	static get(id, cb){
 		connection.oneOrNone(`
 			SELECT 
-				S.*,
-				P.id AS person_id, 
-				P.name, 
-				P.surname, 
-				P.patronymic,
-				P.birthday,
-				P.phone,
-				P.email,
-				P.status,
-				G.id AS group_id,
-				G.specialties_id,
-				G.name AS group_name   
-			FROM students AS S, personalities AS P, groups AS G 
-			WHERE S.id = $1 AND S.person_id = P.id AND S.group_id = G.id
-		`, [id])
+				${fields}
+			FROM 
+				students s
+			left join 
+				personalities p on s.person_id = p.id
+			left join 
+				groups g on g.id = s.group_id
+			left join 
+				specialties sp on sp.id = g.specialties_id
+			WHERE s.id = $1;`, [id])
 		.then(rows => {
 			if (rows === undefined || rows === null) return cb();
 			cb(null, new Student(rows));
@@ -86,63 +109,53 @@ class Student {
 		.catch(err => cb(err));
 	}
 
-	static getByGroup(group_id, cb){
+	static getAll(query, cb){
+		// можно вынести дефолтные значения в конфиг выше
+		const limit = (query.limit <= 1000 ? query.limit : false) || 25;
+		const offset = query.offset || 0;
+
+		const fieldsList = {
+			'id': 's.id',
+			'group_id': 'g.id',
+			'group_name': 'g.name',
+			'specialties_id': 'sp.id',
+			'specialties_name': 'sp.name',
+			'surname': 'p.surname',
+			'phone': 'p.phone',
+			'email': 'p.email',
+			'birthday': 'p.birthday'
+		}
+
+		let orderBy = query.orderBy || ' ORDER BY s.id ';
+		if (orderBy !== ' ORDER BY s.id ') orderBy = strOrderBy(fieldsList, orderBy);
+		if (orderBy === null) return cb({message: message.badOrder})
+
+		let filter = query.filter || '';
+		if (filter !== '') filter = strFilter(fieldsList, filter);
+		if (filter === null) return cb({message: message.badFilter})
+
 		connection.manyOrNone(`
 			SELECT 
-				S.*,
-				P.id AS person_id, 
-				P.name, 
-				P.surname, 
-				P.patronymic,
-				P.birthday,
-				P.phone,
-				P.email,
-				P.status,
-				G.id AS group_id,
-				G.specialties_id,
-				G.name AS group_name  
-			FROM students AS S, personalities AS P, groups AS G 
-			WHERE S.group_id = $1 AND S.person_id = P.id AND S.group_id = G.id
-		`, [group_id])
-		.then(rows => {
-			if (rows === undefined || rows === null) return cb();
+				${fields}
+			FROM 
+				students s
+			left join 
+				personalities p on s.person_id = p.id
+			left join 
+				groups g on g.id = s.group_id
+			left join 
+				specialties sp on sp.id = g.specialties_id
+			${filter}
+			${orderBy} 
+			LIMIT ${limit}
+			OFFSET ${offset};
+			`)
+		.then((rows) => {
 			cb(null, rows);
 		})
 		.catch(err => cb(err));
 	}
 
-	static getBySpecialty(specialty_id, cb){
-		connection.manyOrNone(`
-			SELECT 
-				S.*,
-				P.id AS person_id, 
-				P.name, 
-				P.surname, 
-				P.patronymic,
-				P.birthday,
-				P.phone,
-				P.email,
-				P.status,
-				G.id AS group_id,
-				G.specialties_id,
-				G.name AS group_name,
-				SP.code,
-				SP.name AS specialty_name,
-				SP.profile,
-				SP.educ_form,
-				SP.educ_programm,
-				SP.educ_years,
-				SP.year_join,
-				SP.sub_unit_id   
-			FROM students AS S, personalities AS P, groups AS G, specialties AS SP 
-			WHERE G.specialties_id = $1 AND S.person_id = P.id AND S.group_id = G.id
-		`, [specialty_id])
-		.then(rows => {
-			if (rows === undefined || rows === null) return cb();
-			cb(null, rows);
-		})
-		.catch(err => cb(err));
-	}
 }
 
 module.exports = Student;

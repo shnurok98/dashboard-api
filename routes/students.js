@@ -6,13 +6,24 @@ const Student = require('../models/student');
 const Access = require('../rights');
 const message = require('../messages');
 
+router.get('/', (req, res) => {
+	Student.getAll(req.query, (err, students) => {
+		if (err) return res.status(400).json(err);
+		if (students) {
+			res.status(200).json(students);
+		}else{
+			res.sendStatus(500);
+		}
+	});
+});
+
 router.get('/:id', (req, res) => {
 	Student.get(req.params.id, (err, student) => {
 		if (err) console.error(err);
 		if (student) {
 			res.status(200).json(student);
 		}else{
-			res.status(404).json({ message: message.notExist });
+			res.sendStatus(404);
 		}
 	});
 });
@@ -24,15 +35,16 @@ router.post('/', async (req, res) => {
 		
 		const data = req.body;
 		const student = new Student(data);
-		student.save((err) => {
-			if(err) {
-				res.status(400).json({ message: message.emailExist });
-				return ;
-			};
-			res.status(201).send({ message: message.createSuccess });
+		student.save((err, id) => {
+			if ( err ) return res.status(400).json(err);
+			if ( id ) {
+				res.location(`/api/students/${id}`);
+				res.sendStatus(201)
+			} 
 		});
 	} catch (e) {
-    console.error(e);
+		console.error(e);
+		res.sendStatus(500);
   }
 
 });
@@ -46,40 +58,20 @@ router.put('/:id', async (req, res) => {
 		
 		student.id = +req.params.id;
 		
-		student.save((err) => {
-			if(err) {
-				res.status(400).json({ message: message.badData, error: err.detail });
-				return ;
-			};
-			res.status(204).send({ message: message.updateSuccess });
+		student.save((err, id) => {
+			if ( err ) {
+				return res.status(400).json(err);
+			}
+			if ( id ) {
+				res.sendStatus(204)
+			} else {
+				res.sendStatus(404)
+			}
 		});
 	} catch (e) {
-    console.error(e);
+		console.error(e);
+		res.sendStatus(500);
   }
-});
-
-router.get('/group/:group_id', (req, res) => {
-	Student.getByGroup(req.params.group_id, (err, students) => {
-		if (err) console.error(err);
-		// Потому что это массив
-		if (students.length) {
-			res.status(200).json(students);
-		}else{
-			res.status(404).json({ message: 'Такой группы нету, либо в ней нету студентов' });
-		}
-	});
-});
-
-router.get('/specialty/:specialty_id', (req, res) => {
-	Student.getBySpecialty(req.params.specialty_id, (err, students) => {
-		if (err) console.error(err);
-		// Потому что это массив
-		if (students.length) {
-			res.status(200).json(students);
-		}else{
-			res.status(404).json({ message: 'Такой специальности нету, либо в ней нету студентов' });
-		}
-	});
 });
 
 module.exports = router;

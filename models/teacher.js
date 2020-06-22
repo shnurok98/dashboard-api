@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12; // длина соли
 
 const { strFilter, strOrderBy } = require('../utils/db');
-
 const message = require('../messages');
 
 const fields = `

@@ -4,6 +4,9 @@ const path = require('path');
 const { strFilter, strOrderBy } = require('../utils/db');
 const message = require('../messages');
 
+/**
+ * Класс описывающий файлы
+ */
 class Upload {
 
   static getFile(table, file_id, cb){
@@ -46,7 +49,13 @@ class Upload {
   }
 
   
-
+  /**
+   * Выдают список файлов. Внутрь вшита обработка параметров.
+   * @param {String} table целевая таблица
+   * @param {Number} link_id целевой id ресурса (определение поля вшито)
+   * @param {Object} query строка с праметрами URL
+   * @param {Object} cb 
+   */
   static getList(table, link_id, query, cb){
     const fields = {
       'files_ind_plan': {

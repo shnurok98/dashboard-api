@@ -1,43 +1,30 @@
 const express = require('express');
 const router = express.Router();
 
-const connection = require('../db')
-
 const Access = require('../rights');
 const message = require('../messages');
-const strSet = require('../utils/db').strSet;
+const Specialty = require('../models/specialty');
 
 router.get('/', (req, res) => {
-  connection.manyOrNone(`
-  SELECT sp.*, su.name sub_unit_name 
-  FROM specialties sp 
-  LEFT JOIN sub_unit su
-  ON sp.sub_unit_id = su.id
-  ORDER BY id
-  `)
-  .then(row => {
-    res.status(200).json(row);
-  })
-  .catch(err => {
-    console.error(err);
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
+  Specialty.getAll(req.query, (err, specialties) => {
+    if (err) return res.status(400).json(err);
+		if (specialties) {
+			res.status(200).json(specialties);
+		}else{
+			res.sendStatus(500);
+		}
+  });
 });
 
 router.get('/:id', (req, res) => {
-  connection.oneOrNone(`
-  SELECT sp.*, su.name sub_unit_name 
-  FROM specialties sp, sub_unit su
-  WHERE sp.sub_unit_id = su.id AND sp.id = $1
-  `, [+req.params.id])
-  .then(row => {
-    if (!row) return res.status(404).json({ message: message.notExist });
-    res.status(200).json(row);
-  })
-  .catch(err => {
-    console.error(err);
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
+  Specialty.get(req.params.id, (err, specialty) => {
+		if (err) console.error(err);
+		if (specialty) {
+			res.status(200).json(specialty);
+		}else{
+			res.sendStatus(404);
+		}
+	});
 });
 
 router.post('/', async (req, res) => {
@@ -45,16 +32,18 @@ router.post('/', async (req, res) => {
     const access = await Access(req.user, req.method, '/specialties');
     if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
-    connection.oneOrNone('insert into specialties ( ${this:name} ) values (${this:csv}) returning id;', req.body )
-    .then(rows => {
-      res.status(200).send(rows);
-    })
-    .catch(err => {
-      console.error(err);
-      res.status(400).json({message: message.badData});
-    });
+    const data = req.body;
+		const specialty = new Specialty(data);
+		specialty.save((err, id) => {
+			if ( err ) return res.status(400).json(err);
+			if ( id ) {
+				res.location(`/api/specialties/${id}`);
+				res.sendStatus(201)
+			} 
+		});
   } catch (e) {
     console.error(e);
+    res.sendStatus(500);
   }
 });
 
@@ -63,19 +52,23 @@ router.put('/:id', async (req, res) => {
     const access = await Access(req.user, req.method, '/specialties', req.params.id);
     if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
-    const str = strSet(req.body);
-
-    connection.oneOrNone(`UPDATE specialties SET ${str} where id = ${+req.params.id} returning *;`)
-    .then(rows => {
-      if (!rows) return res.status(404).json({ message: message.notExist });
-      res.status(204).send(rows);
-    })
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({ message: message.smthWentWrong, error: err });
-    });
+    const specialty = new Specialty(req.body);
+		
+		specialty.id = +req.params.id;
+		
+		specialty.save((err, id) => {
+			if ( err ) {
+				return res.status(400).json(err);
+			}
+			if ( id ) {
+				res.sendStatus(204)
+			} else {
+				res.sendStatus(404)
+			}
+		});
   } catch (e) {
     console.error(e);
+    res.sendStatus(500);
   }
 });
 

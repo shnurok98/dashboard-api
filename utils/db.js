@@ -115,7 +115,11 @@ const alias = {
   'rank': 'ra',
   'degree': 'dg',
   'dep_load': 'dl',
-  'projects': 'pj'
+  'projects': 'pj',
+  'students': 's',
+  'groups': 'g',
+  'specialties': 'sp',
+  'students_projects': 'spj'
 }
 
 const operators = {
