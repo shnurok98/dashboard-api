@@ -50,6 +50,7 @@ class Dict {
 		})
 		.catch(err => {
 			if (err.constraint === `${table}_name_key`) return cb({message: message.exist});
+			if (err.code == 23505) return cb({message: message.exist});
 			console.error(err);
 			cb(err);
 		});
@@ -63,7 +64,10 @@ class Dict {
 			if (rows === undefined || rows === null) return cb();
 			cb(null, new Dict(rows));
 		})
-		.catch(err => cb(err));
+		.catch(err => {
+			console.error(err);
+			cb(err)
+		});
   }
   
   static getAll(table, cb){

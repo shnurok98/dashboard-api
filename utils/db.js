@@ -119,7 +119,10 @@ const alias = {
   'students': 's',
   'groups': 'g',
   'specialties': 'sp',
-  'students_projects': 'spj'
+  'students_projects': 'spj',
+  'acad_plan': 'acp',
+  'acad_discipline': 'acd',
+  'dep_load': 'dl'
 }
 
 const operators = {

@@ -1,100 +1,52 @@
 const express = require('express');
 const router = express.Router();
 
-const connection = require('../db')
-
 const Access = require('../rights');
 const message = require('../messages');
-const strSet = require('../utils/db').strSet;
+const AcadPlan = require('../models/acad_plan');
+const Upload = require('../models/upload');
 
 router.get('/', (req, res) => {
-  connection.manyOrNone(`
-  SELECT 
-    A.id,
-    SP.id AS specialties_id,
-    SP.code,
-    SP.name,
-    SP.profile,
-    SP.educ_form,
-    SP.educ_programm,
-    SP.educ_years,
-    SP.year_join,
-    SP.sub_unit_id
-  FROM acad_plan AS A, specialties AS SP 
-  WHERE A.specialties_id = SP.id
-  ORDER BY SP.year_join DESC;
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
+  AcadPlan.getAll(req.query, (err, acad) => {
+    if (err) return res.status(400).json(err);
+		if (acad) {
+			res.status(200).json(acad);
+		}else{
+			res.sendStatus(500);
+		}
+  });
 });
 
 router.get('/:id', (req, res) => {
-  connection.oneOrNone(`
-  SELECT public.pr_acadplan_s(${+req.params.id}) acad_plan;
-  `)
-  .then(row => {
-    if (!row.acad_plan) return res.status(404).json({ message: message.notExist });
-    res.status(200).json(row);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
+  AcadPlan.get(req.params.id, (err, acad) => {
+		if (err) console.error(err);
+		if (acad) {
+			res.status(200).json(acad);
+		}else{
+			res.sendStatus(404);
+		}
+	});
 });
 
 router.get('/:id/files', (req, res) => {
-  connection.manyOrNone(`
-  SELECT id, name, ext, modified_date, teacher_id, sub_unit_id, acad_plan_id 
-  FROM files_acad_plan 
-  WHERE acad_plan_id = ${+req.params.id}
-  ORDER BY modified_date DESC;
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
+  Upload.getList('files_acad_plan', +req.params.id, req.query, (err, rows) => {
+		if (err) return res.status(400).json(err);
+		if (rows) {
+			res.status(200).json(rows);
+		} else {
+			res.sendStatus(500);
+		}
+	});
 });
 
 router.get('/:id/semester/:num', (req, res) => {
-  connection.manyOrNone(`
-  SELECT * from acad_discipline D 
-  where D.acad_plan_id = ${+req.params.id} AND D.semesters[${+req.params.num}] IS NOT NULL;
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
-});
-
-router.get('/filter/year/:year', (req, res) => {
-  connection.manyOrNone(`
-  SELECT 
-    A.id,
-    SP.id AS specialties_id,
-    SP.code,
-    SP.name,
-    SP.profile,
-    SP.educ_form,
-    SP.educ_programm,
-    SP.educ_years,
-    SP.year_join,
-    SP.sub_unit_id
-  FROM acad_plan AS A, specialties AS SP 
-  WHERE A.specialties_id = SP.id and date_part('year', SP.year_join) = ${+req.params.year} 
-  ORDER BY SP.year_join DESC;
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
+  AcadPlan.getSemester(+req.params.id, +req.params.num, (err, dis) => {
+    if (err) console.error(err);
+		if (dis) {
+			res.status(200).json(dis);
+		}else{
+			res.sendStatus(404);
+		}
   })
 });
 
@@ -103,18 +55,18 @@ router.put('/discipline/:id', async (req, res) => {
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
     if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
-    const str = strSet(req.body);
-    
-    connection.oneOrNone(`
-    UPDATE acad_discipline SET ${str} where id = ${+req.params.id} returning *;
-    `)
-    .then(rows => {
-      if (!rows) return res.status(404).json({ message: message.notExist });
-      res.status(204).send(rows);
+    AcadPlan.updateDiscipline(+req.params.id, req.body, (err, id) => {
+      if ( err ) return res.status(400).json(err);
+			if ( id ) {
+				res.sendStatus(204)
+			} else {
+				res.sendStatus(404)
+			}
     })
     
   } catch (e) {
     console.error(e);
+    res.sendStatus(500);
   }
 });
 
@@ -123,123 +75,56 @@ router.post('/', async (req, res) => {
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
     if ( !access ) return res.status(403).json({ message: message.accessDenied});
 
-    connection.one('SELECT public.pr_acadplan_i($1::jsonb) id;', [req.body ])
-    .then(rows => {
-      res.status(201).json(rows);
-    })
+    const data = req.body;
+		const acadplan = new AcadPlan(data);
+		acadplan.save((err, id) => {
+			if ( err ) return res.status(400).json(err);
+			if ( id ) {
+				res.location(`/api/acad_plan/${id}`);
+				res.sendStatus(201)
+			} 
+		});
   } catch(e) {
-    res.status(500).json({ message: message.smthWentWrong, error: e });
+    console.error(e);
+    res.sendStatus(500);
   }
 });
 
 // Block, Part, Module
 
-router.get('/module/:id', (req, res) => {
-  connection.oneOrNone(`
-  SELECT * FROM acad_module WHERE id = ${+req.params.id};
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
+router.get('/:table(module|block|part)/:id', (req, res) => {
+  const table = 'acad_' + req.params.table;
+
+  AcadPlan.getDir(table, +req.params.id, (err, dir) => {
+    if ( err ) return res.status(400).json(err);
+    if ( dir ) {
+      res.status(200).json(dir);
+    } else {
+      res.sendStatus(404);
+    }
   })
 });
 
-router.get('/block/:id', (req, res) => {
-  connection.oneOrNone(`
-  SELECT * FROM acad_block WHERE id = ${+req.params.id};
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
-});
-
-router.get('/part/:id', (req, res) => {
-  connection.oneOrNone(`
-  SELECT * FROM acad_part WHERE id = ${+req.params.id};
-  `)
-  .then(rows => {
-    res.status(200).json(rows);
-  })
-  .catch(err => {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-  })
-});
-
-router.put('/module/:id', async (req, res) => {
+router.put('/:table(module|block|part)/:id', async (req, res) => {
   try {
     const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
     if ( !access ) return res.status(403).json({ message: message.accessDenied });
     
-    connection.oneOrNone(`
-    insert into acad_module ("name", "code") 
-		values ( $1, $2 )
-		on conflict ("name", "code") do update set "name" = $1 
-		returning *;
-    `, [req.body.name, req.body.code])
-    .then(rows => {
-      res.status(204).send(rows);
-    })
-    .catch(e => {
-      res.status(500).json({ message: message.smthWentWrong, error: e });
+    const table = 'acad_' + req.params.table;
+
+    AcadPlan.updateDir(table, +req.params.id, req.body, (err, dir) => {
+      if ( err ) return res.status(400).json(err);
+      if ( dir ) {
+        res.sendStatus(204)
+      } else {
+        res.sendStatus(404);
+      }
     })
     
   } catch (e) {
-    res.status(500).json({ message: message.smthWentWrong, error: e });
     console.error(e);
+    res.sendStatus(500);
   }
-});
-
-router.put('/block/:id', async (req, res) => {
-  try {
-    const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-    
-    connection.oneOrNone(`
-    insert into acad_block ("name", "code") 
-		values ( $1, $2 )
-		on conflict ("name", "code") do update set "name" = $1 
-		returning *;
-    `, [req.body.name, req.body.code])
-    .then(rows => {
-      res.status(204).send(rows);
-    })
-    .catch(e => {
-      res.status(500).json({ message: message.smthWentWrong, error: e });
-    })
-    
-  } catch (e) {
-    res.status(500).json({ message: message.smthWentWrong, error: err });
-    console.error(e);
-  }
-});
-
-router.put('/part/:id', async (req, res) => {
-  try {
-    const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied});
-
-    connection.oneOrNone(`
-    insert into acad_part ("name", "code") 
-		values ( $1, $2 )
-		on conflict ("name", "code") do update set "name" = $1 
-		returning *;
-    `, [req.body.name, req.body.code])
-    .then(rows => {
-      res.status(204).send(rows);
-    })
-    .catch(e => {
-      res.status(500).json({ message: message.smthWentWrong, error: e });
-    })
-    
-  } catch (e) {
-    res.status(500).json({ message: message.smthWentWrong, error: e });
-    console.error(e);
-  }
-});
+})
 
 module.exports = router;
