@@ -67,4 +67,21 @@ router.post('/:table(ind_plan|rpd|acad_plan|dep_load|projects)', async (req, res
   }
 })
 
+router.delete('/:table(ind_plan|rpd|acad_plan|dep_load|projects)/:id', async (req, res) => {
+  try {
+    const table = req.params.table;
+
+    const access = await Access(req.user, req.method, `/uploads/${table}`);
+    if ( !access ) return res.status(403).json({ message: message.accessDenied });
+
+    Upload.delete(table, +req.params.id, (err) => {
+      if ( err ) return res.status(409).json(err);
+			res.sendStatus(204);
+    })
+  } catch(e) {
+    console.error(e);
+    res.sendStatus(500);
+  }
+})
+
 module.exports = router;

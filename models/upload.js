@@ -125,6 +125,20 @@ class Upload {
       cb(err);
     })
   }
+
+  static delete(table, id, cb) {
+		const sql = `DELETE FROM files_${table} where id = ${id};`
+
+		connection.none(sql)
+		.then( () => {
+			cb()
+		})
+		.catch(err => { 
+			console.error(err);
+			cb(err)
+		});
+  }
+  
 }
 
 module.exports = Upload;

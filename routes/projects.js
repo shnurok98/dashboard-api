@@ -106,4 +106,19 @@ router.put('/:id/students', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+	try {
+		const access = await Access(req.user, req.method, '/projects', req.params.id);
+		if ( !access ) return res.status(403).json({ message: message.accessDenied });
+
+		Project.delete(+req.params.id, (err) => {
+			if ( err ) return res.status(409).json(err);
+			res.sendStatus(204);
+		})
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+});
+
 module.exports = router;

@@ -127,4 +127,19 @@ router.put('/:table(module|block|part)/:id', async (req, res) => {
   }
 })
 
+router.delete('/:id', async (req, res) => {
+	try {
+		const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
+		if ( !access ) return res.status(403).json({ message: message.accessDenied });
+
+		AcadPlan.delete(+req.params.id, (err) => {
+			if ( err ) return res.status(409).json(err);
+			res.sendStatus(204);
+		})
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+});
+
 module.exports = router;

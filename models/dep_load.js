@@ -117,6 +117,19 @@ class DepLoad {
 			cb(err)
 		})
 	}
+
+	static delete(id, cb) {
+		const sql = `DELETE FROM dep_load where id = ${id};`
+
+		connection.none(sql)
+		.then( () => {
+			cb()
+		})
+		.catch(err => { 
+			console.error(err);
+			cb(err)
+		});
+	}
 }
 
 module.exports = DepLoad;

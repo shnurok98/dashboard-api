@@ -39,7 +39,7 @@ CREATE TABLE "acad_plan"
 (
  "id"          serial PRIMARY KEY,
  "modified_date" timestamp,
- "specialties_id" int UNIQUE NOT NULL REFERENCES specialties(id)
+ "specialties_id" int UNIQUE NOT NULL REFERENCES specialties(id) ON DELETE CASCADE
 );
 
 COMMENT ON COLUMN "acad_plan"."modified_date" IS 'Дата последнего изменения';
@@ -77,7 +77,7 @@ CREATE TABLE "acad_discipline"
  "hours_lec"   		int,
  "hours_lab"  	 	int,
  "hours_sem" 	 		int,
- "acad_plan_id" 	int REFERENCES acad_plan(id) NOT NULL,
+ "acad_plan_id" 	int NOT NULL REFERENCES acad_plan(id) ON DELETE CASCADE,
  "acad_block_id" 	int REFERENCES acad_block(id) NOT NULL,
  "acad_part_id" 	int REFERENCES acad_part(id),
  "acad_module_id" int REFERENCES acad_module(id),
@@ -170,7 +170,7 @@ CREATE TABLE "disciplines"
  "hours_ruk_aspirant" real,
  "semester_num" 			smallint NOT NULL,
  "acad_discipline_id" int REFERENCES acad_discipline(id),
- "dep_load_id" 				int NOT NULL REFERENCES dep_load(id),
+ "dep_load_id" 				int NOT NULL REFERENCES dep_load(id) ON DELETE CASCADE,
  "is_approved" 				boolean NOT NULL
 );
 
@@ -196,8 +196,8 @@ CREATE TABLE "files_acad_plan"
  "path"       		text NOT NULL,
  "ext" 	  				varchar(10) NOT NULL,
  "modified_date"  timestamp NOT NULL,
- "teacher_id" 		int NOT NULL REFERENCES teachers(id),
- "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
+ "teacher_id" 		int REFERENCES teachers(id) ON DELETE SET NULL,
+ "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id) ON DELETE CASCADE,
  "acad_plan_id" 	int REFERENCES acad_plan(id) NOT NULL
 );
 
@@ -209,7 +209,7 @@ CREATE TABLE "files_ind_plan"
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
  "modified_date"    timestamp NOT NULL,
- "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
+ "teacher_id" 			int REFERENCES teachers(id) ON DELETE SET NULL,
  "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id)
 );
 
@@ -220,7 +220,7 @@ CREATE TABLE "files_rpd"
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
  "modified_date"    timestamp NOT NULL,
- "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
+ "teacher_id" 			int REFERENCES teachers(id) ON DELETE SET NULL,
  "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
  "discipline_id"		int REFERENCES disciplines(id) NOT NULL
 );
@@ -232,16 +232,16 @@ CREATE TABLE "files_dep_load"
  "path"       			text NOT NULL,
  "ext" 	 						varchar(10) NOT NULL,
  "modified_date"    timestamp NOT NULL,
- "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
+ "teacher_id" 			int REFERENCES teachers(id) ON DELETE SET NULL,
  "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
- "dep_load_id"			int REFERENCES dep_load(id) NOT NULL
+ "dep_load_id"			int NOT NULL REFERENCES dep_load(id) ON DELETE CASCADE
 );
 
 CREATE TABLE "rights_roles"
 (
  "id"          serial PRIMARY KEY,
  "role"        smallint NOT NULL,
- "teacher_id"  int NOT NULL REFERENCES teachers(id),
+ "teacher_id"  int NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
  "sub_unit_id" int NOT NULL REFERENCES sub_unit(id)
 );
 
@@ -262,7 +262,7 @@ CREATE TABLE "projects"
  "end_date"     timestamp NOT NULL,
  "link_trello" 	text,
  "sub_unit_id" 	int NOT NULL REFERENCES sub_unit(id),
- "teacher_id"  	int REFERENCES teachers(id)
+ "teacher_id"  	int REFERENCES teachers(id) ON DELETE SET NULL
 );
 
 CREATE TABLE "files_projects"
@@ -272,15 +272,15 @@ CREATE TABLE "files_projects"
  "path"       			text NOT NULL,
  "ext" 	  					varchar(10) NOT NULL,
  "modified_date"    timestamp NOT NULL,
- "teacher_id" 			int REFERENCES teachers(id) NOT NULL,
+ "teacher_id" 			int REFERENCES teachers(id) ON DELETE SET NULL,
  "sub_unit_id" 			int NOT NULL REFERENCES sub_unit(id),
- "project_id" 			int REFERENCES projects(id) NOT NULL
+ "project_id" 			int NOT NULL REFERENCES projects(id) ON DELETE CASCADE
 );
 
 CREATE TABLE "groups"
 (
  "id"             serial PRIMARY KEY,
- "specialties_id" int NOT NULL REFERENCES specialties(id),
+ "specialties_id" int NOT NULL REFERENCES specialties(id) ON DELETE CASCADE,
  "name"           varchar(20) UNIQUE NOT NULL
 );
 
@@ -288,14 +288,14 @@ CREATE TABLE "students"
 (
  "id"          serial PRIMARY KEY,
  "person_id"   int REFERENCES personalities(id) UNIQUE NOT NULL,
- "group_id"    int NOT NULL REFERENCES groups(id)
+ "group_id"    int REFERENCES groups(id) ON DELETE SET NULL
 );
 
 CREATE TABLE "students_projects"
 (
 	"id"	serial PRIMARY KEY,
-	"student_id" int NOT NULL REFERENCES students(id),
-	"project_id" int NOT NULL REFERENCES projects(id),
+	"student_id" int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+	"project_id" int NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
 	"date" date NOT NULL
 );
 
@@ -303,12 +303,12 @@ CREATE TABLE "disciplines_groups"
 (
 	"id"							serial PRIMARY KEY,
 	"discipline_id" 	bigint REFERENCES disciplines(id) NOT NULL,
-	"group_id"				int REFERENCES groups(id) NOT NULL
+	"group_id"				int NOT NULL REFERENCES groups(id) ON DELETE CASCADE
 );
 
 CREATE TABLE "disciplines_teachers"
 (
 	"id"							serial PRIMARY KEY,
 	"discipline_id" 	bigint REFERENCES disciplines(id) NOT NULL,
-	"teacher_id"			int REFERENCES teachers(id) NOT NULL
+	"teacher_id"			int REFERENCES teachers(id) ON DELETE CASCADE
 );

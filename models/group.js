@@ -116,6 +116,18 @@ class Group {
 		.catch(err => cb(err));
 	}
 
+	static delete(id, cb) {
+		const sql = `DELETE FROM groups where id = ${id};`
+
+		connection.none(sql)
+		.then( () => {
+			cb()
+		})
+		.catch(err => { 
+			console.error(err);
+			cb(err)
+		});
+	}
 }
 
 module.exports = Group;
