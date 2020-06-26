@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const Access = require('../rights');
+const Access = require('../middleware/rights');
 const Dict = require('../models/dict');
 
 const { prefix } = require('../config').api;

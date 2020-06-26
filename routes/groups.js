@@ -1,10 +1,29 @@
 const express = require('express');
 const router = express.Router();
 
-const Access = require('../rights');
-const message = require('../messages');
-
+const Access = require('../middleware/rights');
+const { prefix } = require('../config').api;
 const Group = require('../models/group');
+
+router.use('*', async (req, res, next) => {
+	try {
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		// console.log(partsUrl);
+		const parentUrl = partsUrl[0];
+		let resourceId = partsUrl[1];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/', (req, res) => {
   Group.getAll(req.query, (err, groups) => {
@@ -30,9 +49,6 @@ router.get('/:id', (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/groups');
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
     const data = req.body;
 		const group = new Group(data);
 		group.save((err, id) => {
@@ -50,9 +66,6 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/groups', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
     const group = new Group(req.body);
 
     group.id = +req.params.id;
@@ -75,9 +88,6 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/groups', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		Group.delete(+req.params.id, (err) => {
 			if ( err ) return res.status(409).json(err);
 			res.sendStatus(204);

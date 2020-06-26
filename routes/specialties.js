@@ -1,9 +1,29 @@
 const express = require('express');
 const router = express.Router();
 
-const Access = require('../rights');
-const message = require('../messages');
+const Access = require('../middleware/rights');
 const Specialty = require('../models/specialty');
+const { prefix } = require('../config').api;
+
+router.use('*', async (req, res, next) => {
+	try {
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		// console.log(partsUrl);
+		const parentUrl = partsUrl[0];
+		let resourceId = partsUrl[1];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/', (req, res) => {
   Specialty.getAll(req.query, (err, specialties) => {
@@ -29,9 +49,6 @@ router.get('/:id', (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/specialties');
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
     const data = req.body;
 		const specialty = new Specialty(data);
 		specialty.save((err, id) => {
@@ -49,9 +66,6 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/specialties', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
     const specialty = new Specialty(req.body);
 		
 		specialty.id = +req.params.id;
@@ -74,9 +88,6 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/specialties', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		Specialty.delete(+req.params.id, (err) => {
 			if ( err ) return res.status(409).json(err);
 			res.sendStatus(204);

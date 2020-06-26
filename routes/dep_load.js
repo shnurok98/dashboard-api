@@ -1,10 +1,30 @@
 const express = require('express');
 const router = express.Router();
 
-const Access = require('../rights');
-const message = require('../messages');
+const Access = require('../middleware/rights');
 const DepLoad = require('../models/dep_load');
 const Upload = require('../models/upload');
+const { prefix } = require('../config').api;
+
+router.use('*', async (req, res, next) => {
+	try {
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		// console.log(partsUrl);
+		const parentUrl = partsUrl[0];
+		let resourceId = partsUrl[1];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/', (req, res) => {
 	DepLoad.getAll(req.query, (err, dep) => {
@@ -41,9 +61,6 @@ router.get('/:id/files', (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/dep_load');
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
     const data = req.body;
 		const depLoad = new DepLoad(data);
 		depLoad.save((err, id) => {
@@ -61,9 +78,6 @@ router.post('/', async (req, res) => {
 
 router.put('/discipline/:discipline_id', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/projects', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied});
-
     DepLoad.updateDiscipline(+req.params.discipline_id, req.body, (err, id) => {
       if ( err ) return res.status(400).json(err);
 			if ( id ) {
@@ -81,9 +95,6 @@ router.put('/discipline/:discipline_id', async (req, res) => {
 
 router.post('/discipline/teacher', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/dep_load');
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
     DepLoad.setTeacher(req.body, (err, id) => {
 			if ( err ) return res.status(400).json(err);
 			if ( id ) {
@@ -98,9 +109,6 @@ router.post('/discipline/teacher', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/dep_load', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		DepLoad.delete(+req.params.id, (err) => {
 			if ( err ) return res.status(409).json(err);
 			res.sendStatus(204);

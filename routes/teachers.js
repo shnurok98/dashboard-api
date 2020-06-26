@@ -4,8 +4,28 @@ const router = express.Router();
 const Teacher = require('../models/teacher');
 const Upload = require('../models/upload');
 
-const Access = require('../rights');
-const message = require('../messages');
+const Access = require('../middleware/rights');
+const { prefix } = require('../config').api;
+
+router.use('*', async (req, res, next) => {
+	try {
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		// console.log(partsUrl);
+		const parentUrl = partsUrl[0];
+		let resourceId = partsUrl[1];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/', (req, res) => {
 	Teacher.getAll(req.query, (err, teachers) => {
@@ -68,9 +88,6 @@ router.get('/:id/projects', (req, res) => {
 
 router.post('/', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/teachers');
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-		
 		const data = req.body;
 	  teacher = new Teacher(data);
 		teacher.save((err, id) => {
@@ -88,9 +105,6 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/teachers', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		const teacher = new Teacher(req.body);
 		
 		teacher.id = +req.params.id;
@@ -114,9 +128,6 @@ router.put('/:id', async (req, res) => {
 
 router.put('/:id/password', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/teachers', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		Teacher.get(+req.params.id, (err, teacher) => {
 			if ( err ) return res.status(400).json(err);
 			if ( teacher ) {
@@ -140,9 +151,6 @@ router.put('/:id/password', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/teachers', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		Teacher.delete(+req.params.id, (err) => {
 			if ( err ) return res.status(409).json(err);
 			res.sendStatus(204);

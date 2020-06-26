@@ -175,12 +175,12 @@ const rights = {
     },
     'POST': {
       '/teachers': 'forbid',
-      '/students': 'self', 
-      '/groups': 'self', 
-      '/specialties': 'self', 
-      '/acad_plan': 'self', 
-      '/dep_load': 'self', 
-      '/projects': 'self', 
+      '/students': 'allow', 
+      '/groups': 'allow', 
+      '/specialties': 'allow', 
+      '/acad_plan': 'allow', 
+      '/dep_load': 'allow', 
+      '/projects': 'allow', 
       '/uploads/ind_plan': 'allow',
       '/uploads/projects': 'allow',
       '/uploads/rpd': 'allow',
@@ -193,17 +193,17 @@ const rights = {
     },
     'PUT': {
       '/teachers': 'self',
-      '/students': 'self', 
-      '/groups': 'self', 
-      '/specialties': 'self', 
-      '/acad_plan': 'self', 
-      '/dep_load': 'self', 
-      '/projects': 'self', 
-      '/uploads/ind_plan': 'self',
-      '/uploads/projects': 'self',
-      '/uploads/rpd': 'self',
-      '/uploads/acad_plan': 'self', 
-      '/uploads/dep_load': 'self',
+      '/students': 'allow', 
+      '/groups': 'allow', 
+      '/specialties': 'allow', 
+      '/acad_plan': 'allow', 
+      '/dep_load': 'allow', 
+      '/projects': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'forbid',
       '/ranks': 'forbid',
       '/degree': 'forbid',
@@ -211,17 +211,17 @@ const rights = {
     },
     'DELETE': {
       '/teachers': 'forbid',
-      '/students': 'self', 
-      '/groups': 'self', 
-      '/specialties': 'self', 
-      '/acad_plan': 'self', 
-      '/dep_load': 'self', 
-      '/projects': 'self', 
-      '/uploads/ind_plan': 'self',
-      '/uploads/projects': 'self',
-      '/uploads/rpd': 'self',
-      '/uploads/acad_plan': 'self', 
-      '/uploads/dep_load': 'self',
+      '/students': 'allow', 
+      '/groups': 'allow', 
+      '/specialties': 'allow', 
+      '/acad_plan': 'allow', 
+      '/dep_load': 'allow', 
+      '/projects': 'allow', 
+      '/uploads/ind_plan': 'allow',
+      '/uploads/projects': 'allow',
+      '/uploads/rpd': 'allow',
+      '/uploads/acad_plan': 'allow', 
+      '/uploads/dep_load': 'allow',
       '/department': 'forbid',
       '/ranks': 'forbid',
       '/degree': 'forbid',
@@ -303,11 +303,5 @@ const rights = {
     }
   }
 };
-
-const queries = {
-  2: {
-    '/projects': 'sql'
-  }
-}
 
 module.exports = rights;

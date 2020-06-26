@@ -3,8 +3,28 @@ const router = express.Router();
 
 const Student = require('../models/student');
 
-const Access = require('../rights');
-const message = require('../messages');
+const Access = require('../middleware/rights');
+const { prefix } = require('../config').api;
+
+router.use('*', async (req, res, next) => {
+	try {
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		// console.log(partsUrl);
+		const parentUrl = partsUrl[0];
+		let resourceId = partsUrl[1];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/', (req, res) => {
 	Student.getAll(req.query, (err, students) => {
@@ -30,9 +50,6 @@ router.get('/:id', (req, res) => {
 
 router.post('/', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/students');
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-		
 		const data = req.body;
 		const student = new Student(data);
 		student.save((err, id) => {
@@ -51,9 +68,6 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/students', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		const student = new Student(req.body);
 		
 		student.id = +req.params.id;
@@ -76,9 +90,6 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/students', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		Student.delete(+req.params.id, (err) => {
 			if ( err ) return res.status(409).json(err);
 			res.sendStatus(204);

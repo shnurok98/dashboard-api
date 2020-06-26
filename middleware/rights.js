@@ -1,8 +1,8 @@
-const connection = require('./db');
+const connection = require('../db');
 
-const rights = require('./acl');
+const rights = require('../acl');
 
-const mapping = require('./utils/db').mapping;
+const mapping = require('../utils/db').mapping;
 
 /**
  * Получаем владельца ресурса
@@ -13,21 +13,9 @@ function getRights(teacher, method, table, resource_id){
   console.log('Проверка владельца ресурса');
   let sql;
 
-  // можно сделать объект типа {3: {'table': 'sql'} } и поместить его в acl...
+  if (teacher.role == 3) sql = `select (select 1 from ${table} p where p.id = ${resource_id} and p.sub_unit_id = ${teacher.sub_unit_id}) is not null exist`;
+  if (teacher.role == 2) sql = `select (select 1 from ${table} p where p.id = ${resource_id} and p.teacher_id = ${teacher.id}) is not null exist`;
 
-  if ( method === 'PUT' || method === 'DELETE') {
-    console.warn('$ Костыль в системе прав');
-    return true;
-    if (teacher.role == 3) sql = `select (select 1 from ${table} p where p.id = ${resource_id} and p.sub_unit_id = ${teacher.sub_unit_id}) is not null exist`;
-    if (teacher.role == 2) sql = `select (select 1 from ${table} p where p.id = ${resource_id} and p.teacher_id = ${teacher.id}) is not null exist`;
-  }
-  if ( method === 'POST' ){
-    // костыль
-    console.warn('$ Костыль в системе прав');
-    if (teacher.role == 3) sql = `select (select 1 ) is not null exist`;
-    // преподаватель сюда не попадает
-    if (teacher.role == 2) sql = `select (select 1 ) is not null exist`;
-  }
   return new Promise((resolve, reject) => { 
     connection.one(sql)
     .then(row => {

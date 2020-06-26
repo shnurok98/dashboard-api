@@ -4,8 +4,9 @@ const Formidable  = require('formidable');
 const fs = require('fs');
 
 const Upload = require('../models/upload');
-const Access = require('../rights');
+const Access = require('../middleware/rights');
 const message = require('../messages');
+const { prefix } = require('../config').api;
 
 const options = {
   encoding: 'utf-8',
@@ -13,6 +14,29 @@ const options = {
   keepExtensions: false,
   multiples: false
 };
+
+router.use('*', async (req, res, next) => {
+	try {
+		const table = req.baseUrl.match(/ind_plan|rpd|acad_plan|dep_load|projects/)[0];
+
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		console.log(partsUrl);
+		const parentUrl = partsUrl[0] + partsUrl[1]; // /uploads/ind_plan/1
+		let resourceId = partsUrl[2];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		res.locals.table = table;
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/:table(ind_plan|rpd|acad_plan|dep_load|projects)/:id', (req, res) => {
   const table = req.params.table;
@@ -34,9 +58,6 @@ router.get('/:table(ind_plan|rpd|acad_plan|dep_load|projects)/:id', (req, res) =
 router.post('/:table(ind_plan|rpd|acad_plan|dep_load|projects)', async (req, res) => {
   try {
     const table = req.params.table;
-
-    const access = await Access(req.user, req.method, `/uploads/${table}`);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     const form = new Formidable(options);
 
@@ -70,9 +91,6 @@ router.post('/:table(ind_plan|rpd|acad_plan|dep_load|projects)', async (req, res
 router.delete('/:table(ind_plan|rpd|acad_plan|dep_load|projects)/:id', async (req, res) => {
   try {
     const table = req.params.table;
-
-    const access = await Access(req.user, req.method, `/uploads/${table}`);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
 
     Upload.delete(table, +req.params.id, (err) => {
       if ( err ) return res.status(409).json(err);

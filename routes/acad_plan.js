@@ -1,10 +1,30 @@
 const express = require('express');
 const router = express.Router();
 
-const Access = require('../rights');
-const message = require('../messages');
+const Access = require('../middleware/rights');
 const AcadPlan = require('../models/acad_plan');
 const Upload = require('../models/upload');
+const { prefix } = require('../config').api;
+
+router.use('*', async (req, res, next) => {
+	try {
+		const url = req.baseUrl.replace(prefix, '');
+		const partsUrl = url.match(/\/\w+/g); // все части вида '/word'
+		// console.log(partsUrl);
+		const parentUrl = partsUrl[0];
+		let resourceId = partsUrl[1];
+		if ( resourceId ) resourceId = resourceId.substring(1, resourceId.length);
+		
+		// система прав
+		const access = await Access(req.user, req.method, parentUrl, resourceId);
+		if ( !access ) return res.sendStatus(403);
+
+		next();
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+  }
+})
 
 router.get('/', (req, res) => {
   AcadPlan.getAll(req.query, (err, acad) => {
@@ -52,9 +72,6 @@ router.get('/:id/semester/:num', (req, res) => {
 
 router.put('/discipline/:id', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied});
-
     AcadPlan.updateDiscipline(+req.params.id, req.body, (err, id) => {
       if ( err ) return res.status(400).json(err);
 			if ( id ) {
@@ -72,9 +89,6 @@ router.put('/discipline/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied});
-
     const data = req.body;
 		const acadplan = new AcadPlan(data);
 		acadplan.save((err, id) => {
@@ -107,9 +121,6 @@ router.get('/:table(module|block|part)/:id', (req, res) => {
 
 router.put('/:table(module|block|part)/:id', async (req, res) => {
   try {
-    const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-    if ( !access ) return res.status(403).json({ message: message.accessDenied });
-    
     const table = 'acad_' + req.params.table;
 
     AcadPlan.updateDir(table, +req.params.id, req.body, (err, dir) => {
@@ -129,9 +140,6 @@ router.put('/:table(module|block|part)/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 	try {
-		const access = await Access(req.user, req.method, '/acad_plan', req.params.id);
-		if ( !access ) return res.status(403).json({ message: message.accessDenied });
-
 		AcadPlan.delete(+req.params.id, (err) => {
 			if ( err ) return res.status(409).json(err);
 			res.sendStatus(204);
