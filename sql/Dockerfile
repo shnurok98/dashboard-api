@@ -1,4 +1,4 @@
-FROM postgres:latest
+FROM postgres:12-alpine
 
 COPY dump_s.sql /docker-entrypoint-initdb.d/
 
