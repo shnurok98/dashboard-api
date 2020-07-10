@@ -4,6 +4,13 @@ const path = require('path');
 const { strFilter, strOrderBy } = require('../utils/db');
 const message = require('../messages');
 
+const parameters = {
+	limit: {
+		max: 10000,
+		default: 1000
+	}
+}
+
 /**
  * Класс описывающий файлы
  */
@@ -93,7 +100,7 @@ class Upload {
       'project_id': 'project_id'
     }
 
-    const limit = (query.limit <= 100 ? query.limit : false) || 25;
+    const limit = (query.limit <= parameters.limit.max ? query.limit : false) || parameters.limit.default;
     const offset = query.offset || 0;
     
     let orderBy = query.orderBy || ' ORDER BY modified_date DESC ';

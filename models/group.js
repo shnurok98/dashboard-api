@@ -11,6 +11,13 @@ const fields = `
   su.name sub_unit_name 
 `;
 
+const parameters = {
+	limit: {
+		max: 10000,
+		default: 1000
+	}
+}
+
 /**
  * Класс описывающий группу
  */
@@ -78,7 +85,7 @@ class Group {
 
 	static getAll(query, cb){
 		// можно вынести дефолтные значения в конфиг выше
-		const limit = (query.limit <= 1000 ? query.limit : false) || 25;
+		const limit = (query.limit <= parameters.limit.max ? query.limit : false) || parameters.limit.default;
 		const offset = query.offset || 0;
 
 		const fieldsList = {

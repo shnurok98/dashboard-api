@@ -32,6 +32,13 @@ const fields = `
 	de."name" as department_name
 `;
 
+const parameters = {
+	limit: {
+		max: 10000,
+		default: 1000
+	}
+}
+
 /**
 	 * @memberof Teacher
 	 * @typedef {Teacher} Teacher
@@ -245,7 +252,7 @@ class Teacher {
 	}
 
 	static getAll(query, cb){
-		const limit = (query.limit <= 100 ? query.limit : false) || 25;
+		const limit = (query.limit <= parameters.limit.max ? query.limit : false) || parameters.limit.default;
 		const offset = query.offset || 0;
 
 		const fieldsList = {
@@ -324,7 +331,7 @@ class Teacher {
 	}
 
 	static getDisciplines(id, query, cb){
-		const limit = (query.limit <= 100 ? query.limit : false) || 25;
+		const limit = (query.limit <= parameters.limit.max ? query.limit : false) || parameters.limit.default;
 		const offset = query.offset || 0;
 
 		const fieldsList = {
@@ -375,7 +382,7 @@ class Teacher {
 	}
 
 	static getProjects(id, query, cb){
-		const limit = (query.limit <= 100 ? query.limit : false) || 25;
+		const limit = (query.limit <= parameters.limit.max ? query.limit : false) || parameters.limit.default;
 		const offset = query.offset || 0;
 
 		const fieldsList = {
