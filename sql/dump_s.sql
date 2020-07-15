@@ -524,11 +524,12 @@ CREATE FUNCTION public.pr_teachers_u(i_teacher_id integer, i_name text, i_surnam
     AS $$
 declare 
 	v_person_id integer;
+	v_teacher_id integer;
 begin 
-	select t.person_id
+	select t.person_id, t.id
 	from teachers t
 	where t.id = i_teacher_id 
-	into v_person_id;
+	into v_person_id, v_teacher_id;
 	
 	UPDATE public.personalities
 	SET "name" = i_name, surname = i_surname, patronymic = i_patronymic, birthday = i_birthday, phone = i_phone, email = i_email
@@ -538,7 +539,7 @@ begin
 	SET "position" = i_position, rank_id = i_rank_id, degree_id = i_degree_id, rate = i_rate, hours_worked = i_hours_worked, rinc = i_rinc, web_of_science = i_web_of_science, scopus = i_scopus
 	WHERE id = i_teacher_id;
 
-	return i_teacher_id;
+	return v_teacher_id;
 end;
 $$;
 
@@ -1059,7 +1060,7 @@ ALTER SEQUENCE public.disciplines_id_seq OWNED BY public.disciplines.id;
 CREATE TABLE public.disciplines_teachers (
     id integer NOT NULL,
     discipline_id bigint NOT NULL,
-    teacher_id integer NOT NULL
+    teacher_id integer
 );
 
 
@@ -1097,7 +1098,7 @@ CREATE TABLE public.files_acad_plan (
     path text NOT NULL,
     ext character varying(10) NOT NULL,
     modified_date timestamp without time zone NOT NULL,
-    teacher_id integer NOT NULL,
+    teacher_id integer,
     sub_unit_id integer NOT NULL,
     acad_plan_id integer NOT NULL
 );
@@ -1137,7 +1138,7 @@ CREATE TABLE public.files_dep_load (
     path text NOT NULL,
     ext character varying(10) NOT NULL,
     modified_date timestamp without time zone NOT NULL,
-    teacher_id integer NOT NULL,
+    teacher_id integer,
     sub_unit_id integer NOT NULL,
     dep_load_id integer NOT NULL
 );
@@ -1177,7 +1178,7 @@ CREATE TABLE public.files_ind_plan (
     path text NOT NULL,
     ext character varying(10) NOT NULL,
     modified_date timestamp without time zone NOT NULL,
-    teacher_id integer NOT NULL,
+    teacher_id integer,
     sub_unit_id integer NOT NULL
 );
 
@@ -1216,7 +1217,7 @@ CREATE TABLE public.files_projects (
     path text NOT NULL,
     ext character varying(10) NOT NULL,
     modified_date timestamp without time zone NOT NULL,
-    teacher_id integer NOT NULL,
+    teacher_id integer,
     sub_unit_id integer NOT NULL,
     project_id integer NOT NULL
 );
@@ -1255,7 +1256,7 @@ CREATE TABLE public.files_rpd (
     path text NOT NULL,
     ext character varying(10) NOT NULL,
     modified_date timestamp without time zone NOT NULL,
-    teacher_id integer NOT NULL,
+    teacher_id integer,
     sub_unit_id integer NOT NULL,
     discipline_id integer NOT NULL
 );
@@ -1580,7 +1581,7 @@ ALTER SEQUENCE public.specialties_id_seq OWNED BY public.specialties.id;
 CREATE TABLE public.students (
     id integer NOT NULL,
     person_id integer NOT NULL,
-    group_id integer NOT NULL
+    group_id integer
 );
 
 
@@ -1938,305 +1939,183 @@ COPY public.acad_block (id, name, code) FROM stdin;
 --
 
 COPY public.acad_discipline (id, name, code, zet, hours_lec, hours_lab, hours_sem, acad_plan_id, acad_block_id, acad_part_id, acad_module_id, exams, zachets, semesters, is_optional) FROM stdin;
-1	Инностранный язык	Б.1.1.1	9	\N	\N	162	1	1	1	1	\N	{1,2,3}	{54,54,54}	f
-2	Русский язык и культура речи	Б.1.1.2	2	\N	36	\N	1	1	1	2	\N	{1}	{36}	f
-3	Навыки эффективной презентации	Б.1.1.3	2	\N	36	\N	1	1	1	3	\N	{2}	{NULL,36}	f
-4	Безопасность жизнедеятельности	Б.1.1.4	2	18	18	\N	1	1	1	4	\N	{4}	{NULL,NULL,NULL,36}	f
-100	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	102	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-101	Математический анализ	A.1.1.2	4	36	\N	36	102	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
-102	Дискретная математика	A.1.1.3	4	36	\N	36	102	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-103	Иностранный язык	А.1.2.1	12	\N	\N	204	102	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
-104	Технический перевод	А.1.2.2	6	\N	\N	106	102	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
-105	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	102	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
-106	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	102	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-107	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	102	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
-108	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	102	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-109	Философия	А.1.4.1	2	\N	\N	36	102	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
-110	История России	А.1.4.2	1	\N	\N	\N	102	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-111	Всеобщая история	А.1.4.3	1	\N	\N	\N	102	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-112	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	102	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-113	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	102	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-114	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	102	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
-115	Проектная деятельность	А.1.5.2	10	\N	10	\N	102	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-116	Проектный менеджмент	А.1.5.3	4	34	34	\N	102	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
-117	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	102	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
-118	Инженерное проектирование	А.1.6.1	5	\N	10	\N	102	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-119	Основы ИКТ	А.1.7.1	4	\N	72	\N	102	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-120	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	102	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-121	Базы данных	А.1.8.1	3	18	36	\N	102	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
-122	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	102	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-123	Мобильная разработка	А.1.8.3	4	\N	72	\N	102	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-124	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	102	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
-125	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	102	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-126	Теория вероятностей	А.2.1.2	4	36	\N	36	102	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-127	Основы программирования	А.2.2.1	4	\N	72	\N	102	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-128	Веб-разработка	А.2.2.2	2	\N	36	\N	102	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-129	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	102	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
-130	Защита информации	А.2.2.4	4	\N	72	\N	102	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-131	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	102	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
-132	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	102	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-133	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	102	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
-134	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	102	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-135	Разработка ТЭО	А.2.3.5	4	36	36	\N	102	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-136	Инженерная графика	А.2.3.1	4	18	36	\N	102	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
-137	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	102	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
-138	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	102	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-139	Основы измерения деталей	А.2.3.4	2	\N	36	\N	102	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-140	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	102	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-141	Конструкторская документация	А.2.3.6	2	\N	36	\N	102	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-142	Электротехника и электроника	А.2.3.7	4	36	\N	36	102	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-143	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	102	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-144	Физика	А.2.3.9	8	72	36	36	102	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
-145	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	102	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-146	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	102	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
-147	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	102	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
-148	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	102	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-149	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	102	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
-150	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	102	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-151	Программирование в САПР	А.2.6.1	6	\N	108	\N	102	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
-152	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	102	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-153	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	102	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
-154	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	102	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
-155	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	102	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-156	Организация производства в САПР	А.2.7.1	2	\N	36	\N	102	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-157	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	102	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-158	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	102	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-159	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	105	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-160	Математический анализ	A.1.1.2	4	36	\N	36	105	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
-161	Дискретная математика	A.1.1.3	4	36	\N	36	105	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-162	Иностранный язык	А.1.2.1	12	\N	\N	204	105	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
-163	Технический перевод	А.1.2.2	6	\N	\N	106	105	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
-164	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	105	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
-165	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	105	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-166	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	105	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
-167	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	105	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-168	Философия	А.1.4.1	2	\N	\N	36	105	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
-169	История России	А.1.4.2	1	\N	\N	\N	105	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-170	Всеобщая история	А.1.4.3	1	\N	\N	\N	105	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-171	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	105	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-172	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	105	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-173	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	105	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
-174	Проектная деятельность	А.1.5.2	10	\N	10	\N	105	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-175	Проектный менеджмент	А.1.5.3	4	34	34	\N	105	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
-176	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	105	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
-177	Инженерное проектирование	А.1.6.1	5	\N	10	\N	105	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-178	Основы ИКТ	А.1.7.1	4	\N	72	\N	105	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-179	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	105	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-180	Базы данных	А.1.8.1	3	18	36	\N	105	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
-181	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	105	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-182	Мобильная разработка	А.1.8.3	4	\N	72	\N	105	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-183	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	105	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
-184	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	105	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-185	Теория вероятностей	А.2.1.2	4	36	\N	36	105	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-186	Основы программирования	А.2.2.1	4	\N	72	\N	105	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-187	Веб-разработка	А.2.2.2	2	\N	36	\N	105	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-188	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	105	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
-189	Защита информации	А.2.2.4	4	\N	72	\N	105	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-190	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	105	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
-191	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	105	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-192	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	105	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
-193	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	105	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-194	Разработка ТЭО	А.2.3.5	4	36	36	\N	105	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-195	Инженерная графика	А.2.3.1	4	18	36	\N	105	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
-196	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	105	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
-197	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	105	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-198	Основы измерения деталей	А.2.3.4	2	\N	36	\N	105	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-199	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	105	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-200	Конструкторская документация	А.2.3.6	2	\N	36	\N	105	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-201	Электротехника и электроника	А.2.3.7	4	36	\N	36	105	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-202	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	105	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-203	Физика	А.2.3.9	8	72	36	36	105	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
-204	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	105	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-205	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	105	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
-206	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	105	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
-207	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	105	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-208	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	105	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
-209	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	105	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-210	Программирование в САПР	А.2.6.1	6	\N	108	\N	105	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
-211	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	105	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-212	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	105	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
-213	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	105	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
-214	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	105	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-215	Организация производства в САПР	А.2.7.1	2	\N	36	\N	105	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-216	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	105	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-217	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	105	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-218	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	106	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-219	Математический анализ	A.1.1.2	4	36	\N	36	106	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
-220	Дискретная математика	A.1.1.3	4	36	\N	36	106	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-221	Иностранный язык	А.1.2.1	12	\N	\N	204	106	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
-222	Технический перевод	А.1.2.2	6	\N	\N	106	106	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
-223	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	106	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
-224	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	106	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-225	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	106	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
-226	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	106	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-227	Философия	А.1.4.1	2	\N	\N	36	106	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
-228	История России	А.1.4.2	1	\N	\N	\N	106	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-229	Всеобщая история	А.1.4.3	1	\N	\N	\N	106	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-230	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	106	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-231	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	106	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-232	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	106	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
-233	Проектная деятельность	А.1.5.2	10	\N	10	\N	106	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-234	Проектный менеджмент	А.1.5.3	4	34	34	\N	106	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
-235	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	106	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
-236	Инженерное проектирование	А.1.6.1	5	\N	10	\N	106	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-237	Основы ИКТ	А.1.7.1	4	\N	72	\N	106	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-238	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	106	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-239	Базы данных	А.1.8.1	3	18	36	\N	106	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
-240	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	106	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-241	Мобильная разработка	А.1.8.3	4	\N	72	\N	106	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-242	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	106	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
-243	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	106	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-244	Теория вероятностей	А.2.1.2	4	36	\N	36	106	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-245	Основы программирования	А.2.2.1	4	\N	72	\N	106	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-246	Веб-разработка	А.2.2.2	2	\N	36	\N	106	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-247	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	106	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
-248	Защита информации	А.2.2.4	4	\N	72	\N	106	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-249	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	106	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
-250	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	106	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-251	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	106	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
-252	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	106	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-253	Разработка ТЭО	А.2.3.5	4	36	36	\N	106	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-254	Инженерная графика	А.2.3.1	4	18	36	\N	106	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
-255	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	106	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
-256	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	106	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-257	Основы измерения деталей	А.2.3.4	2	\N	36	\N	106	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-258	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	106	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-259	Конструкторская документация	А.2.3.6	2	\N	36	\N	106	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-260	Электротехника и электроника	А.2.3.7	4	36	\N	36	106	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-261	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	106	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-262	Физика	А.2.3.9	8	72	36	36	106	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
-263	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	106	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-264	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	106	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
-265	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	106	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
-266	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	106	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-267	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	106	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
-268	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	106	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-269	Программирование в САПР	А.2.6.1	6	\N	108	\N	106	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
-270	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	106	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-271	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	106	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
-272	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	106	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
-273	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	106	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-274	Организация производства в САПР	А.2.7.1	2	\N	36	\N	106	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-275	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	106	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-276	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	106	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-277	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	109	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-278	Математический анализ	A.1.1.2	4	36	\N	36	109	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
-279	Дискретная математика	A.1.1.3	4	36	\N	36	109	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-280	Иностранный язык	А.1.2.1	12	\N	\N	204	109	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
-281	Технический перевод	А.1.2.2	6	\N	\N	106	109	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
-282	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	109	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
-283	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	109	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-284	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	109	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
-285	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	109	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-286	Философия	А.1.4.1	2	\N	\N	36	109	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
-287	История России	А.1.4.2	1	\N	\N	\N	109	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-288	Всеобщая история	А.1.4.3	1	\N	\N	\N	109	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-289	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	109	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-290	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	109	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-291	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	109	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
-292	Проектная деятельность	А.1.5.2	10	\N	10	\N	109	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-293	Проектный менеджмент	А.1.5.3	4	34	34	\N	109	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
-294	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	109	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
-295	Инженерное проектирование	А.1.6.1	5	\N	10	\N	109	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-296	Основы ИКТ	А.1.7.1	4	\N	72	\N	109	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-297	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	109	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-298	Базы данных	А.1.8.1	3	18	36	\N	109	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
-299	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	109	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-300	Мобильная разработка	А.1.8.3	4	\N	72	\N	109	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-301	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	109	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
-302	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	109	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-303	Теория вероятностей	А.2.1.2	4	36	\N	36	109	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-304	Основы программирования	А.2.2.1	4	\N	72	\N	109	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-305	Веб-разработка	А.2.2.2	2	\N	36	\N	109	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-306	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	109	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
-307	Защита информации	А.2.2.4	4	\N	72	\N	109	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-308	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	109	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
-309	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	109	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-310	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	109	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
-311	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	109	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-312	Разработка ТЭО	А.2.3.5	4	36	36	\N	109	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-313	Инженерная графика	А.2.3.1	4	18	36	\N	109	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
-314	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	109	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
-315	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	109	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-316	Основы измерения деталей	А.2.3.4	2	\N	36	\N	109	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-317	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	109	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-318	Конструкторская документация	А.2.3.6	2	\N	36	\N	109	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-319	Электротехника и электроника	А.2.3.7	4	36	\N	36	109	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-320	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	109	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-321	Физика	А.2.3.9	8	72	36	36	109	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
-322	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	109	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-323	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	109	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
-324	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	109	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
-325	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	109	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-326	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	109	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
-327	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	109	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-328	Программирование в САПР	А.2.6.1	6	\N	108	\N	109	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
-329	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	109	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-330	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	109	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
-331	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	109	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
-332	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	109	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-333	Организация производства в САПР	А.2.7.1	2	\N	36	\N	109	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-334	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	109	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-335	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	109	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-336	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	110	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-337	Математический анализ	A.1.1.2	4	36	\N	36	110	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
-338	Дискретная математика	A.1.1.3	4	36	\N	36	110	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-339	Иностранный язык	А.1.2.1	12	\N	\N	204	110	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
-340	Технический перевод	А.1.2.2	6	\N	\N	106	110	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
-341	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	110	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
-342	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	110	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-343	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	110	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
-344	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	110	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-345	Философия	А.1.4.1	2	\N	\N	36	110	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
-346	История России	А.1.4.2	1	\N	\N	\N	110	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-347	Всеобщая история	А.1.4.3	1	\N	\N	\N	110	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-348	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	110	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
-349	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	110	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-350	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	110	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
-351	Проектная деятельность	А.1.5.2	10	\N	10	\N	110	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-352	Проектный менеджмент	А.1.5.3	4	34	34	\N	110	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
-353	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	110	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
-354	Инженерное проектирование	А.1.6.1	5	\N	10	\N	110	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
-355	Основы ИКТ	А.1.7.1	4	\N	72	\N	110	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-356	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	110	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-357	Базы данных	А.1.8.1	3	18	36	\N	110	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
-358	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	110	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-359	Мобильная разработка	А.1.8.3	4	\N	72	\N	110	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-360	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	110	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
-361	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	110	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-362	Теория вероятностей	А.2.1.2	4	36	\N	36	110	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-363	Основы программирования	А.2.2.1	4	\N	72	\N	110	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
-364	Веб-разработка	А.2.2.2	2	\N	36	\N	110	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-365	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	110	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
-366	Защита информации	А.2.2.4	4	\N	72	\N	110	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-367	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	110	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
-368	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	110	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-369	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	110	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
-370	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	110	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
-371	Разработка ТЭО	А.2.3.5	4	36	36	\N	110	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-372	Инженерная графика	А.2.3.1	4	18	36	\N	110	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
-373	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	110	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
-374	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	110	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-375	Основы измерения деталей	А.2.3.4	2	\N	36	\N	110	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
-376	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	110	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
-377	Конструкторская документация	А.2.3.6	2	\N	36	\N	110	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-378	Электротехника и электроника	А.2.3.7	4	36	\N	36	110	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
-379	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	110	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-380	Физика	А.2.3.9	8	72	36	36	110	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
-381	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	110	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-382	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	110	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
-383	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	110	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
-384	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	110	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-385	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	110	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
-386	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	110	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
-387	Программирование в САПР	А.2.6.1	6	\N	108	\N	110	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
-388	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	110	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
-389	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	110	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
-390	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	110	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
-391	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	110	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-392	Организация производства в САПР	А.2.7.1	2	\N	36	\N	110	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
-393	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	110	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
-394	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	110	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+100	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	100	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+101	Математический анализ	A.1.1.2	4	36	\N	36	100	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
+102	Дискретная математика	A.1.1.3	4	36	\N	36	100	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+103	Иностранный язык	А.1.2.1	12	\N	\N	204	100	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
+104	Технический перевод	А.1.2.2	6	\N	\N	106	100	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
+105	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	100	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
+106	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	100	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+107	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	100	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
+108	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	100	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+109	Философия	А.1.4.1	2	\N	\N	36	100	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
+110	История России	А.1.4.2	1	\N	\N	\N	100	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+111	Всеобщая история	А.1.4.3	1	\N	\N	\N	100	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+112	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	100	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+113	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	100	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+114	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	100	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
+115	Проектная деятельность	А.1.5.2	10	\N	10	\N	100	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
+116	Проектный менеджмент	А.1.5.3	4	34	34	\N	100	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
+117	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	100	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
+118	Инженерное проектирование	А.1.6.1	5	\N	10	\N	100	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
+119	Основы ИКТ	А.1.7.1	4	\N	72	\N	100	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+120	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	100	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+121	Базы данных	А.1.8.1	3	18	36	\N	100	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
+122	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	100	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+123	Мобильная разработка	А.1.8.3	4	\N	72	\N	100	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+124	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	100	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
+125	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	100	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
+126	Теория вероятностей	А.2.1.2	4	36	\N	36	100	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+127	Основы программирования	А.2.2.1	4	\N	72	\N	100	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+128	Веб-разработка	А.2.2.2	2	\N	36	\N	100	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+129	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	100	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
+130	Защита информации	А.2.2.4	4	\N	72	\N	100	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+131	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	100	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
+132	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	100	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+133	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	100	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
+134	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	100	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+135	Разработка ТЭО	А.2.3.5	4	36	36	\N	100	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+136	Инженерная графика	А.2.3.1	4	18	36	\N	100	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
+137	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	100	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
+138	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	100	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+139	Основы измерения деталей	А.2.3.4	2	\N	36	\N	100	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+140	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	100	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
+141	Конструкторская документация	А.2.3.6	2	\N	36	\N	100	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+142	Электротехника и электроника	А.2.3.7	4	36	\N	36	100	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+143	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	100	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+144	Физика	А.2.3.9	8	72	36	36	100	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
+145	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	100	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+146	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	100	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
+147	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	100	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
+148	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	100	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+149	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	100	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
+150	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	100	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+151	Программирование в САПР	А.2.6.1	6	\N	108	\N	100	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
+152	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	100	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+153	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	100	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
+154	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	100	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
+155	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	100	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+156	Организация производства в САПР	А.2.7.1	2	\N	36	\N	100	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+157	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	100	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+158	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	100	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+985	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	117	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+986	Математический анализ	A.1.1.2	4	36	\N	36	117	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
+987	Дискретная математика	A.1.1.3	4	36	\N	36	117	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+988	Иностранный язык	А.1.2.1	12	\N	\N	204	117	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
+989	Технический перевод	А.1.2.2	6	\N	\N	106	117	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
+990	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	117	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
+991	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	117	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+992	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	117	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
+993	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	117	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+994	Философия	А.1.4.1	2	\N	\N	36	117	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
+995	История России	А.1.4.2	1	\N	\N	\N	117	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+996	Всеобщая история	А.1.4.3	1	\N	\N	\N	117	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+997	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	117	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+998	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	117	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+999	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	117	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
+1000	Проектная деятельность	А.1.5.2	10	\N	10	\N	117	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
+1001	Проектный менеджмент	А.1.5.3	4	34	34	\N	117	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
+1002	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	117	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
+1003	Инженерное проектирование	А.1.6.1	5	\N	10	\N	117	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
+1004	Основы ИКТ	А.1.7.1	4	\N	72	\N	117	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1005	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	117	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+1006	Базы данных	А.1.8.1	3	18	36	\N	117	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
+1007	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	117	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1008	Мобильная разработка	А.1.8.3	4	\N	72	\N	117	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1009	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	117	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
+1010	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	117	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
+1011	Теория вероятностей	А.2.1.2	4	36	\N	36	117	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+1012	Основы программирования	А.2.2.1	4	\N	72	\N	117	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1013	Веб-разработка	А.2.2.2	2	\N	36	\N	117	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1014	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	117	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
+1015	Защита информации	А.2.2.4	4	\N	72	\N	117	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+1016	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	117	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
+1017	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	117	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1018	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	117	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
+1019	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	117	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+1020	Разработка ТЭО	А.2.3.5	4	36	36	\N	117	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1021	Инженерная графика	А.2.3.1	4	18	36	\N	117	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1022	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	117	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
+1023	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	117	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+1024	Основы измерения деталей	А.2.3.4	2	\N	36	\N	117	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+1025	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	117	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
+1026	Конструкторская документация	А.2.3.6	2	\N	36	\N	117	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1027	Электротехника и электроника	А.2.3.7	4	36	\N	36	117	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+1028	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	117	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1029	Физика	А.2.3.9	8	72	36	36	117	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
+1030	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	117	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1031	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	117	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
+1032	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	117	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
+1033	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	117	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1034	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	117	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
+1035	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	117	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1036	Программирование в САПР	А.2.6.1	6	\N	108	\N	117	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
+1037	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	117	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1038	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	117	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
+1039	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	117	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
+1040	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	117	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1041	Организация производства в САПР	А.2.7.1	2	\N	36	\N	117	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1042	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	117	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1043	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	117	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1044	Линейная алгебра и функция нескольких переменных	A.1.1.1	4	36	\N	36	118	100	100	100	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1045	Математический анализ	A.1.1.2	4	36	\N	36	118	100	100	100	\N	{}	{NULL,72,NULL,NULL,NULL,NULL,NULL}	f
+1046	Дискретная математика	A.1.1.3	4	36	\N	36	118	100	100	100	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+1047	Иностранный язык	А.1.2.1	12	\N	\N	204	118	103	103	103	\N	{1,2,3}	{68,68,34,34,NULL,NULL,NULL}	f
+1048	Технический перевод	А.1.2.2	6	\N	\N	106	118	103	103	103	\N	{5,6}	{NULL,NULL,NULL,NULL,34,36,36}	f
+1049	Коммуникация в ИТ-сфере	А.1.3.1	2	\N	36	\N	118	103	103	105	\N	{1}	{36,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1050	Навыки эффективной презентации	А.1.3.2	2	\N	36	\N	118	103	103	105	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+1051	Нормативное регулирование внедрения и эксплуатации ИС	А.1.3.3	3	18	36	\N	118	103	103	105	\N	{5}	{NULL,NULL,NULL,NULL,54,NULL,NULL}	f
+1052	Документирование этапов жизненного цикла ИС	А.1.3.4	4	\N	72	\N	118	103	103	105	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1053	Философия	А.1.4.1	2	\N	\N	36	118	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,36}	f
+1054	История России	А.1.4.2	1	\N	\N	\N	118	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1055	Всеобщая история	А.1.4.3	1	\N	\N	\N	118	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1056	Безопасность жизнедеятельности	А.1.4.4	2	\N	\N	\N	118	103	103	109	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1057	Физическая культура и спорт	А.1.4.5	2	\N	\N	36	118	103	103	109	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1058	Введение в проектную деятельность	А.1.5.1	4	\N	4	\N	118	103	103	114	\N	{1,2}	{2,2,NULL,NULL,NULL,NULL,NULL}	f
+1059	Проектная деятельность	А.1.5.2	10	\N	10	\N	118	103	103	114	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
+1060	Проектный менеджмент	А.1.5.3	4	34	34	\N	118	103	103	114	\N	{4}	{NULL,NULL,NULL,34,34,NULL,NULL}	f
+1061	Технологическое предпринимательство	А.1.5.4	4	36	36	\N	118	103	103	114	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,36}	f
+1062	Инженерное проектирование	А.1.6.1	5	\N	10	\N	118	103	103	118	\N	{3,4,5,6,7}	{NULL,NULL,2,2,2,2,2}	f
+1063	Основы ИКТ	А.1.7.1	4	\N	72	\N	118	103	103	119	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1064	Сети и телекоммуникации	А.1.7.2	4	\N	72	\N	118	103	103	119	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+1065	Базы данных	А.1.8.1	3	18	36	\N	118	103	103	121	\N	{}	{NULL,NULL,54,NULL,NULL,NULL,NULL}	f
+1066	Математическая логика и теория алгоритмов в практике программирования	А.1.8.2	4	36	36	\N	118	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1067	Мобильная разработка	А.1.8.3	4	\N	72	\N	118	103	103	121	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1068	Элективные дисциплины по физической культуре и спорту	А.1.9	\N	\N	\N	328	118	103	103	124	\N	{}	{72,72,72,72,40,NULL,NULL}	f
+1069	Комплексная математика и дифференциальные уравнения	А.2.1.1	4	36	\N	36	118	103	125	125	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
+1070	Теория вероятностей	А.2.1.2	4	36	\N	36	118	103	125	125	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+1071	Основы программирования	А.2.2.1	4	\N	72	\N	118	103	125	127	\N	{}	{72,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1072	Веб-разработка	А.2.2.2	2	\N	36	\N	118	103	125	127	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1073	Разработка веб-приложений и баз данных	А.2.2.3	5	18	72	\N	118	103	125	127	\N	{}	{NULL,NULL,NULL,90,NULL,NULL,NULL}	f
+1074	Защита информации	А.2.2.4	4	\N	72	\N	118	103	125	127	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+1075	Моделирование и реинжиниринг бизнес-процессов внедрения и эксплуатации САПР	А.2.3.1	3	\N	54	\N	118	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,54,NULL}	f
+1076	Управление нормативно-справочной информацией	А.2.3.2	4	\N	72	\N	118	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1077	Корпоративные информационные системы	А.2.3.3	3	\N	54	\N	118	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,54}	f
+1078	Управление жизненным циклом и документами	А.2.3.4	4	36	36	\N	118	103	125	131	\N	{}	{NULL,NULL,NULL,NULL,NULL,72,NULL}	f
+1079	Разработка ТЭО	А.2.3.5	4	36	36	\N	118	103	125	131	\N	{7}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1080	Инженерная графика	А.2.3.1	4	18	36	\N	118	103	125	136	\N	{}	{54,NULL,NULL,NULL,NULL,NULL,NULL}	f
+1081	Основы проектирования механизмов	А.2.3.2	4	\N	54	\N	118	103	125	136	\N	{}	{NULL,54,NULL,NULL,NULL,NULL,NULL}	f
+1082	Машиностроительное черчение	А.2.3.3	2	\N	36	\N	118	103	125	136	\N	{2}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+1083	Основы измерения деталей	А.2.3.4	2	\N	36	\N	118	103	125	136	\N	{}	{NULL,36,NULL,NULL,NULL,NULL,NULL}	f
+1084	Основы материаловедения и сопротивления материалов	А.2.3.5	4	36	\N	36	118	103	125	136	\N	{}	{NULL,NULL,72,NULL,NULL,NULL,NULL}	f
+1085	Конструкторская документация	А.2.3.6	2	\N	36	\N	118	103	125	136	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1086	Электротехника и электроника	А.2.3.7	4	36	\N	36	118	103	125	136	\N	{}	{NULL,NULL,NULL,72,NULL,NULL,NULL}	f
+1087	Основы термо-, гидро- и газодинамики	А.2.3.8	4	36	36	\N	118	103	125	136	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1088	Физика	А.2.3.9	8	72	36	36	118	103	125	136	\N	{}	{72,72,NULL,NULL,NULL,NULL,NULL}	f
+1089	Тайм-менеджмент	А.2.4.1	2	\N	\N	36	118	103	125	145	\N	{6}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1090	Основы маркетинговых исследований и анализа	А.2.4.2	2	\N	\N	34	118	103	125	145	\N	{3}	{NULL,NULL,34,NULL,NULL,NULL,NULL}	f
+1091	Трехмерное моделирование в САПР	А.2.5.1	6	\N	108	\N	118	103	125	147	\N	{1}	{36,72,NULL,NULL,NULL,NULL,NULL}	f
+1092	Компьютерное моделирование деталей машин	А.2.5.2	2	\N	36	\N	118	103	125	147	\N	{}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1093	Компьютерное проектирование деталей машин	А.2.5.3	6	\N	108	\N	118	103	125	147	\N	{4,5}	{NULL,NULL,NULL,72,36,NULL,NULL}	f
+1094	Технология машиностроения в Inventor	А.2.5.4	4	18	54	\N	118	103	125	147	\N	{}	{NULL,NULL,NULL,NULL,72,NULL,NULL}	f
+1095	Программирование в САПР	А.2.6.1	6	\N	108	\N	118	103	125	151	\N	{2}	{NULL,36,72,NULL,NULL,NULL,NULL}	f
+1096	ИТ-практикум по сопротивлению материалов	А.2.6.2	2	\N	36	\N	118	103	125	151	\N	{3}	{NULL,NULL,36,NULL,NULL,NULL,NULL}	f
+1097	ИТ-практикум по электротехнике и электронике	А.2.6.3	2	\N	36	\N	118	103	125	151	\N	{4}	{NULL,NULL,NULL,36,NULL,NULL,NULL}	f
+1098	ИТ-практикум по термо-, гидро- и газодинамике	А.2.6.4	2	\N	36	\N	118	103	125	151	\N	{5}	{NULL,NULL,NULL,NULL,36,NULL,NULL}	f
+1099	Бизнес-планирование в ИТ	А.2.7.1	2	\N	36	\N	118	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1100	Организация производства в САПР	А.2.7.1	2	\N	36	\N	118	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,36,NULL}	f
+1101	Прикладные САПР-технологии	А.2.7.2	4	\N	72	\N	118	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
+1102	Прикладные облачные технологии	А.2.7.2	4	\N	72	\N	118	103	125	155	\N	{}	{NULL,NULL,NULL,NULL,NULL,NULL,72}	f
 \.
 
 
@@ -2288,12 +2167,9 @@ COPY public.acad_part (id, name, code) FROM stdin;
 --
 
 COPY public.acad_plan (id, modified_date, specialties_id) FROM stdin;
-1	2016-09-01 09:00:00	2
-102	2020-04-25 21:56:48	100
-105	2020-04-28 17:08:04	101
-106	2020-04-28 20:45:48	102
-109	2020-04-28 20:52:05	103
-110	2020-04-28 21:01:12	104
+100	2020-06-14 00:32:19	100
+117	2020-06-14 11:44:38	116
+118	2020-06-14 13:01:33	119
 \.
 
 
@@ -2312,15 +2188,10 @@ COPY public.degree (id, name) FROM stdin;
 --
 
 COPY public.dep_load (id, department_id, begin_date, end_date, modified_date) FROM stdin;
-1	1	2016-09-01 09:00:00	2016-09-01 09:00:00	2016-09-01 09:00:00
-2	2	2016-09-01 09:00:00	2016-09-01 09:00:00	2016-09-01 09:00:00
-3	1	2016-09-01 09:00:00	2016-09-01 09:00:00	2016-09-01 09:00:00
-4	2	2016-09-01 09:00:00	2016-09-01 09:00:00	2016-09-01 09:00:00
-108	1	2016-09-01 09:00:00	2016-09-01 09:00:00	2016-09-01 09:00:00
-109	1	2016-09-01 09:00:00	2016-09-01 09:00:00	2016-09-01 09:00:00
-119	1	2016-09-01 09:00:00	2016-09-01 09:00:00	2020-04-25 21:27:51
-120	2	2017-05-28 00:00:00	2017-05-31 00:00:00	2020-04-28 21:03:22
-121	100	2017-05-31 00:00:00	2017-06-30 00:00:00	2020-04-30 01:21:18
+103	100	2020-09-01 00:00:00	2020-12-31 00:00:00	2020-06-14 00:43:01
+104	101	2021-01-03 00:00:00	2022-01-03 00:00:00	2020-06-14 00:47:56
+105	102	2020-09-01 00:00:00	2020-12-31 00:00:00	2020-06-14 11:46:03
+106	103	2017-05-25 00:00:00	2017-05-31 00:00:00	2020-06-14 13:01:18
 \.
 
 
@@ -2331,7 +2202,10 @@ COPY public.dep_load (id, department_id, begin_date, end_date, modified_date) FR
 COPY public.department (id, name) FROM stdin;
 1	Информатика и вычислительная техника
 2	Проектная деятельность
-100	Векторные вычисления и магия
+100	Веб-технологии
+101	Информационная безопастность
+102	Машиностроение
+103	Новая кафедра
 \.
 
 
@@ -2340,351 +2214,74 @@ COPY public.department (id, name) FROM stdin;
 --
 
 COPY public.disciplines (id, name, hours_con_project, hours_lec, hours_sem, hours_lab, hours_con_exam, hours_zachet, hours_exam, hours_kurs_project, hours_gek, hours_ruk_prakt, hours_ruk_vkr, hours_ruk_mag, hours_ruk_aspirant, semester_num, acad_discipline_id, dep_load_id, is_approved) FROM stdin;
-1	Инностранный язык	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	1	f
-2	Русский язык и культура речи	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	2	f
-3	Навыки эффективной презентации	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	3	f
-4	Безопасность жизнедеятельности	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	4	f
-106	1	\N	\N	324	162	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	108	f
-107	2	2	2.0999999	2.20000005	2.29999995	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	1	\N	108	f
-108	3	3	3	3	3	3	3	3	3	3	3	3	3	3	1	\N	108	f
-109	1	\N	\N	324	162	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	109	f
-110	2	2	2.0999999	2.20000005	2.29999995	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	2.20000005	1	\N	109	f
-111	3	3	3	3	3	3	3	3	3	3	3	3	3	3	1	\N	109	f
-196	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	119	f
-197	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-198	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-199	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	119	f
-200	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-201	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	119	f
-202	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-203	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	119	f
-204	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-205	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-206	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	119	f
-207	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-208	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	119	f
-209	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	119	f
-210	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-211	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-212	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	119	f
-213	Авторское право	1	2	3	5	7	9	11	13	15	16	17	18	\N	1	\N	120	f
-214	Большие открытые данные	\N	34	\N	68	1	\N	7.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-215	Введение в жестовую лингвистику	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-216	Введение в проектную деятельность	236	\N	\N	15	\N	11.8000002	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-217	Введение в проектную деятельность	280	\N	\N	19	\N	14	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-218	Введение в проектную деятельность	200	\N	\N	15	\N	10	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-219	Введение в психолингвистику	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-220	Веб-райтинг	\N	\N	\N	102	\N	9	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-221	Веб-райтинг	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-222	Веб-технологии	\N	\N	\N	272	3	\N	17.1000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-223	Детали машин и компьютерное моделирование в Inventor	\N	\N	\N	136	\N	11.3999996	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-224	Дискретная математика	\N	34	34	\N	1	\N	8.69999981	\N	\N	\N	\N	\N	\N	1	\N	120	f
-225	Инженерия требований	\N	34	\N	102	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	1	\N	120	f
-226	Инженерное проектирование 	\N	\N	\N	4	\N	5.80000019	\N	87	\N	\N	\N	\N	\N	1	\N	120	f
-227	Инженерное проектирование 	\N	\N	\N	6	\N	\N	\N	99	\N	\N	\N	\N	\N	1	\N	120	f
-228	Инженерное проектирование 	\N	\N	\N	4	\N	5	\N	75	\N	\N	\N	\N	\N	1	\N	120	f
-229	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	120	f
-230	Инженерное проектирование 	\N	\N	\N	8	\N	9.19999981	\N	138	\N	\N	\N	\N	\N	1	\N	120	f
-231	Инженерное проектирование 	\N	\N	\N	6	\N	7.5999999	\N	114	\N	\N	\N	\N	\N	1	\N	120	f
-232	Инженерное проектирование 	\N	\N	\N	6	\N	9	\N	135	\N	\N	\N	\N	\N	1	\N	120	f
-233	Инженерное проектирование 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-234	Инженерное проектирование 	\N	\N	\N	8	\N	11.3999996	\N	171	\N	\N	\N	\N	\N	1	\N	120	f
-235	Инженерное проектирование 	\N	\N	\N	6	\N	9	\N	135	\N	\N	\N	\N	\N	1	\N	120	f
-236	Интегрированные системы проектирования и управления (факультативная)	\N	36	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-237	Интеллектуальные методы обработки информации	\N	\N	\N	68	\N	5.80000019	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-238	Информатика и вычислительная техника	\N	10	8	\N	\N	0.200000003	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-239	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-240	Информационные системы и технологии	\N	\N	\N	272	2	\N	15	150	\N	\N	\N	\N	\N	1	\N	120	f
-241	Исследование и моделирование бизнес-процессов и структур	\N	34	34	\N	1	\N	7.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-242	Коммерциализация ИТ-проектов	\N	\N	\N	68	\N	5.80000019	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-243	Коммуникация в ИТ-сфере	\N	\N	\N	136	\N	11.8000002	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-244	Коммуникация в ИТ-сфере	\N	\N	\N	170	\N	14	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-245	Коммуникация в ИТ-сфере	\N	\N	\N	136	\N	10	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-246	Компьютерная лингвистика	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-247	Компьютерная лингвистика	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-248	Компьютерное моделирование интеллектуальных систем (факультативная)	\N	12	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-249	Компьютерный анализ  термо-,гидро-, и газодинамических процессов	\N	34	102	\N	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	1	\N	120	f
-250	Лабораторный практикум по материаловедению и сопромату	\N	\N	\N	136	\N	11.3999996	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-251	Лабораторный практикум по основам термо-, гидро- и газодинамики	\N	\N	\N	136	\N	9.19999981	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-252	Математическая логика и теория алгоритмов в программировании	\N	34	102	\N	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	1	\N	120	f
-253	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	1	\N	120	f
-254	Математическое обеспечение искусственного интеллекта	\N	12	9	\N	\N	0.600000024	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-255	Методы искусственного интеллекта	\N	14	11	\N	2	\N	7.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-256	Методы статистического оценивания распределенных данных	\N	17	\N	17	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	1	\N	120	f
-257	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-258	Мобильная разработка	\N	\N	\N	272	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	1	\N	120	f
-259	Моделирование бизнес-процессов в веб-индустрии	\N	34	\N	68	2	\N	8.69999981	\N	\N	\N	\N	\N	\N	1	\N	120	f
-260	Мультимедиа технологии	\N	11	11	11	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-261	Мультимедиа технологии	\N	11	11	11	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-262	Мультимедиа-технологии	\N	\N	\N	272	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	1	\N	120	f
-263	Научно-исследовательская и проектная деятельность	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-264	Научно-исследовательская и проектная деятельность	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-265	Объектно-ориентированное проектрование	\N	34	\N	102	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-266	Основы баз данных	\N	17	\N	153	\N	9	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-267	Основы веб-технологий	\N	\N	\N	272	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	1	\N	120	f
-268	Основы ИКТ	\N	\N	\N	272	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	1	\N	120	f
-269	Основы ИКТ	\N	\N	\N	340	3	\N	21	\N	\N	\N	\N	\N	\N	1	\N	120	f
-270	Основы ИКТ	\N	\N	\N	136	1	\N	8.10000038	\N	\N	\N	\N	\N	\N	1	\N	120	f
-271	Основы ИКТ	\N	\N	\N	136	1	\N	7.80000019	\N	\N	\N	\N	\N	\N	1	\N	120	f
-272	Основы ИКТ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-273	Основы ИКТ	\N	\N	\N	272	2	\N	15	\N	\N	\N	\N	\N	\N	1	\N	120	f
-274	Основы КИС	\N	34	\N	102	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-275	Основы маркетинга в САПР	\N	17	51	\N	\N	11.3999996	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-276	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-277	Основы программирования	\N	\N	\N	204	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	1	\N	120	f
-278	Основы программирования	\N	\N	\N	340	3	\N	21	\N	\N	\N	\N	\N	\N	1	\N	120	f
-279	Основы программирования	\N	\N	\N	204	2	\N	15	\N	\N	\N	\N	\N	\N	1	\N	120	f
-280	Основы сетевых технологий	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-281	Основы сетевых технологий	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-282	Основы тестирования	\N	\N	\N	136	\N	10	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-283	Основы языкознания 	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-284	Основы языкознания 	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	850	\N	1	\N	120	f
-285	Параллельное программирование	\N	18	14	\N	2	\N	4.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-286	Письменная деловая комуникация	\N	\N	102	\N	\N	9.19999981	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-287	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-288	Прикладные и системные компоненты и КИС	\N	17	\N	34	1	\N	7.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-289	Принтмедиа технологии	\N	11	11	11	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-290	Программирование	\N	\N	\N	68	\N	3.79999995	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-291	Программирование	\N	\N	\N	102	\N	9	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-292	Программирование в КИС 1С	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-293	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	120	f
-294	Программирование в системах информационной безопасности	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-295	Программирование веб-приложений	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-296	Программирование веб-приложений	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-297	Програмное обеспечение для проектирования автомобиля	\N	\N	\N	68	1	\N	6.9000001	\N	\N	\N	\N	\N	\N	1	\N	120	f
-298	Програмное обеспечение для проектирования автомобиля	\N	\N	\N	102	1	\N	7.19999981	\N	\N	\N	\N	\N	\N	1	\N	120	f
-299	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-300	Проектирование графического интерфейса оператора	\N	7	\N	25	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-301	Проектирование сайтов	\N	\N	\N	136	\N	11.8000002	\N	177	\N	\N	\N	\N	\N	1	\N	120	f
-302	Проектная деятельность	\N	\N	\N	4	\N	5.80000019	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-303	Проектная деятельность	\N	\N	\N	6	\N	6.5999999	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-304	Проектная деятельность	\N	\N	\N	4	\N	5	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-305	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-306	Проектная деятельность	\N	\N	\N	8	\N	9.19999981	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-307	Проектная деятельность	\N	\N	\N	6	\N	7.5999999	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-308	Проектная деятельность	\N	\N	\N	6	\N	9	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-309	Проектная деятельность	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-310	Проектная деятельность	\N	\N	\N	8	\N	11.3999996	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-311	Проектная деятельность	\N	\N	\N	6	\N	9	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-312	Проектное управление в ИТ сфере	\N	34	\N	102	2	\N	9.89999962	\N	\N	\N	\N	\N	\N	1	\N	120	f
-313	Проектное управление в ИТ сфере	\N	34	\N	68	1	\N	7.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-314	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	18	\N	\N	\N	1	\N	120	f
-315	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	18	\N	\N	\N	1	\N	120	f
-316	Психолингвистические исследования	\N	11	11	11	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-317	Разработка в КИС	\N	\N	\N	136	2	\N	8.69999981	\N	\N	\N	\N	\N	\N	1	\N	120	f
-318	Разработка документации в ИТ-проектах и разработке	\N	\N	\N	136	2	\N	8.69999981	\N	\N	\N	\N	\N	\N	1	\N	120	f
-319	Разработка программной документации	\N	17	\N	102	2	\N	9.89999962	\N	\N	\N	\N	\N	\N	1	\N	120	f
-320	Разработка технического задания	\N	34	\N	102	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-321	Разработка ТЭО	\N	17	34	\N	\N	6.5999999	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-322	Разработка ТЭО в ИТ-сфере	\N	\N	\N	68	\N	5.80000019	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-323	Распознавание образов	\N	11	11	11	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-324	Распознавание образов	\N	11	11	11	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	1	\N	120	f
-325	Редактирование технических текстов	\N	11	11	11	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-326	Редактирование технических текстов	\N	11	11	11	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-327	Реинжиниринг бизнес-процессов в САПР	\N	34	\N	102	2	\N	9.89999962	\N	\N	\N	\N	\N	\N	1	\N	120	f
-328	Семиотика и когнитология	\N	11	11	11	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-329	Семиотика и когнитология	\N	11	11	11	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	1	\N	120	f
-330	Сетевое программирование	\N	34	\N	102	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	1	\N	120	f
-331	Сети и системы передачи информации	\N	\N	\N	136	1	\N	8.69999981	\N	\N	\N	\N	\N	\N	1	\N	120	f
-332	Системы автоматического проектирования и прототипирование	\N	17	\N	102	1	\N	7.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-333	Скрипты	\N	\N	\N	102	\N	9	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-334	Скрипты	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-335	Случайные процессы	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-336	Случайные процессы	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-337	Современные тенденции Интернет-идустрии (факультативная)	\N	\N	34	\N	\N	5.80000019	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-338	Современные технологии программирования	\N	6	\N	193	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-339	Современные технологии программирования	\N	6	\N	193	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-340	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-341	Стилистика (факультативная)	\N	8	26	\N	1	\N	2.0999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-342	Стилистика (факультативная)	\N	16	16	\N	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-343	Стилистика (факультативная)	\N	8	26	\N	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-344	Стилистика (факультативная)	\N	8	26	\N	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-345	Структуры данных в веб	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-346	Структуры данных в веб	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-347	Телемедицина	\N	11	11	11	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	1	\N	120	f
-348	Технические средства измерений (факультативная)	\N	8	26	\N	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-349	Технические средства измерений (факультативная)	\N	8	26	\N	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-350	Технические средства медицинских исследований	\N	11	11	11	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-351	Технологии программирования в САПР	\N	\N	\N	272	3	\N	17.1000004	\N	\N	\N	\N	\N	\N	1	\N	120	f
-352	Технологическое предпринимательство	\N	17	34	\N	\N	6.5999999	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-353	Технология проектирования ИС	\N	\N	\N	136	\N	5	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-354	Трехмерное моделирование в САПР	\N	\N	\N	170	\N	14	\N	210	\N	\N	\N	\N	\N	1	\N	120	f
-355	Управление жизненным циклом и документами (PLM|PDM) в САПР	\N	34	\N	136	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	1	\N	120	f
-356	Управление нормативно-справочной информацией (MDM)	\N	34	\N	102	2	\N	9.89999962	\N	\N	\N	\N	\N	\N	1	\N	120	f
-357	Управление программными проектами	\N	17	\N	51	\N	7.5999999	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-358	Учебная практика 	\N	\N	\N	\N	\N	\N	\N	\N	\N	6.5999999	\N	\N	\N	1	\N	120	f
-359	Формальная логика	\N	\N	\N	136	2	\N	15	\N	\N	\N	\N	\N	\N	1	\N	120	f
-360	Формальные системы в информационной безопасности	\N	\N	\N	34	1	\N	3	\N	\N	\N	\N	\N	\N	1	\N	120	f
-361	Формальные системы в информационной безопасности	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-362	Формальные языки и грамматики	\N	11	11	11	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	1	\N	120	f
-363	Формальные языки и грамматики	\N	11	11	11	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	1	\N	120	f
-364	Экспертные системы принятия решений	\N	\N	\N	102	\N	5	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-365	Электронный документооборот	\N	\N	\N	136	\N	10	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-366	Юзабилити сайтов	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	1	\N	120	f
-367	Юзабилити сайтов	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	120	f
-368	Автоматический перевод	\N	7	9	9	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-369	Автоматический перевод	\N	7	9	9	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-370	Администрирование серверов	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-371	Администрирование серверов	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-372	Анализ и автоматическая обработка данных	\N	7	9	9	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-373	Анализ и автоматическая обработка данных	\N	7	9	9	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-374	Анатомия и физиология мозга	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-375	Анатомия и физиология человека	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-376	Базы данных	\N	17	\N	204	3	\N	17.1000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-377	Базы данных	\N	17	\N	136	\N	11.8000002	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-378	Базы данных	\N	17	\N	136	\N	10	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-379	Большие открытые данные	\N	34	\N	102	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	2	\N	120	f
-380	Введение в проектную деятельность	236	\N	\N	8	\N	11.8000002	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-381	Введение в проектную деятельность	280	\N	\N	19	\N	14	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-382	Введение в проектную деятельность	200	\N	\N	8	\N	10	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-383	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-384	Веб-разработка	\N	\N	\N	272	3	\N	17.1000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-385	Веб-технологии	\N	\N	\N	153	\N	9	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-386	Вероятностные основы веб-аналитики	\N	\N	68	\N	2	\N	13.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-387	Вероятностные основы веб-аналитики	\N	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-388	Вероятностные основы веб-аналитики	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-389	Внедрение ИТ решений на предприятии (факультативная)	\N	\N	153	\N	\N	9.19999981	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-390	Внедрение ИТ решений на предприятии (факультативная)	\N	\N	102	\N	\N	7.5999999	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-391	Выпускная квалификационная работа	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	348	\N	\N	2	\N	120	f
-392	Выпускная квалификационная работа	\N	\N	\N	\N	\N	\N	\N	\N	38	\N	300	\N	\N	2	\N	120	f
-393	Выпускная квалификационная работа	\N	\N	\N	\N	\N	\N	\N	\N	49	\N	240	300	\N	2	\N	120	f
-394	Выпускная квалификационная работа	\N	\N	\N	\N	\N	\N	\N	\N	37	\N	180	225	\N	2	\N	120	f
-395	Дискретная математика	\N	34	102	\N	3	\N	17.1000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-396	Защита интеллектуальной собственности	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-397	Защита интеллектуальной собственности	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-398	Инженерное проектирование 	\N	\N	\N	54	2	\N	8.69999981	87	\N	\N	\N	\N	\N	2	\N	120	f
-399	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	2	\N	120	f
-400	Инженерное проектирование 	\N	\N	\N	8	\N	9.19999981	\N	138	\N	\N	\N	\N	\N	2	\N	120	f
-401	Инженерное проектирование 	\N	\N	\N	6	\N	7.5999999	\N	114	\N	\N	\N	\N	\N	2	\N	120	f
-402	Инженерное проектирование 	\N	\N	\N	6	\N	9	\N	135	\N	\N	\N	\N	\N	2	\N	120	f
-403	Инженерное проектирование 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-404	Инженерное проектирование 	\N	\N	\N	8	\N	11.3999996	\N	171	\N	\N	\N	\N	\N	2	\N	120	f
-405	Инженерное проектирование 	\N	\N	\N	6	\N	9	\N	135	\N	\N	\N	\N	\N	2	\N	120	f
-406	Интеграция методов моделирования (факультативная)	\N	4	22	\N	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-407	Интеграция методов моделирования (факультативная)	\N	7	18	\N	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-408	Интернет-маркетинг	\N	\N	\N	136	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	2	\N	120	f
-409	Инфокогнитивные технологии	\N	12	9	\N	2	\N	7.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-410	Информационный поиск	\N	7	9	9	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-411	Информационный поиск	\N	7	9	9	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-412	Исследование и моделирование бизнес-процессов и структур	\N	34	\N	204	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	2	\N	120	f
-413	Коммуникация и общение	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-414	Коммуникация и общение	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-415	Корпоративные информационные системы	\N	34	\N	136	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	2	\N	120	f
-416	Лабораторный практикум по электротехнике и электронике	\N	\N	\N	136	\N	11.3999996	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-417	Логика и алгоритмы	\N	7	9	9	\N	2.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-418	Логика и алгоритмы	\N	7	9	9	\N	1.79999995	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-419	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-420	Математическое обеспечение искусственного интеллекта	\N	10	8	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-421	Медицинская семиотика	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-422	Медицинские информационные системы	\N	7	9	9	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	2	\N	120	f
-423	Медицинские экспертные системы	\N	7	9	9	1	\N	2.70000005	\N	\N	\N	\N	\N	\N	2	\N	120	f
-424	Методология искусственного интеллекта	\N	10	8	\N	\N	0.200000003	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-425	Методы планирования и обработка результатов научных экспериментов 	\N	10	8	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-426	Методы статистического оценивания распределенных данных	\N	17	\N	34	\N	4	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-427	Мобильная разработка	\N	\N	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-428	Мобильная разработка	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-429	Мобильная разработка	\N	\N	\N	204	\N	9	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-430	Моделирование бизнес-процессов в веб-индустрии	\N	\N	\N	102	\N	9	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-431	Моделирование бизнес-процессов в веб-индустрии	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-432	Моделирование бизнес-процессов в САПР	\N	34	102	\N	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	2	\N	120	f
-433	Навыки эффективной презентации	\N	\N	\N	136	\N	11.8000002	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-434	Навыки эффективной презентации	\N	\N	\N	170	\N	14	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-435	Навыки эффективной презентации	\N	\N	\N	68	\N	5.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-436	Навыки эффективной презентации	\N	\N	\N	136	\N	10	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-437	Научно-исследовательская практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	9	\N	\N	\N	2	\N	120	f
-438	Научно-исследовательская практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	3	\N	\N	\N	2	\N	120	f
-439	Обработка изображений	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-440	Обработка изображений	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-441	Обучающие системы	\N	7	9	9	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-442	Основы веб-разработки на стороне клиента	\N	\N	\N	272	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	2	\N	120	f
-443	Основы измерений деталей	\N	\N	\N	170	3	\N	21	\N	\N	\N	\N	\N	\N	2	\N	120	f
-444	Основы инженерного проектирования	\N	\N	\N	8	\N	11.8000002	\N	177	\N	\N	\N	\N	\N	2	\N	120	f
-445	Основы инженерного проектирования	\N	\N	\N	8	\N	10	\N	150	\N	\N	\N	\N	\N	2	\N	120	f
-446	Основы моделирования информационных процессов	\N	\N	\N	272	2	\N	15	\N	\N	\N	\N	\N	\N	2	\N	120	f
-447	Основы проектирования механизмов	\N	\N	\N	255	3	\N	21	\N	\N	\N	\N	\N	\N	2	\N	120	f
-448	Основы серверной веб-разработки	\N	\N	\N	272	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	2	\N	120	f
-449	Основы сетевых технологий	\N	\N	\N	272	3	\N	17.1000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-450	Основы сетевых технологий	\N	\N	\N	136	1	\N	8.10000038	\N	\N	\N	\N	\N	\N	2	\N	120	f
-451	Основы сетевых технологий	\N	\N	\N	136	1	\N	7.80000019	\N	\N	\N	\N	\N	\N	2	\N	120	f
-452	Основы сетевых технологий	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-453	Педагогическая практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	15	\N	\N	\N	2	\N	120	f
-454	Письменная инженерная коммуникация в ИТ-сфере	\N	\N	\N	136	2	\N	15	\N	\N	\N	\N	\N	\N	2	\N	120	f
-455	Преддипломная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	35	\N	\N	\N	2	\N	120	f
-456	Преддипломная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	99	\N	\N	\N	2	\N	120	f
-457	Преддипломная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	83	\N	\N	\N	2	\N	120	f
-458	Преддипломная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	14	\N	\N	\N	2	\N	120	f
-459	Преддипломная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	11	\N	\N	\N	2	\N	120	f
-460	Прикладное программирование	\N	\N	\N	272	2	\N	15	\N	\N	\N	\N	\N	\N	2	\N	120	f
-461	Прикладные и системные компоненты и КИС	\N	17	\N	102	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	2	\N	120	f
-462	Программирование в САПР	\N	\N	\N	170	\N	14	\N	210	\N	\N	\N	\N	\N	2	\N	120	f
-463	Программная инженерия	\N	34	\N	136	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	2	\N	120	f
-464	Программная инженерия	\N	\N	\N	102	2	\N	13.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-465	Программная инженерия	\N	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-466	Программная инженерия	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-467	Программная инженерия	\N	34	\N	204	2	\N	13.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-468	Проектирование интеллектуальных систем	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-469	Проектирование интеллектуальных систем	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-470	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-471	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-472	Проектная деятельность	\N	\N	\N	8	\N	9.19999981	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-473	Проектная деятельность	\N	\N	\N	6	\N	7.5999999	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-474	Проектная деятельность	\N	\N	\N	6	\N	9	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-475	Проектная деятельность	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-476	Проектная деятельность	\N	\N	\N	8	\N	11.3999996	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-477	Проектная деятельность	\N	\N	\N	6	\N	9	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-478	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	72	\N	\N	\N	2	\N	120	f
-479	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	54	\N	\N	\N	2	\N	120	f
-480	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	72	\N	\N	\N	2	\N	120	f
-481	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	7.80000019	\N	\N	\N	2	\N	120	f
-482	Производственная практика	\N	\N	\N	\N	\N	\N	\N	\N	\N	7.80000019	\N	\N	\N	2	\N	120	f
-483	Психодидактика интелектуальных систем	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-484	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-485	Разработка технического задания	\N	\N	\N	\N	2	\N	11.3999996	\N	\N	\N	\N	\N	\N	2	\N	120	f
-486	Разработка ТЭО	\N	\N	68	\N	\N	7.5999999	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-487	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-488	Сети и телекоммуникации	\N	\N	\N	272	2	\N	17.7000008	\N	\N	\N	\N	\N	\N	2	\N	120	f
-489	Сети и телекоммуникации	\N	\N	\N	272	2	\N	15	\N	\N	\N	\N	\N	\N	2	\N	120	f
-490	Системы общения на ЕЯ	\N	7	9	9	1	\N	3.5999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-491	Современные тенденции ИТ-индустрии (факультативная)	\N	34	\N	\N	\N	11.8000002	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-492	Современные тенденции ИТ-индустрии (факультативная)	\N	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-493	Современные тенденции ИТ-индустрии (факультативная)	\N	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-494	Стандарты и нормы автоматизированных систем	\N	14	\N	27	\N	5	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-495	Статистические методы	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-496	Статистические методы	\N	11	11	23	\N	3.4000001	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-497	Техническое зрение	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-498	Техническое зрение	\N	11	11	23	1	\N	5.0999999	\N	\N	\N	\N	\N	\N	2	\N	120	f
-499	Технологии машиностроения в  Inventor	\N	23	68	91	3	\N	13.8000002	\N	\N	\N	\N	\N	\N	2	\N	120	f
-500	Технология деловой коммуникации	\N	\N	34	\N	\N	6	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-501	Технология проектирования ИС	\N	\N	\N	102	\N	7.5999999	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-502	Трехмерное моделирование в САПР	\N	\N	\N	340	3	\N	21	\N	\N	\N	\N	\N	\N	2	\N	120	f
-503	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	2	\N	120	f
-504	Управление веб-проектами	\N	\N	\N	102	2	\N	13.5	\N	\N	\N	\N	\N	\N	2	\N	120	f
-505	Управление веб-проектами	\N	34	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-506	Управление веб-проектами	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-507	Управление репутацией в Интернет	\N	\N	\N	102	\N	9	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-508	Управление репутацией в Интернет	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2	\N	120	f
-509	Учебная практика 	\N	\N	\N	\N	\N	\N	\N	\N	\N	32	\N	\N	\N	2	\N	120	f
-510	Учебная практика 	\N	\N	\N	\N	\N	\N	\N	\N	\N	16	\N	\N	\N	2	\N	120	f
-511	Учебная практика 	\N	\N	\N	\N	\N	\N	\N	\N	\N	16	\N	\N	\N	2	\N	120	f
-512	Учебная практика 	\N	\N	\N	\N	\N	\N	\N	\N	\N	6.5999999	\N	\N	\N	2	\N	120	f
-513	Учебная практика 	\N	\N	\N	\N	\N	\N	\N	\N	\N	6.5999999	\N	\N	\N	2	\N	120	f
-514	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	121	f
-515	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-516	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-517	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	121	f
-518	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-519	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	121	f
-520	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-521	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	121	f
-522	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-523	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-524	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	121	f
-525	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-526	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	121	f
-527	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	121	f
-528	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-529	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
-530	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	121	f
+103	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	103	f
+104	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+105	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+106	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	103	f
+107	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+108	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	103	f
+109	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+110	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	103	f
+111	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+112	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+113	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	103	f
+114	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+115	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	103	f
+116	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	103	f
+117	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+118	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+119	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	103	f
+120	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	104	f
+121	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+122	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+123	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	104	f
+124	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+125	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	104	f
+126	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+127	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	104	f
+128	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+129	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+130	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	104	f
+131	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+132	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	104	f
+133	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	104	f
+134	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+135	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+136	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	104	f
+137	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	105	f
+138	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+139	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+140	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	105	f
+141	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+142	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	105	f
+143	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+144	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	105	f
+145	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+146	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+147	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	105	f
+148	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+149	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	105	f
+150	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	105	f
+151	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+152	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+153	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	105	f
+154	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	106	f
+155	Информационная безопасность	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+156	Мобильная интеграция	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+157	Основы права в Веб	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	106	f
+158	Поисковая оптимизация	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+159	Программирование в системах информационной безопасности	\N	\N	\N	136	1	\N	5.4000001	\N	\N	\N	\N	\N	\N	1	\N	106	f
+160	Проектирование Веб-сервисов	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+161	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	106	f
+162	Статистические методы веб-аналитики	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+163	Веб-аналитика	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+164	Инженерное проектирование 	\N	\N	\N	6	\N	8.39999962	\N	126	\N	\N	\N	\N	\N	1	\N	106	f
+165	Математическая логика и теория алгоритмов в программировании	\N	34	68	\N	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+166	Проектирование информационных систем	\N	\N	\N	102	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	106	f
+167	Проектная деятельность	\N	\N	\N	6	\N	8.39999962	\N	\N	\N	\N	\N	\N	\N	1	\N	106	f
+168	Разработка в КИС	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+169	Реклама в Веб и Социальных медиа	\N	34	\N	102	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
+170	Трехмерные модели в веб-приложениях	\N	\N	\N	204	2	\N	12.6000004	\N	\N	\N	\N	\N	\N	1	\N	106	f
 \.
 
 
@@ -2693,84 +2290,138 @@ COPY public.disciplines (id, name, hours_con_project, hours_lec, hours_sem, hour
 --
 
 COPY public.disciplines_groups (id, discipline_id, group_id) FROM stdin;
-107	106	102
-108	106	1
-109	107	102
-110	107	1
-111	108	102
-112	108	1
-113	109	115
-114	109	116
-115	110	102
-116	110	1
-117	111	102
-118	111	1
-279	196	115
-280	196	116
-281	197	115
-282	197	116
-283	198	115
-284	198	116
-285	199	115
-286	199	116
-287	200	115
-288	200	116
-289	201	178
-290	202	115
-291	202	116
-292	203	115
-293	203	116
-294	204	115
-295	204	116
-296	205	115
-297	205	116
-298	206	115
-299	206	116
-300	207	115
-301	207	116
-302	208	115
-303	208	116
-304	209	115
-305	209	116
-306	210	115
-307	210	116
-308	211	115
-309	211	116
-310	212	115
-311	212	116
-312	514	115
-313	514	116
-314	515	115
-315	515	116
-316	516	115
-317	516	116
-318	517	115
-319	517	116
-320	518	115
-321	518	116
-322	519	178
-323	520	115
-324	520	116
-325	521	115
-326	521	116
-327	522	115
-328	522	116
-329	523	115
-330	523	116
-331	524	115
-332	524	116
-333	525	115
-334	525	116
-335	526	115
-336	526	116
-337	527	115
-338	527	116
-339	528	115
-340	528	116
-341	529	115
-342	529	116
-343	530	115
-344	530	116
+103	103	100
+104	103	101
+105	104	100
+106	104	101
+107	105	100
+108	105	101
+109	106	100
+110	106	101
+111	107	100
+112	107	101
+113	108	102
+114	109	100
+115	109	101
+116	110	100
+117	110	101
+118	111	100
+119	111	101
+120	112	100
+121	112	101
+122	113	100
+123	113	101
+124	114	100
+125	114	101
+126	115	100
+127	115	101
+128	116	100
+129	116	101
+130	117	100
+131	117	101
+132	118	100
+133	118	101
+134	119	100
+135	119	101
+136	120	100
+137	120	101
+138	121	100
+139	121	101
+140	122	100
+141	122	101
+142	123	100
+143	123	101
+144	124	100
+145	124	101
+146	125	102
+147	126	100
+148	126	101
+149	127	100
+150	127	101
+151	128	100
+152	128	101
+153	129	100
+154	129	101
+155	130	100
+156	130	101
+157	131	100
+158	131	101
+159	132	100
+160	132	101
+161	133	100
+162	133	101
+163	134	100
+164	134	101
+165	135	100
+166	135	101
+167	136	100
+168	136	101
+169	137	100
+170	137	101
+171	138	100
+172	138	101
+173	139	100
+174	139	101
+175	140	100
+176	140	101
+177	141	100
+178	141	101
+179	142	102
+180	143	100
+181	143	101
+182	144	100
+183	144	101
+184	145	100
+185	145	101
+186	146	100
+187	146	101
+188	147	100
+189	147	101
+190	148	100
+191	148	101
+192	149	100
+193	149	101
+194	150	100
+195	150	101
+196	151	100
+197	151	101
+198	152	100
+199	152	101
+200	153	100
+201	153	101
+202	154	100
+203	154	101
+204	155	100
+205	155	101
+206	156	100
+207	156	101
+208	157	100
+209	157	101
+210	158	100
+211	158	101
+212	159	102
+213	160	100
+214	160	101
+215	161	100
+216	161	101
+217	162	100
+218	162	101
+219	163	100
+220	163	101
+221	164	100
+222	164	101
+223	165	100
+224	165	101
+225	166	100
+226	166	101
+227	167	100
+228	167	101
+229	168	100
+230	168	101
+231	169	100
+232	169	101
+233	170	100
+234	170	101
 \.
 
 
@@ -2779,10 +2430,7 @@ COPY public.disciplines_groups (id, discipline_id, group_id) FROM stdin;
 --
 
 COPY public.disciplines_teachers (id, discipline_id, teacher_id) FROM stdin;
-100	523	1
-101	523	1
-102	514	2
-103	109	101
+100	112	1
 \.
 
 
@@ -2791,7 +2439,9 @@ COPY public.disciplines_teachers (id, discipline_id, teacher_id) FROM stdin;
 --
 
 COPY public.files_acad_plan (id, name, path, ext, modified_date, teacher_id, sub_unit_id, acad_plan_id) FROM stdin;
-100	AUP_-_FGOS_3__-_09_03_01_-_SAPR.xlsx	/uploads/upload_f6af030fff96449ed6c21cf0fbd64207	.xlsx	2020-05-28 20:59:05.826	1	1	110
+100	AUP_-_FGOS_3__-_09_03_01_-_SAPR.xlsx	/uploads/upload_40cb340594a3a170be4a089fe28ec83b	.xlsx	2020-07-14 00:48:13.121	1	1	100
+101	AUP_-_FGOS_3__-_09_03_01_-_SAPR.xlsx	/uploads/upload_929183ee88229a5b4da49a7ab48f846e	.xlsx	2020-07-14 11:41:48.466	1	1	117
+102	AUP_-_FGOS_3__-_09_03_01_-_SAPR.xlsx	/uploads/upload_d47665cc35ead6cd2a0d3282531be804	.xlsx	2020-07-14 12:58:44.742	1	1	118
 \.
 
 
@@ -2800,8 +2450,10 @@ COPY public.files_acad_plan (id, name, path, ext, modified_date, teacher_id, sub
 --
 
 COPY public.files_dep_load (id, name, path, ext, modified_date, teacher_id, sub_unit_id, dep_load_id) FROM stdin;
-100	Инфокогнитивные технологии_v1.0.xls	/uploads/upload_b70ba57f31ca3794a113dcd707534a50	.xls	2020-05-28 21:01:17.461	1	1	120
-101	тестовая нагрузка.xls	/uploads/upload_aa392b65eab77e3a8e52968c5b696163	.xls	2020-05-30 01:19:10.224	1	1	121
+100	тестовая нагрузка.xls	/uploads/upload_ffd27963cb25d9f053199137d1dd5d65	.xls	2020-07-14 00:47:01.323	1	1	104
+101	тестовая нагрузка.xls	/uploads/upload_8c566cec2b482b0f3005655f3073825c	.xls	2020-07-14 00:47:14.792	1	1	103
+102	тестовая нагрузка.xls	/uploads/upload_b60ef0cd6299986047c5cd4ceb13baa5	.xls	2020-07-14 11:43:13.464	1	1	105
+103	тестовая нагрузка.xls	/uploads/upload_909041bdf8d700636343fe7e5775bafc	.xls	2020-07-14 12:58:28.35	1	1	106
 \.
 
 
@@ -2810,21 +2462,14 @@ COPY public.files_dep_load (id, name, path, ext, modified_date, teacher_id, sub_
 --
 
 COPY public.files_ind_plan (id, name, path, ext, modified_date, teacher_id, sub_unit_id) FROM stdin;
-100	export_202003080019.sql	/uploads/upload_1bd81544b333efa5db7bfcb42f24d050	.sql	2020-05-28 14:40:37.965	1	1
-101	export_202003080019.sql	/uploads/upload_9e28d5ee2517c060405e4df14aee6d1f	.sql	2020-05-28 15:00:41.064	1	1
-102	export_202003080019.sql	/uploads/upload_bd35be8d62a6c353ec6d6a784c78e97d	.sql	2020-05-28 15:01:22.423	1	1
-103	default.conf	/uploads/upload_86b9c276539da17df6b76086e2512559	.conf	2020-05-28 15:42:22.981	1	1
-104	default.conf	/uploads/upload_3a051c447f5d5c7ec3baf6e7a7eada58	.conf	2020-05-28 15:49:30.418	1	1
-105	default.conf	/uploads/upload_65af9fa1c23788309ac283e48ce05621	.conf	2020-05-28 15:50:03.026	1	1
-106	default.conf	/uploads/upload_9c49047642f86f75611dcf9eb342ad10	.conf	2020-05-28 16:08:28.078	1	1
-107	default.conf	/uploads/upload_4857cacccb24cb4826b4bf2a896ec2bc	.conf	2020-05-28 16:09:19.725	1	1
-108	RPD.rar	/uploads/upload_1e029c77e63bc5b5f0d35b150b87619b	.rar	2020-05-28 16:16:58.363	1	1
-109	default.conf	/uploads/upload_2dc54c05df5eeda4d5b6f2b03e754f22	.conf	2020-05-29 01:05:41.008	2	1
-110	default.conf	/uploads/upload_2d00f3a5a8059ee44ba5f1c1216606dc	.conf	2020-05-29 01:05:42.371	2	1
-113	Новый текстовый документ.txt	/uploads/upload_0ab10a5d8eaf9f3df367a0b3c299174c	.txt	2020-05-29 18:37:22.624	1	1
-114	Новый текстовый документ.txt	/uploads/upload_f2e330f6b200c083c45ebcf378e15200	.txt	2020-05-29 18:47:10.561	1	1
-115	Новый текстовый документ.txt	/uploads/upload_f9f4893523664d59d0b2fe09801e2c26	.txt	2020-05-29 18:51:03.434	1	1
-116	тестовая нагрузка.xls	/uploads/upload_04c1b4c2f6a8ea051db69747eeacc0c7	.xls	2020-05-29 21:41:00.429	1	1
+100	тестовая нагрузка.xls	/uploads/upload_2a038314275639c1799dccde4de348d2	.xls	2020-07-14 02:08:37.073	1	1
+102	Индивидуальный план.rar	/uploads/upload_300d1efce04598963e39bdea63fd626c	.rar	2020-07-14 12:17:46.905	1	1
+103	Индивидуальный план.rar	/uploads/upload_56175027e0163a7ffb7f7b00d1fbfa1d	.rar	2020-07-14 12:23:01.119	1	1
+104	Индивидуальный план.rar	/uploads/upload_d81595d05c7e6d1a956ee7b4878ffc76	.rar	2020-07-14 12:25:34.66	1	1
+105	test.txt	/uploads/upload_6e662f9a0feedd0408b99175eddecc6f	.txt	2020-07-14 12:27:36.311	1	1
+106	Индивидуальный план.rar	/uploads/upload_b02f582b32f9dfb8a4bd7a2c782cc4a5	.rar	2020-07-14 12:32:00.186	1	1
+107	test.txt	/uploads/upload_90327af9baf1e2fd7e0a32c51c362660	.txt	2020-07-14 12:47:17.875	1	1
+108	Индивидуальный план.rar	/uploads/upload_9a2294654aa299134f53b5119b0a29c8	.rar	2020-07-14 12:54:59.844	1	1
 \.
 
 
@@ -2833,6 +2478,9 @@ COPY public.files_ind_plan (id, name, path, ext, modified_date, teacher_id, sub_
 --
 
 COPY public.files_projects (id, name, path, ext, modified_date, teacher_id, sub_unit_id, project_id) FROM stdin;
+100	Ссылка.txt	/uploads/upload_053bb2f5ab68ee4d7c25b49fb67b849e	.txt	2020-07-14 02:07:52.953	1	1	100
+101	тест.xlsx	/uploads/upload_9c0a00fa9093ee2fa48f30463c82d060	.xlsx	2020-07-14 02:08:09.14	1	1	101
+102	Индивидуальный план.rar	/uploads/upload_4163a65b963d8b0012c664ae7c0b14ad	.rar	2020-07-14 12:56:19.529	1	1	102
 \.
 
 
@@ -2841,6 +2489,7 @@ COPY public.files_projects (id, name, path, ext, modified_date, teacher_id, sub_
 --
 
 COPY public.files_rpd (id, name, path, ext, modified_date, teacher_id, sub_unit_id, discipline_id) FROM stdin;
+100	тест.xlsx	/uploads/upload_062c5363ef9eaeed2a4295453fbd68fa	.xlsx	2020-07-14 02:09:28.46	1	1	112
 \.
 
 
@@ -2850,51 +2499,9 @@ COPY public.files_rpd (id, name, path, ext, modified_date, teacher_id, sub_unit_
 
 COPY public.groups (id, specialties_id, name) FROM stdin;
 1	2	161-342
-102	2	161-341
-103	2	161-351
-104	2	191-321
-105	2	191-322
-106	2	191-362
-107	2	191-361
-108	2	181-321
-109	2	181-322
-110	2	181-324
-111	2	181-325
-112	2	181-326
-113	2	171-371
-114	2	171-372
-115	2	171-331
-116	2	171-332
-117	2	181-361
-118	2	181-362
-119	2	19А-311
-120	2	151-311
-121	2	184-322
-122	2	191-351
-123	2	161-721
-124	2	171-362
-125	2	181-142
-126	2	181-311
-127	2	184-342
-130	2	181-323
-131	2	191-311
-132	2	161-321
-133	2	161-322
-134	2	161-331
-141	2	171-334
-142	2	171-335
-145	2	17А-312
-157	2	184-321
-160	2	18А-312
-164	2	191-323
-165	2	191-324
-166	2	191-325
-167	2	191-331
-169	2	191-352
-172	2	194-321
-173	2	194-322
-175	2	171-333
-178	2	171-361
+100	100	171-331
+101	100	171-332
+102	100	171-361
 \.
 
 
@@ -2909,50 +2516,15 @@ COPY public.personalities (id, name, surname, patronymic, birthday, phone, email
 4	Павел	Бабушкин	Михайлович	1996-11-30 00:00:00	8(800)555-3535	babushkin@mail.ru	1
 5	Алина	Борзикова	Александровна	1998-03-05 00:00:00	8(800)555-3535	borzikova@mail.ru	1
 53	Дмитрий	Холодов	Алексеевич	\N	8(800)555-3535	holodov@mail.ru	2
-54	Антон	Толстиков	Витальевич	\N	8(800)555-3535	tolstikov@mail.ru	2
 55	Анастасия	Ковалева	Александровна	\N	8(800)555-3535	kovaleva@mail.ru	2
-57	Виктор	Лянг	Федорович	\N	8(800)555-3535	lyang@mail.ru	2
+100	Иван	Иванов	Иванович	1998-06-03 00:00:00	+89996578833	te@yandex.ru	1
+101	Дмитрий	Лысенко	Иванович	1998-09-03 00:00:00	+78238765432	ty@yandex.ru	1
+102	Евгений	Сирков	Дмитриевич	1997-12-03 00:00:00	98887776655	ui@yandex.ru	1
+103	Иван	Иванов	Иванович	2020-04-09 00:00:00	8(000)000-00-00	maiddddddl@mail.ru	2
+106	Николай	Николаев	Николаевич	2020-04-09 00:00:00	8(000)000-00-00	nikolaev@mail.ru	2
 56	Андрей	Джунковский	Владимирович	\N	8(800)555-3535	djunkovski@mail.ru	2
-101	Игорь	Степаненко	Сергеевич	1998-03-06 00:00:00	8(800)555-36-36	stepanenko@yandex.ru	2
-102	Алина	Борзикова	Александровна	2020-05-03 00:00:00	8(800)555-35-35	borz@mail.ru	2
-103	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_1@mail.ru	1
-104	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_2@mail.ru	1
-105	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_3@mail.ru	1
-106	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_4@mail.ru	1
-107	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_5@mail.ru	1
-108	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_6@mail.ru	1
-109	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_7@mail.ru	1
-110	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_8@mail.ru	1
-111	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_9@mail.ru	1
-112	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_10@mail.ru	1
-113	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_11@mail.ru	1
-114	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mail_12@mail.ru	1
-115	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_1@mail.ru	1
-116	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_2@mail.ru	1
-117	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_3@mail.ru	1
-118	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_4@mail.ru	1
-119	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_5@mail.ru	1
-120	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_6@mail.ru	1
-121	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_7@mail.ru	1
-122	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_8@mail.ru	1
-123	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_9@mail.ru	1
-124	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_10@mail.ru	1
-125	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_11@mail.ru	1
-126	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_12@mail.ru	1
-127	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_13@mail.ru	1
-128	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_14@mail.ru	1
-129	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_maill_15@mail.ru	1
-130	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_1@mail.ru	1
-131	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_2@mail.ru	1
-132	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_3@mail.ru	1
-133	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_4@mail.ru	1
-134	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_5@mail.ru	1
-135	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_6@mail.ru	1
-136	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_7@mail.ru	1
-137	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_8@mail.ru	1
-138	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_9@mail.ru	1
-139	Игорь	Tremaskin	Vladimirovich	2020-04-09 00:00:00	8(926)213-12-33	my_mailll_10@mail.ru	1
-140	Антон	Толстиков	Витальевич	1998-06-03 00:00:00	+7-915-173-28-48	temonavto997@yandex.ru	1
+57	Виктор	Лянг	Федорович	\N	8(800)555-3535	lyang@mail.ru	2
+54	Антон	Толстиков	Витальевич	\N	8(800)555-3535	tolstikov@mail.ru	2
 \.
 
 
@@ -2961,11 +2533,11 @@ COPY public.personalities (id, name, surname, patronymic, birthday, phone, email
 --
 
 COPY public.projects (id, name, description, begin_date, end_date, link_trello, sub_unit_id, teacher_id) FROM stdin;
-1	Лодка	Описание лодки	2016-09-01 00:00:00	2016-09-01 00:00:00	asd	1	1
-100	Космический корабль	Будут летать на луну	2020-05-29 00:00:00	2021-06-25 00:00:00	trello.com/id485677	1	100
-101	Учебный курс Inventor	Создаётся учебный курс по inventor	2020-05-01 00:00:00	2020-05-27 00:00:00	trello/inventor	1	100
-102	Аналитическая панель	asdasdasd	2020-05-02 00:00:00	2020-05-31 00:00:00	asdasd	1	101
-2	Самолет	Описание самолета	2016-08-31 00:00:00	2021-08-31 00:00:00	asdasd	1	2
+100	Создание лодки	Спроектировать лодку	2020-05-02 00:00:00	2020-05-30 00:00:00	trello.com/887663	1	1
+101	Создание весов	Смоделировать весы	2021-02-03 00:00:00	2021-04-01 00:00:00	trello.com/9988766	1	2
+102	Новый проект	Описание нового проекта	2020-05-04 00:00:00	2020-05-25 00:00:00	trello.com/87722	1	3
+1	Луноход	Спроектировать луноход	2016-08-29 00:00:00	2016-08-29 00:00:00	trello.com/87722	1	1
+2	База данных цифровых моделей	Сформировать базу данных	2016-08-30 00:00:00	2016-08-30 00:00:00	trello.com/997762	1	2
 \.
 
 
@@ -2989,15 +2561,13 @@ COPY public.ranks (id, name) FROM stdin;
 --
 
 COPY public.rights_roles (id, role, teacher_id, sub_unit_id) FROM stdin;
-1	2	1	1
 2	4	1	1
-3	2	2	1
 4	3	2	1
 5	2	3	1
 6	2	4	1
 7	1	5	1
-100	4	100	1
-101	4	101	1
+100	3	100	2
+101	3	102	3
 \.
 
 
@@ -3007,11 +2577,10 @@ COPY public.rights_roles (id, role, teacher_id, sub_unit_id) FROM stdin;
 
 COPY public.specialties (id, code, name, profile, educ_form, educ_programm, educ_years, year_join, sub_unit_id) FROM stdin;
 2	09.03.01	Информатика и вычислительная техника	Интеграция и программирование в САПР	Очная	1	4	2016-09-01 00:00:00	1
-100	09.03.011	Веб-технологии	ВЕБ	очная	1	4	2019-09-01 09:00:00	1
-101	01.011.100	Маги и волшебники	Огненная магия	Заочная	1	4	2017-05-05 00:00:00	1
-102	01.09.06	Разработка двигателей	САПР	Очно-заочная	1	4	2017-05-28 00:00:00	1
-103	02.02.03	Программирование плат	Платы для чипирования Россиян	Очная	1	4	2020-04-18 00:00:00	1
-104	92.04.88	Машиностроение	Строение тяжелых белазов	Очно-заочная	1	4	2017-05-14 00:00:00	1
+100	09.02.03	Веб-технологии	Разбработка веб-сайтов	Очная	1	4	2020-09-01 00:00:00	2
+116	10.03.01	Информационная безопастность	Безопастность веб-приложений	Очная	1	4	2017-05-23 00:00:00	2
+118	new	new specialty	new	new	1	4	2020-04-08 00:00:00	3
+119	01.22.04	Новая специальность	Новый профиль	Очная	1	4	2017-05-31 00:00:00	1
 \.
 
 
@@ -3025,44 +2594,9 @@ COPY public.students (id, person_id, group_id) FROM stdin;
 3	3	1
 4	4	1
 5	5	1
-100	103	115
-101	104	115
-102	105	115
-103	106	115
-104	107	115
-105	108	115
-106	109	115
-107	110	115
-108	111	115
-109	112	115
-110	113	115
-111	114	115
-112	115	116
-113	116	116
-114	117	116
-115	118	116
-116	119	116
-117	120	116
-118	121	116
-119	122	116
-120	123	116
-121	124	116
-122	125	116
-123	126	116
-124	127	116
-125	128	116
-126	129	116
-127	130	178
-128	131	178
-129	132	178
-130	133	178
-131	134	178
-132	135	178
-133	136	178
-134	137	178
-135	138	178
-136	139	178
-137	140	175
+100	100	100
+101	101	101
+102	102	102
 \.
 
 
@@ -3073,17 +2607,12 @@ COPY public.students (id, person_id, group_id) FROM stdin;
 COPY public.students_projects (id, student_id, project_id, date) FROM stdin;
 1	1	1	2016-09-01
 2	2	2	2016-09-01
-100	3	1	2020-05-29
-101	5	1	2020-05-29
-102	3	100	2020-05-29
-103	5	100	2020-05-29
-104	129	1	2020-06-02
-105	130	1	2020-06-02
-106	127	1	2020-06-02
-107	128	1	2020-06-02
-108	129	1	2020-06-02
-109	136	100	2020-06-02
-110	135	100	2020-06-02
+100	1	100	2020-07-14
+101	5	101	2020-07-14
+102	102	2	2020-07-14
+103	101	102	2020-07-14
+104	5	102	2020-07-14
+105	102	1	2020-07-15
 \.
 
 
@@ -3095,7 +2624,7 @@ COPY public.sub_unit (id, name, department_id) FROM stdin;
 1	САПР	1
 2	ВЕБ	1
 3	КИС	1
-4	Дашборд	2
+4	ИБ	2
 \.
 
 
@@ -3105,12 +2634,12 @@ COPY public.sub_unit (id, name, department_id) FROM stdin;
 
 COPY public.teachers (id, person_id, "position", rank_id, degree_id, rate, hours_worked, rinc, web_of_science, scopus, login, password, salt) FROM stdin;
 1	53	Преподаватель	\N	\N	\N	\N	\N	\N	\N	holodov	$2b$12$WJPfMpLjWz/fRtn21qiy4eyuprgS2YCNSmlUmwOdjZHUjVq33Q7Hi	$2b$12$WJPfMpLjWz/fRtn21qiy4e
-2	54	Преподаватель	\N	\N	\N	\N	\N	\N	\N	tolstikov	$2b$12$H2FY2xgNEANnRv69.gXSruq35I50F6wm5OslvDN0uFk.ky09wJ/MW	$2b$12$H2FY2xgNEANnRv69.gXSru
 3	55	Преподаватель	\N	\N	\N	\N	\N	\N	\N	kovaleva	$2b$12$IH8kIKTXrM3UXyDs1JyFOe3.oBjDWnAo2zMVO2Q0MLR8hINLEH7wm	$2b$12$IH8kIKTXrM3UXyDs1JyFOe
+100	103	Преподаватель	\N	\N	0.25	300	0.100000001	0.100000001	0.100000001	ivanov	$2b$12$VKunaopvr6xP8eN7vZm/p.DV5GFCZ7zmrcoNX75CjsdOs8X79lffW	$2b$12$VKunaopvr6xP8eN7vZm/p.
+102	106	Преподаватель	\N	\N	0.25	300	0.100000001	0.100000001	0.100000001	nikolaev	$2b$12$E64WXaxTCG9m0k6u.dqTDeFJUymgAN3NhlA6xBBl7yENhl8irgbdW	$2b$12$E64WXaxTCG9m0k6u.dqTDe
 4	56	Преподаватель	\N	\N	\N	\N	\N	\N	\N	djunkovski	$2b$12$Qh.8rPRjF.eYOiGPo6F.ReKE32vdJmHdvifhQTvxzKTv.8ycU73IC	$2b$12$Qh.8rPRjF.eYOiGPo6F.Re
 5	57	Преподаватель	\N	\N	\N	\N	\N	\N	\N	lyang	$2b$12$S6ARaLllzdaHhpMPLTvn8uU9ycBlW92zxuO.R1ImCULrMoWkqyn0u	$2b$12$S6ARaLllzdaHhpMPLTvn8u
-100	101	Преподаватель	\N	\N	0.25	300	0.100000001	0.100000001	0.100000001	stepanenko	$2b$12$Zuvnt/BSEvowit3q0Cz6aeYeLbTFG6Ry9YPSRjxcdcsbNQV38Urwi	$2b$12$Zuvnt/BSEvowit3q0Cz6ae
-101	102	Преподаватель	\N	\N	0.25	300	0.100000001	0.100000001	0.100000001	borz	$2b$12$4DuF0NnGmKZzKJTbCnuGh.K1C/SMNjvlvFuvEkQD8uPvnDRulUUQK	$2b$12$4DuF0NnGmKZzKJTbCnuGh.
+2	54	Преподаватель	\N	\N	\N	\N	\N	\N	\N	tolstikov	$2b$12$H2FY2xgNEANnRv69.gXSruq35I50F6wm5OslvDN0uFk.ky09wJ/MW	$2b$12$H2FY2xgNEANnRv69.gXSru
 \.
 
 
@@ -3118,35 +2647,35 @@ COPY public.teachers (id, person_id, "position", rank_id, degree_id, rate, hours
 -- Name: acad_block_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.acad_block_id_seq', 394, true);
+SELECT pg_catalog.setval('public.acad_block_id_seq', 1102, true);
 
 
 --
 -- Name: acad_discipline_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.acad_discipline_id_seq', 394, true);
+SELECT pg_catalog.setval('public.acad_discipline_id_seq', 1102, true);
 
 
 --
 -- Name: acad_module_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.acad_module_id_seq', 394, true);
+SELECT pg_catalog.setval('public.acad_module_id_seq', 1102, true);
 
 
 --
 -- Name: acad_part_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.acad_part_id_seq', 394, true);
+SELECT pg_catalog.setval('public.acad_part_id_seq', 1102, true);
 
 
 --
 -- Name: acad_plan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.acad_plan_id_seq', 110, true);
+SELECT pg_catalog.setval('public.acad_plan_id_seq', 118, true);
 
 
 --
@@ -3160,84 +2689,84 @@ SELECT pg_catalog.setval('public.degree_id_seq', 100, false);
 -- Name: dep_load_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.dep_load_id_seq', 121, true);
+SELECT pg_catalog.setval('public.dep_load_id_seq', 106, true);
 
 
 --
 -- Name: department_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.department_id_seq', 100, true);
+SELECT pg_catalog.setval('public.department_id_seq', 103, true);
 
 
 --
 -- Name: disciplines_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.disciplines_groups_id_seq', 344, true);
+SELECT pg_catalog.setval('public.disciplines_groups_id_seq', 234, true);
 
 
 --
 -- Name: disciplines_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.disciplines_id_seq', 530, true);
+SELECT pg_catalog.setval('public.disciplines_id_seq', 170, true);
 
 
 --
 -- Name: disciplines_teachers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.disciplines_teachers_id_seq', 103, true);
+SELECT pg_catalog.setval('public.disciplines_teachers_id_seq', 100, true);
 
 
 --
 -- Name: files_acad_plan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.files_acad_plan_id_seq', 101, true);
+SELECT pg_catalog.setval('public.files_acad_plan_id_seq', 102, true);
 
 
 --
 -- Name: files_dep_load_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.files_dep_load_id_seq', 101, true);
+SELECT pg_catalog.setval('public.files_dep_load_id_seq', 103, true);
 
 
 --
 -- Name: files_ind_plan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.files_ind_plan_id_seq', 116, true);
+SELECT pg_catalog.setval('public.files_ind_plan_id_seq', 108, true);
 
 
 --
 -- Name: files_projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.files_projects_id_seq', 100, false);
+SELECT pg_catalog.setval('public.files_projects_id_seq', 102, true);
 
 
 --
 -- Name: files_rpd_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.files_rpd_id_seq', 100, false);
+SELECT pg_catalog.setval('public.files_rpd_id_seq', 100, true);
 
 
 --
 -- Name: groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.groups_id_seq', 179, true);
+SELECT pg_catalog.setval('public.groups_id_seq', 104, true);
 
 
 --
 -- Name: personalities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.personalities_id_seq', 140, true);
+SELECT pg_catalog.setval('public.personalities_id_seq', 106, true);
 
 
 --
@@ -3265,21 +2794,21 @@ SELECT pg_catalog.setval('public.rights_roles_id_seq', 101, true);
 -- Name: specialties_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.specialties_id_seq', 104, true);
+SELECT pg_catalog.setval('public.specialties_id_seq', 119, true);
 
 
 --
 -- Name: students_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.students_id_seq', 137, true);
+SELECT pg_catalog.setval('public.students_id_seq', 102, true);
 
 
 --
 -- Name: students_projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.students_projects_id_seq', 110, true);
+SELECT pg_catalog.setval('public.students_projects_id_seq', 105, true);
 
 
 --
@@ -3293,7 +2822,7 @@ SELECT pg_catalog.setval('public.sub_unit_id_seq', 100, false);
 -- Name: teachers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: diplom_user
 --
 
-SELECT pg_catalog.setval('public.teachers_id_seq', 101, true);
+SELECT pg_catalog.setval('public.teachers_id_seq', 102, true);
 
 
 --
@@ -3629,7 +3158,7 @@ ALTER TABLE ONLY public.acad_discipline
 --
 
 ALTER TABLE ONLY public.acad_discipline
-    ADD CONSTRAINT acad_discipline_acad_plan_id_fkey FOREIGN KEY (acad_plan_id) REFERENCES public.acad_plan(id);
+    ADD CONSTRAINT acad_discipline_acad_plan_id_fkey FOREIGN KEY (acad_plan_id) REFERENCES public.acad_plan(id) ON DELETE CASCADE;
 
 
 --
@@ -3637,7 +3166,7 @@ ALTER TABLE ONLY public.acad_discipline
 --
 
 ALTER TABLE ONLY public.acad_plan
-    ADD CONSTRAINT acad_plan_specialties_id_fkey FOREIGN KEY (specialties_id) REFERENCES public.specialties(id);
+    ADD CONSTRAINT acad_plan_specialties_id_fkey FOREIGN KEY (specialties_id) REFERENCES public.specialties(id) ON DELETE CASCADE;
 
 
 --
@@ -3661,7 +3190,7 @@ ALTER TABLE ONLY public.disciplines
 --
 
 ALTER TABLE ONLY public.disciplines
-    ADD CONSTRAINT disciplines_dep_load_id_fkey FOREIGN KEY (dep_load_id) REFERENCES public.dep_load(id);
+    ADD CONSTRAINT disciplines_dep_load_id_fkey FOREIGN KEY (dep_load_id) REFERENCES public.dep_load(id) ON DELETE CASCADE;
 
 
 --
@@ -3677,7 +3206,7 @@ ALTER TABLE ONLY public.disciplines_groups
 --
 
 ALTER TABLE ONLY public.disciplines_groups
-    ADD CONSTRAINT disciplines_groups_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id);
+    ADD CONSTRAINT disciplines_groups_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE CASCADE;
 
 
 --
@@ -3693,7 +3222,7 @@ ALTER TABLE ONLY public.disciplines_teachers
 --
 
 ALTER TABLE ONLY public.disciplines_teachers
-    ADD CONSTRAINT disciplines_teachers_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT disciplines_teachers_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE CASCADE;
 
 
 --
@@ -3709,7 +3238,7 @@ ALTER TABLE ONLY public.files_acad_plan
 --
 
 ALTER TABLE ONLY public.files_acad_plan
-    ADD CONSTRAINT files_acad_plan_sub_unit_id_fkey FOREIGN KEY (sub_unit_id) REFERENCES public.sub_unit(id);
+    ADD CONSTRAINT files_acad_plan_sub_unit_id_fkey FOREIGN KEY (sub_unit_id) REFERENCES public.sub_unit(id) ON DELETE CASCADE;
 
 
 --
@@ -3717,7 +3246,7 @@ ALTER TABLE ONLY public.files_acad_plan
 --
 
 ALTER TABLE ONLY public.files_acad_plan
-    ADD CONSTRAINT files_acad_plan_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT files_acad_plan_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE SET NULL;
 
 
 --
@@ -3725,7 +3254,7 @@ ALTER TABLE ONLY public.files_acad_plan
 --
 
 ALTER TABLE ONLY public.files_dep_load
-    ADD CONSTRAINT files_dep_load_dep_load_id_fkey FOREIGN KEY (dep_load_id) REFERENCES public.dep_load(id);
+    ADD CONSTRAINT files_dep_load_dep_load_id_fkey FOREIGN KEY (dep_load_id) REFERENCES public.dep_load(id) ON DELETE CASCADE;
 
 
 --
@@ -3741,7 +3270,7 @@ ALTER TABLE ONLY public.files_dep_load
 --
 
 ALTER TABLE ONLY public.files_dep_load
-    ADD CONSTRAINT files_dep_load_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT files_dep_load_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE SET NULL;
 
 
 --
@@ -3757,7 +3286,7 @@ ALTER TABLE ONLY public.files_ind_plan
 --
 
 ALTER TABLE ONLY public.files_ind_plan
-    ADD CONSTRAINT files_ind_plan_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT files_ind_plan_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE SET NULL;
 
 
 --
@@ -3765,7 +3294,7 @@ ALTER TABLE ONLY public.files_ind_plan
 --
 
 ALTER TABLE ONLY public.files_projects
-    ADD CONSTRAINT files_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+    ADD CONSTRAINT files_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -3781,7 +3310,7 @@ ALTER TABLE ONLY public.files_projects
 --
 
 ALTER TABLE ONLY public.files_projects
-    ADD CONSTRAINT files_projects_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT files_projects_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE SET NULL;
 
 
 --
@@ -3805,7 +3334,7 @@ ALTER TABLE ONLY public.files_rpd
 --
 
 ALTER TABLE ONLY public.files_rpd
-    ADD CONSTRAINT files_rpd_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT files_rpd_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE SET NULL;
 
 
 --
@@ -3813,7 +3342,7 @@ ALTER TABLE ONLY public.files_rpd
 --
 
 ALTER TABLE ONLY public.groups
-    ADD CONSTRAINT groups_specialties_id_fkey FOREIGN KEY (specialties_id) REFERENCES public.specialties(id);
+    ADD CONSTRAINT groups_specialties_id_fkey FOREIGN KEY (specialties_id) REFERENCES public.specialties(id) ON DELETE CASCADE;
 
 
 --
@@ -3829,7 +3358,7 @@ ALTER TABLE ONLY public.projects
 --
 
 ALTER TABLE ONLY public.projects
-    ADD CONSTRAINT projects_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT projects_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE SET NULL;
 
 
 --
@@ -3845,7 +3374,7 @@ ALTER TABLE ONLY public.rights_roles
 --
 
 ALTER TABLE ONLY public.rights_roles
-    ADD CONSTRAINT rights_roles_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id);
+    ADD CONSTRAINT rights_roles_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id) ON DELETE CASCADE;
 
 
 --
@@ -3861,7 +3390,7 @@ ALTER TABLE ONLY public.specialties
 --
 
 ALTER TABLE ONLY public.students
-    ADD CONSTRAINT students_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id);
+    ADD CONSTRAINT students_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE SET NULL;
 
 
 --
@@ -3877,7 +3406,7 @@ ALTER TABLE ONLY public.students
 --
 
 ALTER TABLE ONLY public.students_projects
-    ADD CONSTRAINT students_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+    ADD CONSTRAINT students_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -3885,7 +3414,7 @@ ALTER TABLE ONLY public.students_projects
 --
 
 ALTER TABLE ONLY public.students_projects
-    ADD CONSTRAINT students_projects_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id);
+    ADD CONSTRAINT students_projects_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE;
 
 
 --
